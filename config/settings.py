@@ -144,4 +144,4 @@ LOGOUT_REDIRECT_URL = "/login/"
 LOGIN_URL = "/login/"
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"gi
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
