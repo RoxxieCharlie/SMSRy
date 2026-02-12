@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Store Management System | Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{% static 'store/css/login.css' %}">
+</head>
+<body>
+
+<!-- TOP LEFT BRAND TEXT -->
+<div class="system-title">
+    Store Management System
+</div>
+
+<!-- CENTER LOGIN PANEL -->
+<div class="login-container">
+    <div class="login-panel">
+        <div class="panel-header">
+            <h1>Welcome</h1>
+            <p>Login to continue</p>
+        </div>
+
+        <!-- ERROR BLOCK (wrong password etc.) -->
+        {% if form.errors %}
+        <div class="login-errors" role="alert">
+            {% if form.non_field_errors %}
+            {% for err in form.non_field_errors %}
+            <p class="error-text">{{ err }}</p>
+            {% endfor %}
+            {% endif %}
+
+            {% if form.username.errors %}
+            {% for err in form.username.errors %}
+            <p class="error-text">{{ err }}</p>
+            {% endfor %}
+            {% endif %}
+
+            {% if form.password.errors %}
+            {% for err in form.password.errors %}
+            <p class="error-text">{{ err }}</p>
+            {% endfor %}
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <form method="post" autocomplete="off" novalidate>
+            {% csrf_token %}
+
+            <!-- USERNAME -->
+            <div class="form-group">
+                <input
+                        type="text"
+                        name="username"
+                        required
+                        autocomplete="off"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        value="{{ form.username.value|default_if_none:'' }}"
+                >
+                <label>Username</label>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="form-group password-group">
+                <input
+                        id="passwordInput"
+                        type="password"
+                        name="password"
+                        required
+                        autocomplete="new-password"
+                        value=""
+                >
+                <label>Password</label>
+
+                <!-- SEE PASSWORD TOGGLE -->
+                <button
+                        type="button"
+                        class="toggle-password"
+                        id="togglePasswordBtn"
+                        aria-label="Show password"
+                >
+                    See
+                </button>
+            </div>
+
+            <button type="submit" class="login-btn">
+                Login
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const input = document.getElementById("passwordInput");
+        const btn = document.getElementById("togglePasswordBtn");
+
+        if (!input || !btn) return;
+
+        // Ensure password is always cleared on page load
+        input.value = "";
+
+        btn.addEventListener("click", function () {
+            const isHidden = input.type === "password";
+            input.type = isHidden ? "text" : "password";
+            btn.textContent = isHidden ? "Hide" : "See";
+            btn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+        });
+    })();
+</script>
+
+</body>
+</html>

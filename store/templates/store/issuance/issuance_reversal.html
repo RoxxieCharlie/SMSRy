@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Issuance Reversal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'store/css/stock_in.css' %}">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2>Store</h2>
+        <nav>
+            <a href="{% url 'dashboard_storekeeper' %}">Home</a>
+            <a href="{% url 'issuance_create' %}">Issue Item</a>
+            <a href="{% url 'inventory_store' %}">Inventory</a>
+            <hr>
+            <a href="{% url 'history_issuance_storekeeper' %}">Issuance History</a>
+            <a href="{% url 'history_stockin_store' %}">Stock In History</a>
+        </nav>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <header class="header">
+            <h1>Issuance Reversal</h1>
+            <p>Store Management System</p>
+        </header>
+
+        <section class="reversal-wrapper">
+
+            <div class="reversal-card">
+                <h2>Issuance Details</h2>
+
+                <p><strong>Staff:</strong> {{ issuance.staff.get_full_name }}</p>
+                <p><strong>Department:</strong> {{ issuance.staff.profile.department|default:"N/A" }}</p>
+                <p><strong>Issued By:</strong> {{ issuance.issued_by.get_full_name }}</p>
+                <p><strong>Date:</strong> {{ issuance.issued_at|date:"d M Y H:i" }}</p>
+                <p><strong>Comment:</strong> {{ issuance.comment|default:"No comment" }}</p>
+
+                <p><strong>Items:</strong></p>
+                <ul>
+                    {% for line in issuance.items.all %}
+                        <li>{{ line.item.name }} ({{ line.quantity }})</li>
+                    {% endfor %}
+                </ul>
+
+                <form method="post" class="reversal-action">
+                    {% csrf_token %}
+                    <button type="submit" class="primary">Confirm Reversal</button>
+                    <a href="{% url 'history_issuance_storekeeper' %}" class="warn">Cancel</a>
+                </form>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

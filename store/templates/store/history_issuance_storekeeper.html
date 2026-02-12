@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Issuance History</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'store/css/history_issuance.css' %}">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2>Store</h2>
+        <nav>
+            <a href="{% url 'dashboard_storekeeper' %}">Home</a>
+            <a href="{% url 'issuance_create' %}">Issue Item</a>
+            <a href="{% url 'stockin' %}">Stock In</a>
+            <a href="{% url 'inventory_store' %}">Inventory</a>
+            <hr>
+            <a href="{% url 'history_issuance_storekeeper' %}">Issuance History</a>
+            <a href="{% url 'history_stockin_store' %}">Stock In History</a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </nav>
+
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <header class="header">
+            <p>Store Management System</p>
+        </header>
+
+        <section class="issuance-history-wrapper">
+
+            <!-- PAGE TITLE -->
+            <div class="history-title">
+                <h2>Issuance History</h2>
+            </div>
+
+            <!-- SEARCH & FILTER -->
+            <form method="get" class="history-filters">
+                <input type="text" name="q" placeholder="Search staff or item..." value="{{ search_query|default:'' }}">
+
+                <select name="department">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}" {% if dept.id == department_id %}selected{% endif %}>
+                        {{ dept.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Filter</button>
+            </form>
+
+            <!-- ISSUANCE TABLE -->
+            <div class="history-card">
+                <table class="history-table">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Staff</th>
+                        <th>Department</th>
+                        <th>Issued By</th>
+                        <th>Items</th>
+                        <th>Comment</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for issuance in page_obj %}
+                    <tr>
+                        <td>{{ issuance.issued_at|date:"d M Y H:i" }}</td>
+                        <td>{{ issuance.staff.name }}</td>
+                        <td>{{ issuance.staff.department.name }}</td>
+                        <td>{{ issuance.issued_by.get_full_name }}</td>
+                        <td>
+                            <ul>
+                                {% for line in issuance.items.all %}
+                                <li>{{ line.item.name }} ({{ line.quantity }})</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{ issuance.comment|default:"-" }}</td>
+                        <td>
+                            {% if issuance.is_reversed %}
+                            <span class="status reversed">Reversed</span>
+
+                            {% elif issuance.can_reverse %}
+                            <form method="post" action="{% url 'issuance_reverse' issuance.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="reverse-btn">
+                                    Reverse
+                                </button>
+                            </form>
+
+                            {% else %}
+                            <span class="status locked">Locked</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="empty">No issuance records found.</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if department_id %}&department={{ department_id }}{% endif %}">Previous</a>
+                {% endif %}
+
+                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if department_id %}&department={{ department_id }}{% endif %}">Next</a>
+                {% endif %}
+            </div>
+
+        </section>
+
+    </main>
+</div>
+
+</body>
+</html>

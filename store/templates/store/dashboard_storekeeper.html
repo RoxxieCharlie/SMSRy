@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Storekeeper Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'store/css/dashboard.css' %}">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2>Store</h2>
+
+        <nav>
+            <a href="{% url 'issuance_create' %}">Issue Item</a>
+            <a href="{% url 'stockin' %}">Stock In</a>
+            <a href="{% url 'inventory_store' %}">Inventory</a>
+
+            <hr>
+
+            <a href="{% url 'history_issuance_storekeeper' %}">Issuance History</a>
+            <a href="{% url 'history_stockin_store' %}">Stock In History</a>
+        </nav>
+
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn2">Logout</button>
+        </form>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- HEADER -->
+        <header class="header">
+            <h1>Welcome, {{ user.first_name }}</h1>
+            <p>Store Management Dashboard</p>
+        </header>
+
+        <!-- LOW STOCK ALERTS -->
+        <div class="low-stock-bar">
+
+            {% for item in out_of_stock_items %}
+            <div class="alert-chip alert-chip--danger">
+                <span class="alert-dot alert-dot--danger"></span>
+                <span>OUT OF STOCK: {{ item.name }}</span>
+            </div>
+            {% endfor %}
+
+            {% for item in low_stock_items %}
+            <div class="alert-chip alert-chip--warn">
+                <span class="alert-dot alert-dot--warn"></span>
+                <span>LOW STOCK: {{ item.name }}</span>
+            </div>
+            {% endfor %}
+
+            {% if out_of_stock_items|length == 0 and low_stock_items|length == 0 %}
+            <div class="alert-chip alert-chip--empty">
+                <span>No stock alerts</span>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- HERO PANEL -->
+        <section class="hero">
+            <div class="hero-glass">
+
+                <!-- ACTIVITY FEED -->
+                <div class="activity-feed">
+                    <h3>Recent Activity</h3>
+                    <hr class="activity-hr">
+
+                    <ul class="activity-box">
+                        {% for activity in activities %}
+                        <li class="activity-item {{ activity.verb|lower }}">
+                                <span class="activity-summary">
+                                    {{ activity.summary }}
+                                </span>
+                            <br>
+                            <small class="activity-time">
+                                {{ activity.created_at|timesince }} ago
+                            </small>
+                        </li>
+                        {% empty %}
+                        <p class="empty-activity">
+                            No activity recorded yet.
+                        </p>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- IMAGE PANEL -->
+                <div class="hero-image">
+                    <img
+                            src="{% static 'store/images/folded_coverall_warehouse.png' %}"
+                            alt="Warehouse"
+                    >
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

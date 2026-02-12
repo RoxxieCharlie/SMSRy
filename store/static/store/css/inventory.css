@@ -1,0 +1,367 @@
+:root {
+    --bg: #0f172a;
+    --panel: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.12);
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #020617, #0f172a);
+    color: var(--text);
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 220px;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(10px);
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    position: fixed;
+    top:0;
+    left: 0 ;
+
+}
+
+.sidebar h2 {
+    margin-bottom: 24px;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: var(--text);
+    opacity: 0.85;
+}
+
+.sidebar a:hover {
+    color: var(--accent);
+}
+
+.sidebar hr {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 16px 0;
+}
+
+.activity-feed hr{
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 16px 0;
+}
+/* MAIN */
+.main {
+    flex: 1;
+    padding: 32px;
+    margin-left: 240px;
+    width: calc(100% - 240px);
+}
+
+/* HEADER */
+.header {
+    margin-bottom: 32px;
+}
+
+.header h1 {
+    font-size: 40px;
+    text-align: center;
+    display: flex;
+}
+
+.header p {
+    color: var(--muted);
+}
+
+/* HERO */
+.hero {
+    margin-bottom: 70px;
+}
+
+.hero-glass {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    overflow: hidden;
+    height: 400px;
+}
+
+.activity-feed{
+    padding: 30px;
+    font-size: 15px;
+
+
+}
+
+/* ACTIONS */
+.actions {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    justify-content: center;
+}
+
+.actions button {
+    padding: 16px;
+    font-size: 16px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+}
+
+.primary {
+    background: var(--accent);
+    color: #020617;
+    font-weight: 600;
+}
+
+.secondary {
+    background: rgba(56, 189, 248, 0.2);
+    color: var(--text);
+}
+
+.ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+/* IMAGE */
+.hero-image img {
+    width: 100%;
+    height: 80%;
+    object-fit: cover;
+}
+
+
+
+.activity-box {
+    padding: 120px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .app {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        display: flex;
+        overflow-x: auto;
+    }
+
+    .hero-glass {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-image {
+        height: 220px;
+    }
+}
+
+/* WRAPPER */
+.inventory-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* TITLE */
+.inventory-title {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.inventory-title h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: 3px;
+}
+
+/* CARD */
+.inventory-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid rgba(255,255,255,0.18);
+}
+
+/* TABLE */
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.inventory-table thead th {
+    font-size: 13px;
+    color: #94a3b8;
+    text-align: left;
+    padding-bottom: 12px;
+}
+
+.inventory-table tbody td {
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.inventory-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* EMPTY STATE */
+.inventory-table .empty {
+    text-align: center;
+    padding: 24px;
+    color: #94a3b8;
+}
+
+/* STATUS TAGS */
+.status {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status.ok {
+    background: rgba(34,197,94,0.25);
+    color: #22c55e;
+}
+
+.status.low {
+    background: rgba(234,179,8,0.25);
+    color: #eab308;
+}
+
+.status.out {
+    background: rgba(239,68,68,0.25);
+    color: #ef4444;
+}
+
+/* LOGOUT FORM POSITIONING */
+.logout-form {
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+/* LOGOUT BUTTON */
+.logout-btn {
+    width: 100%;
+    padding: 12px 14px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: rgba(248,250,252,0.75);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(6px);
+    margin-top: 130px;
+}
+
+/* HOVER STATE */
+.logout-btn:hover {
+    background: rgba(239,68,68,0.18);
+    border-color: rgba(239,68,68,0.45);
+    color: #fecaca;
+    box-shadow: 0 8px 20px rgba(239,68,68,0.25);
+}
+
+/* OPTIONAL FOCUS (ACCESSIBILITY) */
+.logout-btn:focus-visible {
+    outline: 2px solid rgba(239,68,68,0.6);
+    outline-offset: 2px;
+}
+
+/* Container for search and filter */
+.inventory-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.inventory-filters input[type="text"],
+.inventory-filters select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inventory-filters input[type="text"]:focus,
+.inventory-filters select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.inventory-filters button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.inventory-filters button:hover {
+    background-color: #0056b3;
+}
+
+.status.out {
+    color: #fff;
+    background-color: #e74c3c; /* red */
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.status.low {
+    color: #fff;
+    background-color: #f39c12; /* amber/orange */
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.status.available {
+    color: #fff;
+    background-color: #2ecc71; /* green */
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+}
+

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>INVENTORY</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'store/css/inventory.css' %}">
+
+</head>
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2>Store</h2>
+        <nav>
+            <a href="{% url 'dashboard_management' %}">Home</a>
+            <a href="{% url 'history_issuance_management' %}">Issuance History</a>
+            <a href="{% url 'history_stockin_mgt' %}">Stock In History</a>
+            <a href="{% url 'weekly' %}">Weekly Report</a>
+
+        </nav>
+
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+    {% csrf_token %}
+    <button type="submit" class="logout-btn">
+        Logout
+    </button>
+</form>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- HEADER -->
+        <header class="header">
+            <p>Store Management Dashboard</p>
+        </header>
+
+
+        <section class="inventory-wrapper">
+
+            <div class="inventory-title">
+                <h1>Inventory</h1>
+            </div>
+
+            <!-- SEARCH & FILTER -->
+            <form method="get" class="inventory-filters">
+                <input
+                        type="text"
+                        name="q"
+                        placeholder="Search item..."
+                        value="{{ search_query|default:'' }}"
+                >
+
+                <select name="category">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option
+                            value="{{ cat.id }}"
+                            {% if cat.id == category_id %}selected{% endif %}
+                    >
+                        {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Filter</button>
+            </form>
+
+            <!-- INVENTORY TABLE -->
+            <table class="inventory-table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Item</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Unit</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for item in page_obj %}
+                <tr class="{% if item.quantity <= item.reorder_level %}low-stock{% endif %}">
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.description|default:"-" }}</td>
+                    <td>{{ item.category.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.unit_of_measurement }}</td>
+                    <td>
+                        {% if item.quantity == 0 %}
+                        <span class="status out">Out of Stock</span>
+                        {% elif item.quantity <= item.reorder_level %}
+                        <span class="status low">Low Stock</span>
+                        {% else %}
+                        <span class="status available">Available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="empty">
+                        No inventory data available
+                    </td>
+                </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+            <!-- PAGINATION -->
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}">
+                    Previous
+                </a>
+                {% endif %}
+
+                <span>
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}">
+                    Next
+                </a>
+                {% endif %}
+            </div>
+
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

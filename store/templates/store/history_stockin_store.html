@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock In History</title>
+    <link rel="stylesheet" href="{% static 'store/css/weekly.css' %}">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2>Store</h2>
+        <nav>
+            <a href="{% url 'dashboard_storekeeper' %}">Home</a>
+            <a href="{% url 'issuance_create' %}">Issue Item</a>
+            <a href="{% url 'stockin' %}">Stock In</a>
+            <a href="{% url 'inventory_store' %}">Inventory</a>
+            <hr>
+            <a href="{% url 'history_issuance_storekeeper' %}">Issuance History</a>
+
+
+            <form method="post" action="{% url 'logout' %}" class="logout-form4">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn4">Logout</button>
+            </form>
+        </nav>
+
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <header class="header">
+            <p>Store Management System</p>
+        </header>
+
+        <section class="history-wrapper">
+
+            <h2>Stock In History</h2>
+
+            <!-- SEARCH -->
+            <form method="get" class="history-filters">
+                <input
+                        type="text"
+                        name="q"
+                        placeholder="Search item or receiver..."
+                        value="{{ search_query }}"
+                >
+                <button type="submit">Search</button>
+            </form>
+
+            <!-- TABLE -->
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Received By</th>
+                    <th>Comment</th>
+                    <th>Document</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                {% for stockin in page_obj %}
+                <tr>
+                    <td>{{ stockin.received_at|date:"d M Y H:i" }}</td>
+
+                    <td>
+                        <ul>
+                            {% for line in stockin.lines.all %}
+                            <li>
+                                {{ line.item.name }}
+                                ({{ line.quantity }} {{ line.item.unit_of_measurement }})
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+
+                    <td>{{ stockin.received_by.get_full_name }}</td>
+                    <td>{{ stockin.comment|default:"-" }}</td>
+
+                    <td>
+                        {% if stockin.document %}
+                        <a href="{{ stockin.document.url }}" download>
+                            Download
+                        </a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No stock-in records found.</td>
+                </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+
+            <!-- PAGINATION -->
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}">Previous</a>
+                {% endif %}
+
+                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}">Next</a>
+                {% endif %}
+            </div>
+
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

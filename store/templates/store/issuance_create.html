@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ISSUANCE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'store/css/issuance.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'store/favicon.ico' %}">
+</head>
+
+<body>
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2>Store</h2>
+        <nav>
+            <a href="{% url 'dashboard_storekeeper' %}">Home</a>
+            <a href="{% url 'stockin' %}">Stock In</a>
+            <a href="{% url 'inventory_store' %}">Inventory</a>
+            <hr>
+            <a href="{% url 'history_issuance_storekeeper' %}">Issuance History</a>
+            <a href="{% url 'history_stockin_store' %}">Stock In History</a>
+
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- HEADER -->
+        <header class="header">
+            <h1>ISSUE ITEM</h1>
+            <p>Store Management System</p>
+        </header>
+
+        <!-- CONTENT -->
+        <section class="issuance-wrapper">
+
+            <form class="gridder" method="post" action="{% url 'issuance_create' %}">
+                {% csrf_token %}
+
+                <!-- ISSUANCE CARD -->
+                <div class="issuance-card">
+                    <h2>Item Issuance</h2>
+
+                    <label>Staff</label>
+                    <select name="staff" id="staff-select" required>
+                        <option value="">Select staff</option>
+                        {% for staff in staff_list %}
+                        <option value="{{ staff.id }}">{{ staff.staff_id }} - {{ staff.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <div class="full-width" id="comment-box">
+                        <label>Comment</label>
+                        <textarea name="comment" placeholder="Optional comment..."></textarea>
+                    </div>
+
+                    <!-- ISSUANCE LINES -->
+                    <div class="issuance-lines">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="item-row">
+                                <td>
+                                    <select name="item[]" required>
+                                        <option value="">Select item</option>
+                                        {% for item in items %}
+                                        <option value="{{ item.id }}">{{ item.name }} (Available: {{ item.quantity }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="quantity[]" min="1" required>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn--remove" onclick="removeLineItem(this)">Remove</button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="issuance-actions">
+                    <button type="submit" class="primary">Save</button>
+                    <button type="button" id="add-item-btn">Add Item</button>
+                    <button type="reset" id="clear-form-btn" class="warn">Clear</button>
+                </div>
+            </form>
+
+            <!-- UNIVERSAL MODAL -->
+            {% if messages %}
+            <div id="universalModal" class="modal modal--universal">
+                <div class="modal__backdrop"></div>
+                <div class="modal__card">
+                    {% for message in messages %}
+                    <h3 class="modal__title {{ message.tags }}">
+                        {% if message.tags == "success" %}Success{% else %}Error{% endif %}
+                    </h3>
+                    <div class="modal__divider {{ message.tags }}"></div>
+                    <p class="modal__body">{{ message }}</p>
+                    {% endfor %}
+                    <div class="modal__actions">
+                        <button type="button" class="btn btn--close" onclick="closeUniversalModal()">Close</button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </section>
+    </main>
+</div>
+
+<script>
+    // =========================
+    // CLOSE UNIVERSAL MODAL
+    // =========================
+    function closeUniversalModal() {
+        const modal = document.getElementById("universalModal");
+        if (modal) modal.remove();
+    }
+
+    // =========================
+    // UPDATE REMOVE BUTTON VISIBILITY
+    // =========================
+    function updateRemoveButtons() {
+        const rows = document.querySelectorAll(".item-row");
+        rows.forEach(row => {
+            const btn = row.querySelector(".btn--remove");
+            if (rows.length > 1) {
+                btn.style.display = "inline-block"; // show button
+            } else {
+                btn.style.display = "none"; // hide button
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        updateRemoveButtons();
+    });
+
+    // =========================
+    // ADD ITEM ROW
+    // =========================
+    document.getElementById("add-item-btn").addEventListener("click", function () {
+        const tbody = document.querySelector(".issuance-lines tbody");
+        const row = document.querySelector(".item-row");
+        const clone = row.cloneNode(true);
+
+        clone.querySelector("select").value = "";
+        clone.querySelector("input").value = "";
+
+        tbody.appendChild(clone);
+        updateRemoveButtons();
+    });
+
+    // =========================
+    // REMOVE ITEM ROW
+    // =========================
+    function removeLineItem(button) {
+        const tbody = document.querySelector(".issuance-lines tbody");
+        const row = button.closest(".item-row");
+
+        if (tbody.querySelectorAll(".item-row").length > 1) {
+            row.remove();
+            updateRemoveButtons();
+        }
+    }
+</script>
+
+</body>
+</html>

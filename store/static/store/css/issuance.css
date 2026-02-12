@@ -1,0 +1,643 @@
+:root {
+    --bg: #0f172a;
+    --panel: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.12);
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #020617, #0f172a);
+    color: var(--text);
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 220px;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(10px);
+    overflow-y: auto;
+    z-index: 1000;
+    height: 100vh;
+    position:fixed;
+    top: 0;
+    left: 0 ;
+
+}
+
+.sidebar h2 {
+    margin-bottom: 24px;
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: var(--text);
+    opacity: 0.85;
+}
+
+.sidebar a:hover {
+    color: var(--accent);
+}
+
+.sidebar hr {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 16px 0;
+}
+
+.activity-feed hr{
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 16px 0;
+}
+/* MAIN */
+.main {
+    flex: 1;
+    padding: 32px;
+    margin-left: 240px;         /* SAME as sidebar width */
+    width: calc(100% - 240px);
+}
+
+/* HEADER */
+.header {
+    margin-bottom: 32px;
+}
+
+.header h1 {
+    font-size: 28px;
+}
+
+.header p {
+    color: var(--muted);
+}
+
+/* HERO */
+.hero {
+    margin-bottom: 70px;
+}
+
+.hero-glass {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    overflow: hidden;
+    height: 400px;
+}
+
+.activity-feed{
+    padding: 30px;
+    font-size: 15px;
+
+
+}
+
+/* ACTIONS */
+.actions {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    justify-content: center;
+}
+
+.actions button {
+    padding: 16px;
+    font-size: 16px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+}
+
+.primary {
+    background: var(--accent);
+    color: #020617;
+    font-weight: 600;
+}
+
+.secondary {
+    background: rgba(56, 189, 248, 0.2);
+    color: var(--text);
+}
+
+.ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .app {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        display: flex;
+        overflow-x: auto;
+    }
+
+    .hero-glass {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-image {
+        height: 220px;
+    }
+}
+
+/* WRAPPER */
+.issuance-wrapper {
+
+}
+
+/* CARD */
+.issuance-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px);
+    border-radius: 18px;
+    padding: 24px;
+    border: 1px solid rgba(255,255,255,0.18);
+
+}
+
+
+/* HEADER */
+.issuance-header h2 {
+    margin-bottom: 16px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+
+.issuance-card label {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.issuance-card input,
+.issuance-card select,
+.issuance-card textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(15,23,42,0.6);
+    color: #f8fafc;
+    outline: none;
+}
+
+.issuance-card textarea {
+    resize: none;
+    height: 70px;
+}
+
+.issuance-card full-width {
+    grid-column: 1 / -1;
+}
+
+/* TABLE */
+.issuance-lines {
+    margin-top: 24px;
+}
+
+.issuance-lines table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.issuance-lines th {
+    text-align: left;
+    font-size: 13px;
+    color: #64748b;
+    padding-bottom: 8px;
+}
+
+.issuance-lines td {
+    padding-top: 8px;
+}
+
+.issuance-lines input,
+.issuance-lines select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(15,23,42,0.6);
+    color: #f8fafc;
+}
+
+/* ACTIONS */
+.issuance-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.issuance-card{
+     display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.issuance-actions button {
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255,255,255,0.12);
+    color: #f8fafc;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.issuance-actions button:hover {
+    transform: translateY(-2px);
+}
+
+.issuance-actions .primary {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    color: #020617;
+}
+
+.issuance-actions .warn {
+    background: rgba(234,179,8,0.25);
+}
+
+.issuance-actions .danger {
+    background: rgba(239,68,68,0.25);
+}
+
+/* LOGOUT FORM POSITIONING */
+.logout-form {
+    margin-top: auto;
+    padding-top: 24px;
+}
+.gridder{
+    display: grid;
+    grid-template-columns: 1fr 160px;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+/* Modal overlay */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Modal box */
+.modal-box {
+    background: #ffffff;
+    padding: 28px 24px;
+    border-radius: 15px;
+    width: 300px;
+    text-align: center;
+}
+
+/* Decorative lines */
+.modal-line {
+    height: 3px;
+    background-color: #0b2c5d; /* dark blue */
+    margin: 10px 0;
+}
+
+.top-line {
+    margin-bottom: 16px;
+    length: 100%;
+}
+
+.bottom-line {
+    margin-top: 16px;
+}
+
+/* Message text */
+.modal-message {
+    font-weight: 700;
+    color: #000000;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* OK button */
+.modal-ok-btn {
+    height:10px
+    width: 15px;
+    margin-top: 24px;
+    padding: 12px 36px;
+    font-size: 16px;
+    font-weight: 700;
+    background-color: #0b2c5d; /* dark blue */
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.modal-ok-btn:hover {
+    opacity: 0.9;
+}
+
+/* =========================
+   MODAL CONTAINER
+   ========================= */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   BACKDROP
+   ========================= */
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* =========================
+   MODAL CARD
+   ========================= */
+
+.modal__card {
+  position: relative;
+  z-index: 1001;
+
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  padding: 1.5rem 1.75rem;
+  border-radius: 6px;
+
+  box-shadow: 0 12px 45px rgba(0, 0, 0, 0.25);
+}
+
+/* =========================
+   ERROR EMPHASIS
+   ========================= */
+
+.modal--error .modal__card {
+  border-top: 5px solid #b00020; /* deep red */
+}
+
+/* =========================
+   TITLE
+   ========================= */
+
+.modal__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #b00020;
+}
+
+/* =========================
+   RED DIVIDER
+   ========================= */
+
+.modal__divider {
+  height: 2px;
+  width: 100%;
+  background-color: #b00020;
+  margin: 0.75rem 0 1rem;
+  border-radius: 1px;
+}
+
+/* =========================
+   BODY TEXT
+   ========================= */
+
+.modal__body {
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+/* =========================
+   ACTIONS
+   ========================= */
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* =========================
+   DANGER BUTTON
+   ========================= */
+
+.btn--danger {
+  background-color: #b00020;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  transition: background-color 0.15s ease-in-out;
+}
+
+.btn--danger:hover {
+  background-color: #8a0019;
+}
+
+
+/* LOGOUT BUTTON */
+.logout-btn {
+    width: 100%;
+    padding: 12px 14px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: rgba(248,250,252,0.75);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(6px);
+    margin-top: 70px;
+}
+
+/* HOVER STATE */
+.logout-btn:hover {
+    background: rgba(239,68,68,0.18);
+    border-color: rgba(239,68,68,0.45);
+    color: #fecaca;
+    box-shadow: 0 8px 20px rgba(239,68,68,0.25);
+}
+
+/* OPTIONAL FOCUS (ACCESSIBILITY) */
+.logout-btn:focus-visible {
+    outline: 2px solid rgba(239,68,68,0.6);
+    outline-offset: 2px;}
+
+
+    /* =========================
+       UNIVERSAL MODAL
+       ========================= */
+
+    .modal--universal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal--universal .modal__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+    }
+
+    .modal--universal .modal__card {
+      position: relative;
+      z-index: 1001;
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      padding: 1.5rem 1.75rem;
+      border-radius: 6px;
+      box-shadow: 0 12px 45px rgba(0, 0, 0, 0.25);
+    }
+
+    /* TITLE STYLING BASED ON MESSAGE TYPE */
+    .modal__title.success {
+      color: #2e7d32; /* green for success */
+    }
+
+    .modal__title.error {
+      color: #b00020; /* red for error */
+    }
+
+    /* DIVIDER BASED ON MESSAGE TYPE */
+    .modal__divider.success {
+      background-color: #2e7d32;
+      height: 2px;
+      margin: 0.75rem 0 1rem;
+      border-radius: 1px;
+    }
+
+    .modal__divider.error {
+      background-color: #b00020;
+      height: 2px;
+      margin: 0.75rem 0 1rem;
+      border-radius: 1px;
+    }
+
+    /* BODY TEXT */
+    .modal__body {
+      font-size: 0.95rem;
+      color: #333;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ACTIONS */
+    .modal__actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* CLOSE BUTTON */
+    .btn--close {
+      background-color: #555;
+      color: #fff;
+      padding: 0.5rem 1.25rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn--close:hover {
+      background-color: #333;
+    }
+
+    /* MULTIPLE MESSAGES STACKING */
+    .modal__card .modal__title + .modal__divider + .modal__body {
+      margin-top: 0.5rem;
+    }
+
+    /* OPTIONAL: Scroll for many messages */
+    .modal__card {
+      max-height: 70vh;
+      overflow-y: auto;
+      padding-bottom: 1rem;
+    }
+
+    /* SUCCESS / ERROR COLORS REUSE */
+    .success {
+      color: #2e7d32;
+    }
+    .error {
+      color: #b00020;
+    }
+
+/* =========================
+   REMOVE BUTTON
+   ========================= */
+.btn--remove {
+    background-color: #b00020; /* deep red */
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.btn--remove:hover {
+    background-color: #8a0019;
+}
+
+/* HIDE BUTTON WHEN ONLY ONE ROW (controlled via JS) */
+.btn--remove[style*="display: none"] {
+    opacity: 0;
+    pointer-events: none;
+}

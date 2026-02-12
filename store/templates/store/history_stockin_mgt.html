@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock In History</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'store/css/weekly.css' %}">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2>Store</h2>
+        <nav>
+            <a href="{% url 'dashboard_management' %}">Home</a>
+            <a href="{% url 'inventory_mgt' %}">Inventory</a>
+            <a href="{% url 'history_issuance_management' %}">Issuance History</a>
+            <a href="{% url 'history_stockin_mgt' %}">Stock In History</a>
+            <a href="{% url 'weekly' %}">Generate Weekly Report</a>
+        </nav>
+
+        <form method="post" action="{% url 'logout' %}" class="logout-form3">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn3">Logout</button>
+        </form>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- HEADER -->
+        <header class="header">
+            <p>Store Management System</p>
+        </header>
+
+        <section class="stockin-history-wrapper">
+
+            <!-- PAGE HEADING -->
+            <div class="history-title">
+                <h2>Stock In History</h2>
+            </div>
+
+            <!-- SEARCH -->
+            <form method="get" class="history-filters">
+                <input type="text" name="q" placeholder="Search item or receiver..." value="{{ search_query|default:'' }}">
+                <button type="submit">Search</button>
+            </form>
+
+            <!-- STOCKIN TABLE -->
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Received By</th>
+                    <th>Items</th>
+                    <th>Comment</th>
+                    <th>Document</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for s in page_obj %}
+                <tr>
+                    <td>{{ s.received_at|date:"d M Y H:i" }}</td>
+                    <td>{{ s.received_by.get_full_name|default:s.received_by.username }}</td>
+                    <td>
+                        <ul style="margin:0; padding-left:18px;">
+                            {% for line in s.lines.all %}
+                            <li>
+                                {{ line.item.name }} ({{ line.quantity }}) - {{ line.item.unit_of_measurement }}
+                            </li>
+                            {% empty %}
+                            <li>-</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>{{ s.comment|default:"-" }}</td>
+                    <td>
+                        {% if s.document %}
+                        <a href="{{ s.document.url }}" target="_blank">View</a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty">No stock-ins found.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- PAGINATION -->
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Previous</a>
+                {% endif %}
+
+                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Next</a>
+                {% endif %}
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

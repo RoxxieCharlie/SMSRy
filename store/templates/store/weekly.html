@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weekly Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'store/css/weekly.css' %}">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2>Store</h2>
+        <nav>
+            <a href="{% url 'dashboard_management' %}">Home</a>
+            <a href="{% url 'inventory_mgt' %}">Inventory</a>
+            <a href="{% url 'history_issuance_management' %}">Issuance History</a>
+            <a href="{% url 'history_stockin_mgt' %}">Stock In History</a>
+        </nav>
+
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <header class="header">
+            <p>Store Management System</p>
+        </header>
+
+        <!-- HEADER -->
+        <header class="header">
+            <h1>Weekly Report</h1>
+            <p>Management Dashboard</p>
+        </header>
+
+        <section class="report-wrapper">
+
+            {% if report_closed %}
+            <!-- CLOSED MESSAGE (same page layout, no table) -->
+            <div class="history-title">
+                <h2>Weekly Report (Closed)</h2>
+
+            </div>
+
+            <div class="report-card">
+                <div style="padding: 22px; text-align: center;">
+                    <h2 style="margin-bottom: 10px;">Report Not Available Yet</h2>
+                    <p style="font-size: 16px;">
+                        This report is generated for <b>Monday → Sunday</b> and becomes available at <b>Sunday 6:00 PM</b>.
+                    </p>
+                    <p style="margin-top: 12px; font-weight: 700; font-size: 18px;">
+                        Access Window: {{ window_label }}
+                    </p>
+                    <p style="margin-top: 12px; color: gray;">
+                        Please come back during the access period.
+                    </p>
+                </div>
+            </div>
+
+            {% else %}
+
+            <div class="history-title">
+                <h2>Weekly Report (Monday → Sunday)</h2>
+
+
+                <div class="actions">
+                    <a class="btn" href="{% url 'weekly' %}?export=1">
+                        Export CSV (Item + Total + Departments)
+                    </a>
+                </div>
+            </div>
+
+            <div class="report-card">
+                <table class="history-table">
+                    <thead>
+                    <tr>
+                        <th>S/N</th>
+                        <th>Item</th>
+                        <th>Total Issued</th>
+                        <th>Departments with Usage</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for line in report_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ line.item }}</td>
+                        <td>{{ line.total_quantity }}</td>
+                        <td>{{ line.departments_with_usage }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty">No issuances recorded for this week.</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% endif %}
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

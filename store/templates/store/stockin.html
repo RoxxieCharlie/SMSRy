@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>STOCK IN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'store/css/stock_in.css' %}">
+</head>
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+        <h2>Store</h2>
+        <nav>
+            <a href="{% url 'dashboard_storekeeper' %}">Home</a>
+            <a href="{% url 'issuance_create' %}">Issue Item</a>
+            <a href="{% url 'inventory_store' %}">Inventory</a>
+            <hr>
+            <a href="{% url 'history_issuance_storekeeper' %}">Issuance History</a>
+            <a href="{% url 'history_stockin_store' %}">Stock In History</a>
+        </nav>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="logout-btn">Logout</button>
+        </form>
+
+    </aside>
+
+
+    <main class="main">
+
+        <header class="header">
+            <h1>STOCK IN ITEM</h1>
+            <p>Store Management System</p>
+        </header>
+
+        <section class="stockin-wrapper">
+
+            <div class="stockin-layout">
+
+                <!-- CARD -->
+                <form method="post" id="stockin-form" class="stockin-card" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <h2>Stock In</h2>
+
+                    <div class="stockin-grid">
+
+                        <div>
+                            <label>Document</label>
+                            <input type="file" name="document">
+                        </div>
+
+                        <div>
+                            <label>Comment</label>
+                            <textarea name="comment"></textarea>
+                        </div>
+
+                        <div class="stockin-lines">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr class="item-row">
+                                    <td>
+                                        <select name="item[]" required>
+                                            <option value="">Select item</option>
+                                            {% for item in items %}
+                                            <option value="{{ item.id }}">
+                                                {{ item.name }} (Available: {{ item.quantity }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+
+                                    <td>
+                                        <input type="number" name="quantity[]" min="1" required>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn--remove" onclick="removeLineItem(this)">Remove</button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </form>
+
+                <!-- ACTIONS -->
+                <div class="stockin-actions">
+                    <button type="submit" form="stockin-form" class="primary">Save</button>
+                    <button type="reset" form="stockin-form" class="warn">Clear</button>
+                    <button type="button" id="add-item-btn">Add Item</button>
+                </div>
+
+                <!-- SUCCESS MODAL -->
+                {% if messages %}
+                {% for message in messages %}
+                {% if message.tags == "success" %}
+                <div id="success-modal" class="modal-overlay">
+                    <div class="modal-box">
+                        <div class="modal-line"></div>
+                        <p class="modal-message">{{ message }}</p>
+                        <div class="modal-line"></div>
+                        <button id="close-modal" class="modal-ok-btn">OK</button>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+
+                <!-- ERROR MODAL -->
+                {% if messages %}
+                {% for message in messages %}
+                {% if message.tags == "error" %}
+                <div id="errorModal" class="modal modal--error">
+                    <div class="modal__backdrop"></div>
+                    <div class="modal__card">
+                        <h3 class="modal__title">Stock-In Error</h3>
+                        <div class="modal__divider"></div>
+                        <p class="modal__body">{{ message }}</p>
+                        <div class="modal__actions">
+                            <button type="button" class="btn btn--close" onclick="closeErrorModal()">Close</button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+    const addItemBtn = document.getElementById("add-item-btn");
+    const tbody = document.querySelector(".stockin-lines tbody");
+
+    function updateRemoveButtons() {
+        const rows = tbody.querySelectorAll(".item-row");
+        rows.forEach(row => {
+            const btn = row.querySelector(".btn--remove");
+            btn.style.display = rows.length > 1 ? "inline-block" : "none";
+        });
+    }
+
+    function removeLineItem(button) {
+        const row = button.closest(".item-row");
+        if (tbody.querySelectorAll(".item-row").length > 1) {
+            row.remove();
+            updateRemoveButtons();
+        }
+    }
+
+    addItemBtn.addEventListener("click", function () {
+        const template = tbody.querySelector(".item-row");
+        const clone = template.cloneNode(true);
+
+        clone.querySelectorAll("select").forEach(s => s.selectedIndex = 0);
+        clone.querySelectorAll("input").forEach(i => i.value = "");
+
+        tbody.appendChild(clone);
+        updateRemoveButtons();
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        updateRemoveButtons();
+
+        const modal = document.getElementById("success-modal");
+        const closeBtn = document.getElementById("close-modal");
+
+        if (modal && closeBtn) {
+            closeBtn.addEventListener("click", function () {
+                modal.style.display = "none";
+            });
+        }
+    });
+
+    function closeErrorModal() {
+        const modal = document.getElementById("errorModal");
+        if (modal) {
+            modal.remove();
+        }
+    }
+</script>
+
+</body>
+</html>
