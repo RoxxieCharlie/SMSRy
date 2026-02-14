@@ -18,8 +18,8 @@ def _split_env_list(key: str, default: str = ""):
         return []
     return [x.strip() for x in raw.split(",") if x.strip()]
 
-ALLOWED_HOSTS = _split_env_list("DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1")
-CSRF_TRUSTED_ORIGINS = _split_env_list("CSRF_TRUSTED_ORIGINS", default="")
+ALLOWED_HOSTS = [h.strip() for h in config("DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",") if h.strip()]
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in config("CSRF_TRUSTED_ORIGINS", default="").split(",") if o.strip()]
 
 # If you're using Render's default *.onrender.com domain, you can optionally
 # add it via env: DJANGO_ALLOWED_HOSTS=yourapp.onrender.com
