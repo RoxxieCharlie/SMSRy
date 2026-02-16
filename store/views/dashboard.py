@@ -10,18 +10,18 @@ from store.models import Activity, Item
 def dashboard_router(request):
     user = request.user
 
-    if user.groups.filter(name="Management").exists():
-        return redirect("dashboard_management")
+    if user.groups.filter(name__iexact="Management").exists():
+        return redirect("store:dashboard_management")
 
-    if user.groups.filter(name="StoreKeeper").exists():
-        return redirect("dashboard_storekeeper")
+    if user.groups.filter(name__iexact="StoreKeeper").exists():
+        return redirect("store:dashboard_storekeeper")
 
     return HttpResponseForbidden("No dashboard assigned.")
 
 
 @login_required
 def dashboard_storekeeper(request):
-    if not request.user.groups.filter(name="StoreKeeper").exists():
+    if not request.user.groups.filter(name__iexact="StoreKeeper").exists():
         return HttpResponseForbidden("Forbidden")
 
     activities = Activity.objects.order_by("-created_at")[:15]
@@ -43,7 +43,7 @@ def dashboard_storekeeper(request):
 
 @login_required
 def dashboard_management(request):
-    if not request.user.groups.filter(name="Management").exists():
+    if not request.user.groups.filter(name__iexact="Management").exists():
         return HttpResponseForbidden("Forbidden")
 
     activities = Activity.objects.order_by("-created_at")[:20]
