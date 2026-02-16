@@ -8,6 +8,10 @@ urlpatterns = [
     path("", include("store.urls")),
 ]
 
+from django.urls import path, include
+
+
+
 # Serve media only in development
 if settings.DEBUG:
     urlpatterns += static(
