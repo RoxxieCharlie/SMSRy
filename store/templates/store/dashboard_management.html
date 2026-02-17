@@ -24,7 +24,7 @@
 
 
         </nav>
-        <form method="post" action="{% url 'logout' %}" class="logout-form">
+        <form method="post" action="{% url 'store:logout' %}" class="logout-form">
     {% csrf_token %}
     <button type="submit" class="logout-btn">
         Logout
