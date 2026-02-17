@@ -94,7 +94,7 @@
                             <span class="status reversed">Reversed</span>
 
                             {% elif issuance.can_reverse %}
-                            <form method="post" action="{% url 'issuance_reverse' issuance.id %}">
+                            <form method="post" action="{% url 'store:issuance_reverse' issuance.id %}">
                                 {% csrf_token %}
                                 <button type="submit" class="reverse-btn">
                                     Reverse
