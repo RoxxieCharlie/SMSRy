@@ -36,4 +36,4 @@ def inventory_view(request):
         "search_query": search_query,
         "category_id": category_id,
     }
-    return render(request, "store/store:inventory_store.html", context)
+    return render(request, "store/inventory_store.html", context)

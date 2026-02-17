@@ -48,6 +48,6 @@ def stockin_view(request):
 
     return render(
         request,
-        "store/store:stockin.html",
+        "store/stockin.html",
         {"items": Item.objects.order_by("name")}
     )
