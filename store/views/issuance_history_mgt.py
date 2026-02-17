@@ -43,4 +43,4 @@ def history_issuance_management(request):
         "department_id": department_id,  # ✅ keep as string
         "departments": Department.objects.all().order_by("name"),
     }
-    return render(request, "store/history_issuance_management.html", context)
+    return render(request, "store/store:history_issuance_management.html", context)

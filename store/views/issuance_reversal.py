@@ -7,13 +7,13 @@ from store.services.activity_service import emit_activity
 def issuance_reverse_view(request, issuance_id):
     if request.method != "POST":
         messages.error(request, "Invalid request method.")
-        return redirect("history_issuance_storekeeper")
+        return redirect("store:history_issuance_storekeeper")
 
     issuance = get_object_or_404(Issuance, id=issuance_id)
 
     if not issuance.can_reverse:
         messages.error(request, "Cannot reverse this issuance (time window expired or already reversed).")
-        return redirect("history_issuance_storekeeper")
+        return redirect("store:history_issuance_storekeeper")
 
     # Reverse items
     for line in issuance.items.all():
@@ -39,5 +39,5 @@ def issuance_reverse_view(request, issuance_id):
         }
     )
 
-    messages.success(request, "Issuance reversed successfully.")
-    return redirect("history_issuance_storekeeper")
+    #messages.success(request, "Issuance reversed successfully.")
+    return redirect("store:history_issuance_storekeeper")

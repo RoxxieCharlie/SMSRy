@@ -23,7 +23,7 @@ def issuance_create(request):
 
         if not staff_id:
             messages.error(request, "Staff is required.")
-            return redirect("issuance_create")
+            return redirect("store:issuance_create")
 
         staff = get_object_or_404(Staff, id=staff_id)
 
@@ -32,7 +32,7 @@ def issuance_create(request):
         for idx, (item_id, qty) in enumerate(zip(item_ids, quantities), start=1):
             if not item_id or not qty:
                 messages.error(request, f"Row {idx}: Item and quantity required.")
-                return redirect("issuance_create")
+                return redirect("store:issuance_create")
 
             items_with_qty.append({
                 "item_id": item_id,
@@ -48,16 +48,16 @@ def issuance_create(request):
             )
 
             messages.success(request, "Issuance saved successfully.")
-            return redirect("issuance_create")
+            return redirect("store:issuance_create")
 
         except IssuanceError as e:
             emit_failed_issuance_activity(actor=request.user, error=str(e))
             messages.error(request, str(e))
-            return redirect("issuance_create")
+            return redirect("store:issuance_create")
 
     return render(
         request,
-        "store/issuance_create.html",
+        "store/store:issuance_create.html",
         {
             "staff_list": Staff.objects.all().order_by("name"),
             "items": Item.objects.order_by("name"),
@@ -76,7 +76,7 @@ def reverse_issuance(request, pk):
 
     try:
         reverse_issuance(issuance, request.user)
-        messages.success(request, "Issuance reversed successfully.")
+        #messages.success(request, "Issuance reversed successfully.")
 
     except ValidationError as e:
         if hasattr(e, "messages"):
@@ -85,4 +85,4 @@ def reverse_issuance(request, pk):
         else:
             messages.error(request, str(e))
 
-    return redirect("issuance_history")
+    return redirect("store:issuance_history")

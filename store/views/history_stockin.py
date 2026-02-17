@@ -34,7 +34,7 @@ def history_stockin(request):
 
     return render(
         request,
-        "store/history_stockin_store.html",
+        "store/store:history_stockin_store.html",
         {
             "page_obj": page_obj,
             "search_query": search_query,

@@ -42,6 +42,6 @@ def history_issuance_storekeeper(request):
         "departments": Department.objects.all(),
     }
 
-    return render(request, "store/history_issuance_storekeeper.html", context)
+    return render(request, "store/store:history_issuance_storekeeper.html", context)
 
 

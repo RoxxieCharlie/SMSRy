@@ -30,7 +30,7 @@ def stockin_view(request):
 
         if not lines:
             messages.error(request, "Add at least one item.")
-            return redirect("stockin")
+            return redirect("store:stockin")
 
         try:
             create_bulk_stockin(
@@ -40,14 +40,14 @@ def stockin_view(request):
                 document=document,  # 🔴 PASS FILE DOWN
             )
             messages.success(request, "Stock-In saved successfully.")
-            return redirect("stockin")
+            return redirect("store:stockin")
 
         except Exception as e:
             messages.error(request, str(e))
-            return redirect("stockin")
+            return redirect("store:stockin")
 
     return render(
         request,
-        "store/stockin.html",
+        "store/store:stockin.html",
         {"items": Item.objects.order_by("name")}
     )
