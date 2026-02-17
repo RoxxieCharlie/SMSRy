@@ -26,7 +26,7 @@
             <a href="{% url 'store:history_stockin_store' %}">Stock In History</a>
         </nav>
 
-        <form method="post" action="{% url 'logout' %}" class="logout-form">
+        <form method="post" action="{% url 'store:logout' %}" class="logout-form">
             {% csrf_token %}
             <button type="submit" class="logout-btn2">Logout</button>
         </form>

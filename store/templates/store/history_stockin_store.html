@@ -14,15 +14,15 @@
     <aside class="sidebar">
         <h2>Store</h2>
         <nav>
-            <a href="{% url 'dashboard_storekeeper' %}">Home</a>
-            <a href="{% url 'issuance_create' %}">Issue Item</a>
-            <a href="{% url 'stockin' %}">Stock In</a>
-            <a href="{% url 'inventory_store' %}">Inventory</a>
+            <a href="{% url 'store:dashboard_storekeeper' %}">Home</a>
+            <a href="{% url 'store:issuance_create' %}">Issue Item</a>
+            <a href="{% url 'store:stockin' %}">Stock In</a>
+            <a href="{% url 'store:inventory_store' %}">Inventory</a>
             <hr>
-            <a href="{% url 'history_issuance_storekeeper' %}">Issuance History</a>
+            <a href="{% url 'store:history_issuance_storekeeper' %}">Issuance History</a>
 
 
-            <form method="post" action="{% url 'logout' %}" class="logout-form4">
+            <form method="post" action="{% url 'store:logout' %}" class="logout-form4">
                 {% csrf_token %}
                 <button type="submit" class="logout-btn4">Logout</button>
             </form>

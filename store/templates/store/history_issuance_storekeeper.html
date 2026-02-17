@@ -22,7 +22,7 @@
             <hr>
             <a href="{% url 'store:history_issuance_storekeeper' %}">Issuance History</a>
             <a href="{% url 'store:history_stockin_store' %}">Stock In History</a>
-            <form method="post" action="{% url 'logout' %}">
+            <form method="post" action="{% url 'store:logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="logout-btn">Logout</button>
             </form>

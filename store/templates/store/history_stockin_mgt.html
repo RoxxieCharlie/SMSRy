@@ -22,7 +22,7 @@
             <a href="{% url 'store:weekly' %}">Generate Weekly Report</a>
         </nav>
 
-        <form method="post" action="{% url 'logout' %}" class="logout-form3">
+        <form method="post" action="{% url 'store:logout' %}" class="logout-form3">
             {% csrf_token %}
             <button type="submit" class="logout-btn3">Logout</button>
         </form>
