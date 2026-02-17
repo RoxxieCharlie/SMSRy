@@ -57,7 +57,7 @@ def issuance_create(request):
 
     return render(
         request,
-        "store/store:issuance_create.html",
+        "store/issuance_create.html",
         {
             "staff_list": Staff.objects.all().order_by("name"),
             "items": Item.objects.order_by("name"),
