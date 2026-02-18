@@ -27,20 +27,32 @@ body {
 /* SIDEBAR */
 .sidebar {
     width: 220px;
-    padding: 30px;
+    padding: 24px;
     background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(10px);
+    overflow-y: auto;
+    z-index: 1000;
+    height: 100vh;
+    position:fixed;
+    top: 0;
+    left: 0 ;
+
+}
+
+.sidebar h2 {
+    margin-bottom: 24px;
 }
 
 .sidebar nav {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
 }
 
 .sidebar a {
     text-decoration: none;
     color: var(--text);
-    margin-top: 20px;
+    opacity: 0.85;
 }
 
 .sidebar a:hover {
@@ -49,7 +61,8 @@ body {
 
 .sidebar hr {
     border: none;
-    border-top: 1px solid var(--border);
+    border-top: 2px solid var(--border);
+    margin: 16px 0;
 }
 
 /* MAIN */
@@ -176,7 +189,7 @@ body {
     cursor: pointer;
     transition: all 0.25s ease;
     backdrop-filter: blur(6px);
-    margin-top: 180px;
+    margin-top: 150px;
 }
 
 .logout-form {
