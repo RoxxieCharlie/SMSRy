@@ -294,7 +294,7 @@ body {
     cursor: pointer;
     transition: all 0.25s ease;
     backdrop-filter: blur(6px);
-    margin-top: 180px;
+    margin-top: 140px;
 
 
 
@@ -313,6 +313,45 @@ body {
 .logout-btn:focus-visible {
     outline: 2px solid rgba(239,68,68,0.6);
     outline-offset: 2px;}
+
+.logout-form10 {
+    margin-top: auto;
+    padding-top: 5px;
+}
+
+/* LOGOUT BUTTON */
+.logout-btn10 {
+    width: 100%;
+    padding: 12px 14px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: rgba(248,250,252,0.75);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(6px);
+    margin-top: 260px;
+
+
+
+
+}
+
+/* HOVER STATE */
+.logout-btn10:hover {
+    background: rgba(239,68,68,0.18);
+    border-color: rgba(239,68,68,0.45);
+    color: #fecaca;
+    box-shadow: 0 8px 20px rgba(239,68,68,0.25);
+}
+
+/* OPTIONAL FOCUS (ACCESSIBILITY) */
+.logout-btn10:focus-visible {
+    outline: 2px solid rgba(239,68,68,0.6);
+    outline-offset: 2px;}
+
 
 /* =============================
    SEARCH & FILTER CONTAINER
