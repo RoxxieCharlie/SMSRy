@@ -196,7 +196,7 @@ body {
     cursor: pointer;
     transition: all 0.25s ease;
     backdrop-filter: blur(6px);
-    margin-top: 260px;
+    margin-top: 280px;
 }
 
 .logout-btn:hover {
