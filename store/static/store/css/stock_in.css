@@ -20,39 +20,35 @@ body {
 }
 
 .app {
-    display: flex;
-    min-height: 100vh;
+     display: flex;
+        min-height: 100vh;
 }
 
 /* SIDEBAR */
 .sidebar {
-    width: 220px;
-    padding: 24px;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(10px);
-    overflow-y: auto;
-    z-index: 1000;
-    height: 100vh;
-    position:fixed;
-    top: 0;
-    left: 0 ;
+    position: fixed;
+       top: 0;
+       left: 0;
 
-}
+       height: 100vh;
+       width: 220px;              /* MUST match your current sidebar width */
+       padding: 30px;
 
-.sidebar h2 {
-    margin-bottom: 24px;
+       background: rgba(15, 23, 42, 0.85);
+       overflow-y: auto;
+       z-index: 1000;
 }
 
 .sidebar nav {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 20px;
 }
 
 .sidebar a {
     text-decoration: none;
     color: var(--text);
-    opacity: 0.85;
+    margin-top: 20px;
 }
 
 .sidebar a:hover {
@@ -61,14 +57,14 @@ body {
 
 .sidebar hr {
     border: none;
-    border-top: 2px solid var(--border);
-    margin: 16px 0;
+    border-top: 1px solid var(--border);
 }
 
 /* MAIN */
 .main {
     flex: 1;
-    padding: 32px;
+        padding: 32px;
+        margin-left: 220px;
 }
 
 /* HEADER */
@@ -353,7 +349,22 @@ body {
 }
 
 
+@media (max-width: 768px) {
+    .sidebar {
+        position: sticky; /* or fixed if you want, but sticky is cleaner on mobile */
+        width: 100%;
+        height: auto;
+        top: 0;
+    }
 
+    .main {
+        margin-left: 0;
+    }
+
+    .app {
+        flex-direction: column;
+    }
+}
 
 .item-row:hover .btn--remove {
     opacity: 1;
