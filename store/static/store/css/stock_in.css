@@ -173,6 +173,24 @@ body {
     color: var(--text);
 }
 
+.logout-form {
+    margin-top: auto;
+    padding-top: 24px;
+}
+
+.logout-btn:hover {
+    background: rgba(239,68,68,0.18);
+    border-color: rgba(239,68,68,0.45);
+    color: #fecaca;
+    box-shadow: 0 8px 20px rgba(239,68,68,0.25);
+}
+
+/* OPTIONAL FOCUS (ACCESSIBILITY) */
+.logout-btn:focus-visible {
+    outline: 2px solid rgba(239,68,68,0.6);
+    outline-offset: 2px;}
+
+
 /* Modal overlay */
 .modal-overlay {
     position: fixed;
