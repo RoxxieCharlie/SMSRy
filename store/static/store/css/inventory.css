@@ -284,7 +284,7 @@ body {
     cursor: pointer;
     transition: all 0.25s ease;
     backdrop-filter: blur(6px);
-    margin-top: 280px;
+    margin-top: 230px;
 }
 
 /* HOVER STATE */
