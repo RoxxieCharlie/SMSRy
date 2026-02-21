@@ -102,30 +102,37 @@ body {
    LOW STOCK BAR
    One long horizontal pane + scroll
 ========================= */
-.low-stock-bar {
-    width: 100%;
-    max-width: none;
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
+.low-stock-bar{
+  /* fill the available content width, regardless of parent quirks */
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
 
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-bottom: 8px;
-    -webkit-overflow-scrolling: touch;
+  /* key: force it to behave like a block that spans the row */
+  width: 100%;
+  min-width: 0;
+
+  margin: 0 0 20px 0;
+  padding: 0 0 10px 0;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
-.low-stock-bar::-webkit-scrollbar {
-    height: 6px;
+/* Make each chip keep its size and scroll horizontally */
+.low-stock-bar > .alert-chip{
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
-.low-stock-bar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
+/* scrollbar cosmetics (optional) */
+.low-stock-bar::-webkit-scrollbar{ height: 6px; }
+.low-stock-bar::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
 }
-
 /* Chips behave in a single row */
 .alert-chip {
     flex: 0 0 auto;
@@ -338,7 +345,7 @@ body {
     50% { transform: scale(1.4); opacity: 0.6; }
 }
 
-/* ===== FORCE LOW STOCK BAR FULL WIDTH (FINAL OVERRIDE) ===== */
+/* ===== FORCE LOW STOCK BAR FULL WIDTH (FINAL OVERRIDE) =====
 .main .low-stock-bar{
   display: flex !important;
   width: 100% !important;
@@ -355,8 +362,8 @@ body {
   flex: 0 0 auto !important;
 }
 
-/* If the bar still “looks short”, it’s because items are wrapping or shrinking.
-   This prevents that. */
+If the bar still “looks short”, it’s because items are wrapping or shrinking.
+   This prevents that.
 .main .low-stock-bar .alert-chip{
   white-space: nowrap !important;
-}
+}*/
