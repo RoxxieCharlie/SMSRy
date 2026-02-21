@@ -76,13 +76,23 @@ body {
 }
 
 /* =========================
+   MENU TOGGLE (IMPORTANT FIX)
+   Hidden by default, ONLY shows on small screens.
+   ========================= */
+.menu-toggle {
+    display: none !important; /* ✅ FIX: stop random desktop appearance */
+    font-size: 22px;
+    cursor: pointer;
+    margin-bottom: 16px;
+}
+
+/* =========================
    MAIN
    ========================= */
 .main {
     flex: 1;
     padding: 32px;
 
-    /* ✅ FIX: match actual sidebar width */
     margin-left: var(--sidebar-w);
     width: calc(100% - var(--sidebar-w));
 }
@@ -119,10 +129,10 @@ body {
 .activity-feed {
     padding: 30px;
     font-size: 15px;
-    overflow-y: auto; /* ✅ prevents overflow on small screens */
+    overflow-y: auto;
 }
 
-/* ✅ FIX: your 120px padding was killing layout */
+/* activity list spacing */
 .activity-box {
     padding-left: 18px;
     margin-top: 10px;
@@ -168,70 +178,6 @@ body {
     height: 100%;
     object-fit: cover;
     display: block;
-}
-
-/* =========================
-   RESPONSIVE
-   ========================= */
-@media (max-width: 900px) {
-
-    .app {
-        flex-direction: column;
-    }
-
-    /* ✅ The real fix: sidebar must stop being fixed on mobile */
-    .sidebar {
-        position: sticky; /* stays at top when you scroll */
-        top: 0;
-        left: auto;
-        width: 100%;
-        height: auto;
-        padding: 16px;
-        overflow: visible;
-    }
-
-    /* ✅ main must stop being offset */
-    .main {
-        margin-left: 0;
-        width: 100%;
-        padding: 18px;
-    }
-
-    /* ✅ nav becomes horizontal scroll bar */
-    .sidebar nav {
-        flex-direction: row;
-        gap: 14px;
-        overflow-x: auto;
-        white-space: nowrap;
-        padding-bottom: 6px;
-    }
-
-    .sidebar nav a {
-        display: inline-block;
-        padding: 10px 12px;
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 12px;
-        background: rgba(255,255,255,0.06);
-    }
-
-    .hero-glass {
-        grid-template-columns: 1fr;
-        height: auto;
-    }
-
-    /* give image a predictable height */
-    .hero-image {
-        height: 220px;
-    }
-
-    .hero-image img {
-        height: 100%;
-    }
-
-    /* logout button spacing must not be huge */
-    .logout-btn {
-        margin-top: 16px;
-    }
 }
 
 /* =========================
@@ -311,7 +257,6 @@ body {
     box-shadow: 0 6px 14px rgba(56,189,248,0.35);
 }
 
-/* ✅ FIX: only one reverse-btn definition */
 .reverse-btn {
     background: rgba(239,68,68,0.25);
     color: #ef4444;
@@ -347,7 +292,7 @@ body {
     cursor: pointer;
     transition: all 0.25s ease;
     backdrop-filter: blur(6px);
-    margin-top: 100px;
+    margin-top: 16px; /* ✅ FIX: remove huge 100px gap */
 }
 
 .logout-btn:hover {
@@ -440,19 +385,26 @@ body {
     color: #6b7280;
 }
 
+/* =========================
+   RESPONSIVE (MOBILE)
+   Keep ONE strategy: nav hidden, toggled by .sidebar.active
+   ========================= */
 @media (max-width: 900px) {
 
     .app {
         flex-direction: column;
     }
 
+    /* sidebar becomes top area */
     .sidebar {
         position: relative;
         width: 100%;
         height: auto;
         padding: 16px;
+        overflow: visible;
     }
 
+    /* main becomes full width */
     .main {
         margin-left: 0;
         width: 100%;
@@ -461,9 +413,7 @@ body {
 
     .hero-glass {
         grid-template-columns: 1fr;
-
-        /* FIX: keep a height so the activity list can scroll */
-        min-height: 420px;
+        height: auto;
     }
 
     .hero-image {
@@ -482,13 +432,9 @@ body {
         display: flex;
     }
 
+    /* ✅ only on small screens */
     .menu-toggle {
-        display: block;
-    }
-
-    /* Low stock bar still horizontal; just give it a little more comfort on small screens */
-    .low-stock-bar {
-        padding-bottom: 10px;
+        display: block !important;
     }
 }
 
@@ -499,3 +445,4 @@ body {
 @keyframes pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.4); opacity: 0.6; }
+}

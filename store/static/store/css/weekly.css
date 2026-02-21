@@ -25,7 +25,7 @@ body {
 }
 
 /* ============================
-   SIDEBAR (DESKTOP DEFAULT)
+   SIDEBAR (DESKTOP)
 ============================ */
 .sidebar {
     width: 220px;
@@ -46,7 +46,6 @@ body {
     margin-bottom: 24px;
 }
 
-/* FIX: remove position:fixed from nav (your old code broke layouts) */
 .sidebar nav {
     display: flex;
     flex-direction: column;
@@ -69,10 +68,16 @@ body {
     margin: 16px 0;
 }
 
-.activity-feed hr {
-    border: none;
-    border-top: 2px solid var(--border);
-    margin: 16px 0;
+/* ============================
+   MENU TOGGLE (STANDARDIZED)
+   Hidden by default, shows only on small screens
+============================ */
+.menu-toggle {
+    display: none !important;   /* ✅ STOP desktop leakage */
+    font-size: 22px;
+    cursor: pointer;
+    margin: 0 0 16px 0;
+    user-select: none;
 }
 
 /* ============================
@@ -110,7 +115,6 @@ body {
     border-radius: 20px;
     backdrop-filter: blur(14px);
     overflow: hidden;
-    /* FIX: don’t hard-lock height */
     min-height: 320px;
     height: auto;
 }
@@ -120,40 +124,6 @@ body {
     font-size: 15px;
 }
 
-/* ACTIONS */
-.actions {
-    padding: 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    justify-content: center;
-}
-
-.actions button {
-    padding: 16px;
-    font-size: 16px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-}
-
-.primary {
-    background: var(--accent);
-    color: #020617;
-    font-weight: 600;
-}
-
-.secondary {
-    background: rgba(56, 189, 248, 0.2);
-    color: var(--text);
-}
-
-.ghost {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text);
-}
-
 /* IMAGE */
 .hero-image img {
     width: 100%;
@@ -161,12 +131,14 @@ body {
     object-fit: cover;
 }
 
+/* ⚠️ Your old padding here was a layout killer */
 .activity-box {
-    padding: 120px;
+    padding-left: 18px;
+    margin-top: 10px;
 }
 
 /* ============================
-   ISSUANCE HISTORY TABLE
+   HISTORY TABLE
 ============================ */
 .issuance-history-wrapper {
     width: 100%;
@@ -183,7 +155,6 @@ body {
     margin-bottom: 10px;
 }
 
-/* PANEL */
 .history-card {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(14px);
@@ -193,7 +164,6 @@ body {
     overflow-x: auto;
 }
 
-/* TABLE */
 .history-table {
     width: 100%;
     border-collapse: collapse;
@@ -217,7 +187,6 @@ body {
     background: rgba(255, 255, 255, 0.04);
 }
 
-/* ITEMS LIST */
 .history-table td ul {
     margin: 0;
     padding-left: 18px;
@@ -256,7 +225,6 @@ body {
     box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35);
 }
 
-/* DISABLED STATE */
 .disabled {
     color: #94a3b8;
     font-weight: 600;
@@ -264,7 +232,7 @@ body {
 }
 
 /* ============================
-   LOGOUT (CLEANED)
+   LOGOUT
 ============================ */
 .logout-form,
 .logout-form10,
@@ -289,7 +257,7 @@ body {
     cursor: pointer;
     transition: all 0.25s ease;
     backdrop-filter: blur(6px);
-    margin-top: 0; /* kill the old margin-top hacks */
+    margin-top: 0;
 }
 
 .logout-btn:hover,
@@ -311,7 +279,7 @@ body {
 }
 
 /* =============================
-   SEARCH & FILTER CONTAINER
+   SEARCH & FILTERS
 ============================= */
 .history-filters {
     display: flex;
@@ -353,114 +321,50 @@ body {
 }
 
 /* ============================
-   MOBILE/TABLET: HAMBURGER TOGGLE (OFF-CANVAS)
-   REQUIRED HTML (place near top of body):
-   <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleSidebar()">
-      <span></span>
-   </button>
-   <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
-
-   REQUIRED JS (before </body>):
-   <script>
-     function toggleSidebar(){ document.body.classList.toggle('sidebar-open'); }
-   </script>
+   RESPONSIVE (MOBILE/TABLET)
+   Uses YOUR existing HTML:
+   <div class="menu-toggle" onclick="toggleMenu()">☰ Menu</div>
+   JS toggles: .sidebar.active
 ============================ */
-
-/* hidden on desktop */
-.mobile-menu-btn {
-    display: none;
-}
-
-.sidebar-overlay {
-    display: none;
-}
-
-/* RESPONSIVE */
 @media (max-width: 900px) {
     .app {
         flex-direction: column;
     }
 
-    /* show hamburger */
-    .mobile-menu-btn {
-        display: block;
-        position: fixed;
-        top: 14px;
-        left: 14px;
-        z-index: 1300;
-
-        width: 46px;
-        height: 46px;
-        border-radius: 14px;
-        border: 1px solid var(--border);
-        background: rgba(15, 23, 42, 0.88);
-        backdrop-filter: blur(10px);
-        cursor: pointer;
-    }
-
-    /* hamburger lines */
-    .mobile-menu-btn span,
-    .mobile-menu-btn span::before,
-    .mobile-menu-btn span::after {
-        content: "";
-        display: block;
-        width: 18px;
-        height: 2px;
-        background: var(--text);
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        border-radius: 2px;
-    }
-
-    .mobile-menu-btn span {
-        top: 50%;
-    }
-
-    .mobile-menu-btn span::before {
-        top: -6px;
-        position: absolute;
-    }
-
-    .mobile-menu-btn span::after {
-        top: 6px;
-        position: absolute;
-    }
-
-    /* overlay */
-    .sidebar-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(2, 6, 23, 0.6);
-        z-index: 1200;
-    }
-
-    body.sidebar-open .sidebar-overlay {
-        display: block;
-    }
-
-    /* make sidebar a drawer */
+    /* Sidebar becomes top section */
     .sidebar {
-        width: 78vw;
-        max-width: 320px;
-        transform: translateX(-110%);
-        transition: transform 0.25s ease;
-        z-index: 1250;
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding: 16px;
+        overflow: visible;
     }
 
-    body.sidebar-open .sidebar {
-        transform: translateX(0);
-    }
-
-    /* main becomes full width and padded under button */
+    /* Main becomes full width */
     .main {
         margin-left: 0;
         width: 100%;
-        padding-top: 72px;
+        padding: 20px;
     }
 
-    /* hero becomes single column */
+    /* Show toggle ONLY on small screens */
+    .menu-toggle {
+        display: block !important;
+    }
+
+    /* Hide nav until toggled */
+    .sidebar nav {
+        display: none;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .sidebar.active nav {
+        display: flex;
+    }
+
+    /* Hero stacks */
     .hero-glass {
         grid-template-columns: 1fr;
         min-height: unset;
@@ -470,7 +374,7 @@ body {
         height: 220px;
     }
 
-    /* filters stack */
+    /* Filters stack */
     .history-filters {
         flex-direction: column;
         align-items: stretch;
@@ -484,10 +388,6 @@ body {
 @media (max-width: 600px) {
     .header h1 {
         font-size: 22px;
-    }
-
-    .actions {
-        padding: 20px;
     }
 
     .history-table th,
