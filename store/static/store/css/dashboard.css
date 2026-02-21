@@ -103,16 +103,17 @@ body {
    - wraps to new lines
    - stays full width
 ========================= */
-.low-stock-bar {
+/*.low-stock-bar {
     width: 100%;
     display: flex;
-    flex-wrap: wrap;        /* ✅ wrap instead of scroll */
+    flex-wrap: wrap;
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
+
 }
 
-/* Chips */
+ Chips
 .alert-chip {
     display: inline-flex;
     align-items: center;
@@ -124,7 +125,26 @@ body {
     font-weight: 500;
 
     border: 1px solid transparent;
+}*/
+
+.low-stock-bar {
+    width: 100%;
+    margin-bottom: 24px;
 }
+
+/* Make each alert stretch full width */
+.low-stock-bar .alert-chip {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 15px;
+
+    border: 1px solid transparent;
 
 /* =========================
    HERO PANEL
