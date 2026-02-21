@@ -292,7 +292,7 @@ body {
     cursor: pointer;
     transition: all 0.25s ease;
     backdrop-filter: blur(6px);
-    margin-top: 16px; /* ✅ FIX: remove huge 100px gap */
+    margin-top: 24px; /* ✅ FIX: remove huge 100px gap */
 }
 
 .logout-btn:hover {
