@@ -5,6 +5,8 @@
     --text: #e5e7eb;
     --muted: #94a3b8;
     --accent: #38bdf8;
+
+    --sidebar-w: 220px; /* ✅ single source of truth */
 }
 
 * {
@@ -24,18 +26,21 @@ body {
     min-height: 100vh;
 }
 
-/* SIDEBAR */
+/* =========================
+   SIDEBAR
+   ========================= */
 .sidebar {
-    width: 220px;
+    width: var(--sidebar-w);
     padding: 24px;
     background: rgba(15, 23, 42, 0.85);
     backdrop-filter: blur(10px);
     overflow-y: auto;
     z-index: 1000;
-    height:100vh;
-    position:fixed;
-    top: 0 ;
-    left:0;
+
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
 }
 
 .sidebar h2 {
@@ -64,17 +69,22 @@ body {
     margin: 16px 0;
 }
 
-.activity-feed hr{
+.activity-feed hr {
     border: none;
     border-top: 2px solid var(--border);
     margin: 16px 0;
 }
-/* MAIN */
+
+/* =========================
+   MAIN
+   ========================= */
 .main {
     flex: 1;
     padding: 32px;
-    margin-left: 240px;
-    width: calc(100% - 240px);
+
+    /* ✅ FIX: match actual sidebar width */
+    margin-left: var(--sidebar-w);
+    width: calc(100% - var(--sidebar-w));
 }
 
 /* HEADER */
@@ -106,11 +116,16 @@ body {
     height: 400px;
 }
 
-.activity-feed{
+.activity-feed {
     padding: 30px;
     font-size: 15px;
+    overflow-y: auto; /* ✅ prevents overflow on small screens */
+}
 
-
+/* ✅ FIX: your 120px padding was killing layout */
+.activity-box {
+    padding-left: 18px;
+    margin-top: 10px;
 }
 
 /* ACTIONS */
@@ -150,38 +165,78 @@ body {
 /* IMAGE */
 .hero-image img {
     width: 100%;
-    height: 80%;
+    height: 100%;
     object-fit: cover;
+    display: block;
 }
 
-
-
-.activity-box {
-    padding: 120px;
-}
-
-/* RESPONSIVE */
+/* =========================
+   RESPONSIVE
+   ========================= */
 @media (max-width: 900px) {
+
     .app {
         flex-direction: column;
     }
 
+    /* ✅ The real fix: sidebar must stop being fixed on mobile */
     .sidebar {
+        position: sticky; /* stays at top when you scroll */
+        top: 0;
+        left: auto;
         width: 100%;
-        display: flex;
+        height: auto;
+        padding: 16px;
+        overflow: visible;
+    }
+
+    /* ✅ main must stop being offset */
+    .main {
+        margin-left: 0;
+        width: 100%;
+        padding: 18px;
+    }
+
+    /* ✅ nav becomes horizontal scroll bar */
+    .sidebar nav {
+        flex-direction: row;
+        gap: 14px;
         overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 6px;
+    }
+
+    .sidebar nav a {
+        display: inline-block;
+        padding: 10px 12px;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 12px;
+        background: rgba(255,255,255,0.06);
     }
 
     .hero-glass {
         grid-template-columns: 1fr;
+        height: auto;
     }
 
+    /* give image a predictable height */
     .hero-image {
         height: 220px;
     }
+
+    .hero-image img {
+        height: 100%;
+    }
+
+    /* logout button spacing must not be huge */
+    .logout-btn {
+        margin-top: 16px;
+    }
 }
 
-/* WRAPPER & HEADING */
+/* =========================
+   HISTORY / TABLE
+   ========================= */
 .issuance-history-wrapper {
     width: 100%;
     display: flex;
@@ -197,7 +252,6 @@ body {
     margin-bottom: 10px;
 }
 
-/* PANEL */
 .history-card {
     background: rgba(255,255,255,0.08);
     backdrop-filter: blur(14px);
@@ -207,7 +261,6 @@ body {
     overflow-x: auto;
 }
 
-/* TABLE */
 .history-table {
     width: 100%;
     border-collapse: collapse;
@@ -231,7 +284,6 @@ body {
     background: rgba(255,255,255,0.04);
 }
 
-/* ITEMS LIST */
 .history-table td ul {
     margin: 0;
     padding-left: 18px;
@@ -259,6 +311,7 @@ body {
     box-shadow: 0 6px 14px rgba(56,189,248,0.35);
 }
 
+/* ✅ FIX: only one reverse-btn definition */
 .reverse-btn {
     background: rgba(239,68,68,0.25);
     color: #ef4444;
@@ -276,13 +329,12 @@ body {
     font-size: 13px;
 }
 
-/* LOGOUT FORM POSITIONING */
+/* LOGOUT */
 .logout-form {
     margin-top: auto;
     padding-top: 3px;
 }
 
-/* LOGOUT BUTTON */
 .logout-btn {
     width: 100%;
     padding: 12px 14px;
@@ -298,7 +350,6 @@ body {
     margin-top: 100px;
 }
 
-/* HOVER STATE */
 .logout-btn:hover {
     background: rgba(239,68,68,0.18);
     border-color: rgba(239,68,68,0.45);
@@ -306,25 +357,22 @@ body {
     box-shadow: 0 8px 20px rgba(239,68,68,0.25);
 }
 
-/* OPTIONAL FOCUS (ACCESSIBILITY) */
 .logout-btn:focus-visible {
     outline: 2px solid rgba(239,68,68,0.6);
     outline-offset: 2px;
 }
 
-/* Container for search & filter form */
-/* Container for search & filter form */
+/* FILTERS */
 .history-filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px; /* space between fields */
+    gap: 10px;
     margin-bottom: 20px;
     align-items: center;
 }
 
-/* Search input field - shortened */
 .history-filters input[type="text"] {
-    flex: 0 1 180px; /* fixed-ish width, can shrink */
+    flex: 0 1 180px;
     padding: 8px 12px;
     border: 1px solid #ccc;
     border-radius: 6px;
@@ -338,9 +386,8 @@ body {
     outline: none;
 }
 
-/* Select dropdown */
 .history-filters select {
-    flex: 0 1 150px; /* reasonable width */
+    flex: 0 1 150px;
     padding: 8px 12px;
     border: 1px solid #ccc;
     border-radius: 6px;
@@ -355,7 +402,6 @@ body {
     outline: none;
 }
 
-/* Filter button */
 .history-filters button {
     padding: 8px 16px;
     background-color: #007BFF;
@@ -372,7 +418,6 @@ body {
     transform: scale(1.05);
 }
 
-/* Responsive adjustments for small screens */
 @media (max-width: 600px) {
     .history-filters {
         flex-direction: column;
@@ -393,12 +438,4 @@ body {
 
 .status.locked {
     color: #6b7280;
-}
-
-.reverse-btn {
-    background: #dc2626;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    cursor: pointer;
 }

@@ -15,6 +15,7 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <h2>Store</h2>
+        <div class="menu-toggle" onclick="toggleMenu()">☰ Menu</div>
         <nav>
             <a href="{% url 'store:dashboard_management' %}">Home</a>
             <a href="{% url 'store:inventory_mgt' %}">Inventory</a>
@@ -133,6 +134,10 @@
 
     </main>
 </div>
-
+<script>
+    function toggleMenu(){
+      document.querySelector(".sidebar").classList.toggle("active");
+    }
+</script>
 </body>
 </html>

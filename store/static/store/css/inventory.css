@@ -365,3 +365,18 @@ body {
     font-weight: bold;
 }
 
+@media (max-width: 900px) {
+
+    .menu-toggle {
+        display: inline-block;
+    }
+
+    .sidebar nav {
+        display: none;
+    }
+
+    .sidebar.active nav {
+        display: flex;
+        flex-direction: column;
+    }
+}

@@ -9,6 +9,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'store/css/dashboard.css' %}">
 </head>
+
+
 <body>
 
 <div class="app">
@@ -16,6 +18,7 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <h2>Store</h2>
+        <div class="menu-toggle" onclick="toggleMenu()">☰ Menu</div>
         <nav>
             <a href="{% url 'store:inventory_mgt' %}">Inventory</a>
             <a href="{% url 'store:history_issuance_management' %}">Issuance History</a>
@@ -110,6 +113,10 @@
     </main>
 
 </div>
-
+<script>
+    function toggleMenu(){
+      document.querySelector(".sidebar").classList.toggle("active");
+    }
+</script>
 </body>
 </html>

@@ -6,8 +6,8 @@
     --muted: #94a3b8;
     --accent: #38bdf8;
 
-    --lowstock-color: #f59e0b;   /* amber */
-    --outofstock-color: #ef4444; /* red */
+    --lowstock-color: #f59e0b;
+    --outofstock-color: #ef4444;
 }
 
 * {
@@ -27,11 +27,14 @@ body {
     min-height: 100vh;
 }
 
-/* SIDEBAR */
+/* =========================
+   SIDEBAR (DESKTOP)
+   ========================= */
+
 .sidebar {
     width: 220px;
     padding: 24px;
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(15, 23, 42, 0.95);
     backdrop-filter: blur(10px);
     position: fixed;
     top: 0;
@@ -39,6 +42,9 @@ body {
     height: 100vh;
     overflow-y: auto;
     z-index: 1000;
+
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar h2 {
@@ -55,6 +61,7 @@ body {
     text-decoration: none;
     color: var(--text);
     opacity: 0.85;
+    transition: 0.2s ease;
 }
 
 .sidebar a:hover {
@@ -67,15 +74,21 @@ body {
     margin: 16px 0;
 }
 
-/* MAIN */
+/* =========================
+   MAIN
+   ========================= */
+
 .main {
     flex: 1;
     padding: 32px;
-    margin-left: 240px;
-    width: calc(100% - 240px);
+    margin-left: 220px;
+    width: calc(100% - 220px);
 }
 
-/* HEADER */
+/* =========================
+   HEADER
+   ========================= */
+
 .header {
     margin-bottom: 20px;
 }
@@ -88,16 +101,21 @@ body {
     color: var(--muted);
 }
 
-/* LOW STOCK ALERTS */
+/* =========================
+   LOW STOCK BAR
+   ========================= */
+
 .low-stock-bar {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 20px;
-    width: 100%;
 }
 
-/* ACTIVITY PANEL */
+/* =========================
+   HERO PANEL
+   ========================= */
+
 .hero {
     margin-bottom: 70px;
 }
@@ -110,7 +128,7 @@ body {
     border-radius: 20px;
     backdrop-filter: blur(14px);
     overflow: hidden;
-    height: 400px;
+    min-height: 400px;
 }
 
 .activity-feed {
@@ -137,53 +155,21 @@ body {
     padding-left: 20px;
 }
 
-.activity-box li:first-child {
-    margin-top: 10px;
-}
-
-/* IMAGE PANEL */
 .hero-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-/* LOGOUT BUTTON */
-.logout-form {
-    margin-top: auto;
-}
-
-.logout-btn2 {
-    width: 100%;
-    padding: 12px 14px;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
-    color: rgba(248, 250, 252, 0.75);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    backdrop-filter: blur(6px);
-    margin-top: 120px;
-}
-
-.logout-btn2:hover {
-    background: rgba(239, 68, 68, 0.18);
-    border-color: rgba(239, 68, 68, 0.45);
-    color: #fecaca;
-    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
-}
-
-.logout-btn2:focus-visible {
-    outline: 2px solid rgba(239, 68, 68, 0.6);
-    outline-offset: 2px;
-}
+/* =========================
+   LOGOUT
+   ========================= */
 
 .logout-form {
     margin-top: auto;
 }
 
+.logout-btn2,
 .logout-btn {
     width: 100%;
     padding: 12px 14px;
@@ -196,9 +182,9 @@ body {
     cursor: pointer;
     transition: all 0.25s ease;
     backdrop-filter: blur(6px);
-    margin-top: 230px;
 }
 
+.logout-btn2:hover,
 .logout-btn:hover {
     background: rgba(239, 68, 68, 0.18);
     border-color: rgba(239, 68, 68, 0.45);
@@ -206,48 +192,8 @@ body {
     box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
 }
 
-.logout-btn:focus-visible {
-    outline: 2px solid rgba(239, 68, 68, 0.6);
-    outline-offset: 2px;
-}
-
-
-/* ANIMATION */
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(1.4);
-        opacity: 0.6;
-    }
-}
-
-/* RESPONSIVE */
-@media (max-width: 900px) {
-    .app {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        display: flex;
-        overflow-x: auto;
-    }
-
-    .hero-glass {
-        grid-template-columns: 1fr;
-        height: auto;
-    }
-
-    .hero-image {
-        height: 220px;
-    }
-}
-
 /* =========================
-   STOCK ALERT CHIPS
+   ALERT CHIPS
    ========================= */
 
 .alert-chip {
@@ -257,35 +203,27 @@ body {
     padding: 10px 16px;
     border-radius: 14px;
     font-weight: 500;
-    width: 100%;
     backdrop-filter: blur(10px);
     border: 1px solid transparent;
 }
 
-/* 🔴 OUT OF STOCK — glassy red */
 .alert-chip--danger {
     background: rgba(239, 68, 68, 0.18);
     border: 1px solid rgba(239, 68, 68, 0.45);
     color: #fecaca;
 }
 
-/* 🟡 LOW STOCK — glassy amber */
 .alert-chip--warn {
     background: rgba(245, 158, 11, 0.18);
     border: 1px solid rgba(245, 158, 11, 0.45);
     color: #fde68a;
 }
 
-/* EMPTY STATE */
 .alert-chip--empty {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: var(--muted);
 }
-
-/* =========================
-   ALERT DOTS
-   ========================= */
 
 .alert-dot {
     width: 10px;
@@ -294,14 +232,79 @@ body {
     animation: pulse 1.5s infinite;
 }
 
-/* 🔴 red dot */
 .alert-dot--danger {
     background: #ef4444;
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.9);
 }
 
-/* 🟡 amber dot */
 .alert-dot--warn {
     background: #f59e0b;
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.9);
+}
+
+/* =========================
+   HAMBURGER BUTTON
+   ========================= */
+
+.menu-toggle {
+    display: none;
+    font-size: 22px;
+    cursor: pointer;
+    margin-bottom: 16px;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 900px) {
+
+    .app {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding: 16px;
+    }
+
+    .main {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .hero-glass {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+
+    .hero-image {
+        height: 220px;
+    }
+
+    /* NAV COLLAPSE */
+    .sidebar nav {
+        display: none;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .sidebar.active nav {
+        display: flex;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+}
+
+/* =========================
+   ANIMATION
+   ========================= */
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.6; }
 }

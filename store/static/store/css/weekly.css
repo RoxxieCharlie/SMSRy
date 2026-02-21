@@ -24,30 +24,33 @@ body {
     min-height: 100vh;
 }
 
-/* SIDEBAR */
+/* ============================
+   SIDEBAR (DESKTOP DEFAULT)
+============================ */
 .sidebar {
     width: 220px;
     padding: 24px;
     background: rgba(15, 23, 42, 0.85);
     backdrop-filter: blur(10px);
     position: fixed;
-       top: 0;
-       left: 0;
-       height: 100vh;
-       overflow-y: auto;
-       z-index: 1000;
-
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
 }
 
 .sidebar h2 {
     margin-bottom: 24px;
 }
 
+/* FIX: remove position:fixed from nav (your old code broke layouts) */
 .sidebar nav {
     display: flex;
     flex-direction: column;
     gap: 25px;
-    position:fixed;
 }
 
 .sidebar a {
@@ -66,16 +69,19 @@ body {
     margin: 16px 0;
 }
 
-.activity-feed hr{
+.activity-feed hr {
     border: none;
     border-top: 2px solid var(--border);
     margin: 16px 0;
 }
-/* MAIN */
+
+/* ============================
+   MAIN (DESKTOP)
+============================ */
 .main {
     margin-left: 240px;
-        padding: 24px;
-        width: calc(100% - 240px);
+    padding: 24px;
+    width: calc(100% - 240px);
 }
 
 /* HEADER */
@@ -104,14 +110,14 @@ body {
     border-radius: 20px;
     backdrop-filter: blur(14px);
     overflow: hidden;
-    height: 400px;
+    /* FIX: don’t hard-lock height */
+    min-height: 320px;
+    height: auto;
 }
 
-.activity-feed{
+.activity-feed {
     padding: 30px;
     font-size: 15px;
-
-
 }
 
 /* ACTIONS */
@@ -155,33 +161,13 @@ body {
     object-fit: cover;
 }
 
-
-
 .activity-box {
     padding: 120px;
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-    .app {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        display: flex;
-        overflow-x: auto;
-    }
-
-    .hero-glass {
-        grid-template-columns: 1fr;
-    }
-
-    .hero-image {
-        height: 220px;
-    }
-}
-/* WRAPPER & HEADING */
+/* ============================
+   ISSUANCE HISTORY TABLE
+============================ */
 .issuance-history-wrapper {
     width: 100%;
     display: flex;
@@ -199,11 +185,11 @@ body {
 
 /* PANEL */
 .history-card {
-    background: rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(14px);
     border-radius: 16px;
     padding: 20px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     overflow-x: auto;
 }
 
@@ -215,7 +201,7 @@ body {
 
 .history-table th,
 .history-table td {
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 12px;
     text-align: left;
     font-size: 14px;
@@ -223,12 +209,12 @@ body {
 }
 
 .history-table thead th {
-    background: rgba(15,23,42,0.75);
+    background: rgba(15, 23, 42, 0.75);
     font-weight: 600;
 }
 
 .history-table tbody tr:nth-child(even) {
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.04);
 }
 
 /* ITEMS LIST */
@@ -238,7 +224,8 @@ body {
 }
 
 /* ACTION BUTTONS */
-.edit-btn, .reverse-btn {
+.edit-btn,
+.reverse-btn {
     padding: 6px 12px;
     border-radius: 8px;
     border: none;
@@ -250,23 +237,23 @@ body {
 }
 
 .edit-btn {
-    background: rgba(56,189,248,0.25);
+    background: rgba(56, 189, 248, 0.25);
     color: #0ea5e9;
 }
 
 .edit-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(56,189,248,0.35);
+    box-shadow: 0 6px 14px rgba(56, 189, 248, 0.35);
 }
 
 .reverse-btn {
-    background: rgba(239,68,68,0.25);
+    background: rgba(239, 68, 68, 0.25);
     color: #ef4444;
 }
 
 .reverse-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(239,68,68,0.35);
+    box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35);
 }
 
 /* DISABLED STATE */
@@ -275,83 +262,53 @@ body {
     font-weight: 600;
     font-size: 13px;
 }
-/* LOGOUT FORM POSITIONING */
-.logout-form {
+
+/* ============================
+   LOGOUT (CLEANED)
+============================ */
+.logout-form,
+.logout-form10,
+.logout-form3,
+.logout-form4 {
     margin-top: auto;
-    padding-top: 5px;
+    padding-top: 16px;
 }
 
-/* LOGOUT BUTTON */
-.logout-btn {
+.logout-btn,
+.logout-btn10,
+.logout-btn3,
+.logout-btn4 {
     width: 100%;
     padding: 12px 14px;
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 10px;
-    color: rgba(248,250,252,0.75);
+    color: rgba(248, 250, 252, 0.75);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.25s ease;
     backdrop-filter: blur(6px);
-    margin-top: 140px;
-
-
-
-
+    margin-top: 0; /* kill the old margin-top hacks */
 }
 
-/* HOVER STATE */
-.logout-btn:hover {
-    background: rgba(239,68,68,0.18);
-    border-color: rgba(239,68,68,0.45);
+.logout-btn:hover,
+.logout-btn10:hover,
+.logout-btn3:hover,
+.logout-btn4:hover {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.45);
     color: #fecaca;
-    box-shadow: 0 8px 20px rgba(239,68,68,0.25);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
 }
 
-/* OPTIONAL FOCUS (ACCESSIBILITY) */
-.logout-btn:focus-visible {
-    outline: 2px solid rgba(239,68,68,0.6);
-    outline-offset: 2px;}
-
-.logout-form10 {
-    margin-top: auto;
-    padding-top: 5px;
+.logout-btn:focus-visible,
+.logout-btn10:focus-visible,
+.logout-btn3:focus-visible,
+.logout-btn4:focus-visible {
+    outline: 2px solid rgba(239, 68, 68, 0.6);
+    outline-offset: 2px;
 }
-
-/* LOGOUT BUTTON */
-.logout-btn10 {
-    width: 100%;
-    padding: 12px 14px;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
-    color: rgba(248,250,252,0.75);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    backdrop-filter: blur(6px);
-    margin-top: 260px;
-
-
-
-
-}
-
-/* HOVER STATE */
-.logout-btn10:hover {
-    background: rgba(239,68,68,0.18);
-    border-color: rgba(239,68,68,0.45);
-    color: #fecaca;
-    box-shadow: 0 8px 20px rgba(239,68,68,0.25);
-}
-
-/* OPTIONAL FOCUS (ACCESSIBILITY) */
-.logout-btn10:focus-visible {
-    outline: 2px solid rgba(239,68,68,0.6);
-    outline-offset: 2px;}
-
 
 /* =============================
    SEARCH & FILTER CONTAINER
@@ -395,8 +352,125 @@ body {
     background-color: #357ABD;
 }
 
+/* ============================
+   MOBILE/TABLET: HAMBURGER TOGGLE (OFF-CANVAS)
+   REQUIRED HTML (place near top of body):
+   <button class="mobile-menu-btn" type="button" aria-label="Open menu" onclick="toggleSidebar()">
+      <span></span>
+   </button>
+   <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+   REQUIRED JS (before </body>):
+   <script>
+     function toggleSidebar(){ document.body.classList.toggle('sidebar-open'); }
+   </script>
+============================ */
+
+/* hidden on desktop */
+.mobile-menu-btn {
+    display: none;
+}
+
+.sidebar-overlay {
+    display: none;
+}
+
 /* RESPONSIVE */
-@media screen and (max-width: 600px) {
+@media (max-width: 900px) {
+    .app {
+        flex-direction: column;
+    }
+
+    /* show hamburger */
+    .mobile-menu-btn {
+        display: block;
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 1300;
+
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(15, 23, 42, 0.88);
+        backdrop-filter: blur(10px);
+        cursor: pointer;
+    }
+
+    /* hamburger lines */
+    .mobile-menu-btn span,
+    .mobile-menu-btn span::before,
+    .mobile-menu-btn span::after {
+        content: "";
+        display: block;
+        width: 18px;
+        height: 2px;
+        background: var(--text);
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 2px;
+    }
+
+    .mobile-menu-btn span {
+        top: 50%;
+    }
+
+    .mobile-menu-btn span::before {
+        top: -6px;
+        position: absolute;
+    }
+
+    .mobile-menu-btn span::after {
+        top: 6px;
+        position: absolute;
+    }
+
+    /* overlay */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.6);
+        z-index: 1200;
+    }
+
+    body.sidebar-open .sidebar-overlay {
+        display: block;
+    }
+
+    /* make sidebar a drawer */
+    .sidebar {
+        width: 78vw;
+        max-width: 320px;
+        transform: translateX(-110%);
+        transition: transform 0.25s ease;
+        z-index: 1250;
+    }
+
+    body.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+
+    /* main becomes full width and padded under button */
+    .main {
+        margin-left: 0;
+        width: 100%;
+        padding-top: 72px;
+    }
+
+    /* hero becomes single column */
+    .hero-glass {
+        grid-template-columns: 1fr;
+        min-height: unset;
+    }
+
+    .hero-image {
+        height: 220px;
+    }
+
+    /* filters stack */
     .history-filters {
         flex-direction: column;
         align-items: stretch;
@@ -407,78 +481,18 @@ body {
     }
 }
 
-/* LOGOUT BUTTON */
-.logout-btn3 {
-    width: 100%;
-    padding: 12px 14px;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
-    color: rgba(248,250,252,0.75);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    backdrop-filter: blur(6px);
-    margin-top: 350px;
+@media (max-width: 600px) {
+    .header h1 {
+        font-size: 22px;
+    }
 
+    .actions {
+        padding: 20px;
+    }
 
-
-
+    .history-table th,
+    .history-table td {
+        font-size: 13px;
+        padding: 10px;
+    }
 }
-
-/* HOVER STATE */
-.logout-btn3:hover {
-    background: rgba(239,68,68,0.18);
-    border-color: rgba(239,68,68,0.45);
-    color: #fecaca;
-    box-shadow: 0 8px 20px rgba(239,68,68,0.25);
-}
-
-/* OPTIONAL FOCUS (ACCESSIBILITY) */
-.logout-btn3:focus-visible {
-    outline: 2px solid rgba(239,68,68,0.6);
-    outline-offset: 2px;}
-
-.logout-form3 {
-    margin-top: auto;
-    padding-top: 5px;
-}
-
-.logout-form4 {
-    margin-top: auto;
-    padding-top: 5px;
-}
-
-/* LOGOUT BUTTON */
-.logout-btn4 {
-    width: 100%;
-    padding: 12px 14px;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
-    color: rgba(248,250,252,0.75);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    backdrop-filter: blur(6px);
-    margin-top: 180px;
-
-
-
-
-}
-
-/* HOVER STATE */
-.logout-btn4:hover {
-    background: rgba(239,68,68,0.18);
-    border-color: rgba(239,68,68,0.45);
-    color: #fecaca;
-    box-shadow: 0 8px 20px rgba(239,68,68,0.25);
-}
-
-/* OPTIONAL FOCUS (ACCESSIBILITY) */
-.logout-btn4:focus-visible {
-    outline: 2px solid rgba(239,68,68,0.6);
-    outline-offset: 2px;}

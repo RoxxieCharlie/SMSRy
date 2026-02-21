@@ -20,23 +20,46 @@ body {
 }
 
 .app {
-     display: flex;
-        min-height: 100vh;
+    display: flex;
+    min-height: 100vh;
 }
 
-/* SIDEBAR */
+/* =========================
+   SIDEBAR (DESKTOP)
+   ========================= */
 .sidebar {
     position: fixed;
-       top: 0;
-       left: 0;
+    top: 0;
+    left: 0;
 
-       height: 100vh;
-       width: 220px;              /* MUST match your current sidebar width */
-       padding: 30px;
+    height: 100vh;
+    width: 220px; /* MUST match .main margin-left */
+    padding: 30px;
 
-       background: rgba(15, 23, 42, 0.85);
-       overflow-y: auto;
-       z-index: 1000;
+    background: rgba(15, 23, 42, 0.85);
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.sidebar h2 {
+    margin-bottom: 14px;
+}
+
+/* ✅ TOGGLE BUTTON (HIDDEN ON DESKTOP) */
+.menu-toggle {
+    display: none;
+    margin: 10px 0 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.menu-toggle:hover {
+    border-color: rgba(56, 189, 248, 0.55);
 }
 
 .sidebar nav {
@@ -60,11 +83,14 @@ body {
     border-top: 1px solid var(--border);
 }
 
-/* MAIN */
+/* =========================
+   MAIN (DESKTOP)
+   ========================= */
 .main {
     flex: 1;
-        padding: 32px;
-        margin-left: 220px;
+    padding: 32px;
+    margin-left: 220px;
+    width: calc(100% - 220px);
 }
 
 /* HEADER */
@@ -200,13 +226,14 @@ body {
     box-shadow: 0 8px 20px rgba(239,68,68,0.25);
 }
 
-/* OPTIONAL FOCUS (ACCESSIBILITY) */
 .logout-btn:focus-visible {
     outline: 2px solid rgba(239,68,68,0.6);
-    outline-offset: 2px;}
+    outline-offset: 2px;
+}
 
-
-/* Modal overlay */
+/* =========================
+   MODALS
+   ========================= */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -217,7 +244,6 @@ body {
     z-index: 9999;
 }
 
-/* Modal box */
 .modal-box {
     background: #ffffff;
     padding: 28px 24px;
@@ -226,23 +252,12 @@ body {
     text-align: center;
 }
 
-/* Decorative lines */
 .modal-line {
     height: 3px;
-    background-color: #0b2c5d; /* dark blue */
+    background-color: #0b2c5d;
     margin: 10px 0;
 }
 
-.top-line {
-    margin-bottom: 16px;
-    length: 100%;
-}
-
-.bottom-line {
-    margin-top: 16px;
-}
-
-/* Message text */
 .modal-message {
     font-weight: 700;
     color: #000000;
@@ -250,15 +265,15 @@ body {
     line-height: 1.5;
 }
 
-/* OK button */
 .modal-ok-btn {
-    height:10px
-    width: 15px;
+    /* ✅ fixed missing semicolon */
+    height: 40px;
+    width: auto;
     margin-top: 24px;
     padding: 12px 36px;
     font-size: 16px;
     font-weight: 700;
-    background-color: #0b2c5d; /* dark blue */
+    background-color: #0b2c5d;
     color: #ffffff;
     border: none;
     border-radius: 6px;
@@ -270,64 +285,64 @@ body {
 }
 
 .modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .modal__card {
-  position: relative;
-  z-index: 1001;
+    position: relative;
+    z-index: 1001;
 
-  background: #ffffff;
-  border-radius: 6px;
-  padding: 1.5rem;
-  width: 90%;
-  max-width: 420px;
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 420px;
 
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 .modal__title {
-  margin: 0 0 0.75rem;
-  color: #b00020;
-  font-size: 1.25rem;
+    margin: 0 0 0.75rem;
+    color: #b00020;
+    font-size: 1.25rem;
 }
 
 .modal__body {
-  margin-bottom: 1.25rem;
-  color: #333;
+    margin-bottom: 1.25rem;
+    color: #333;
 }
 
 .modal__actions {
-  text-align: right;
+    text-align: right;
 }
 
 .btn--danger {
-  background: #b00020;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
+    background: #b00020;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .btn--danger:hover {
-  background: #8a0019;
+    background: #8a0019;
 }
 
+/* REMOVE */
 .btn--remove {
-    background-color: #b00020; /* deep red */
+    background-color: #b00020;
     color: #fff;
     border: none;
     padding: 6px 12px;
@@ -342,30 +357,75 @@ body {
     background-color: #8a0019;
 }
 
-/* HIDE BUTTON WHEN ONLY ONE ROW (controlled via JS) */
 .btn--remove[style*="display: none"] {
     opacity: 0;
     pointer-events: none;
 }
 
+.item-row:hover .btn--remove {
+    opacity: 1;
+}
 
+/* =========================
+   ✅ MOBILE: TOP BAR + TOGGLE
+   ========================= */
 @media (max-width: 768px) {
+    .app {
+        flex-direction: column;
+    }
+
+    /* sidebar becomes top bar */
     .sidebar {
-        position: sticky; /* or fixed if you want, but sticky is cleaner on mobile */
+        position: sticky;
+        top: 0;
+        left: 0;
         width: 100%;
         height: auto;
-        top: 0;
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* show toggle on mobile */
+    .menu-toggle {
+        display: inline-block;
+    }
+
+    /* hide nav + logout by default */
+    .sidebar nav,
+    .sidebar .logout-form {
+        display: none;
+    }
+
+    /* show when active */
+    .sidebar.active nav,
+    .sidebar.active .logout-form {
+        display: flex;
+        flex-direction: column;
+        margin-top: 14px;
     }
 
     .main {
         margin-left: 0;
+        width: 100%;
+        padding: 20px;
     }
 
-    .app {
-        flex-direction: column;
+    /* stack form + actions */
+    .stockin-layout {
+        grid-template-columns: 1fr;
     }
-}
 
-.item-row:hover .btn--remove {
-    opacity: 1;
+    /* make actions buttons horizontal optional (comment out if you hate it) */
+    .stockin-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .stockin-actions button {
+        flex: 1 1 140px;
+    }
+
+    .logout-btn {
+        margin-top: 16px;
+    }
 }

@@ -24,7 +24,9 @@ body {
     min-height: 100vh;
 }
 
-/* SIDEBAR */
+/* =========================
+   SIDEBAR (DESKTOP)
+   ========================= */
 .sidebar {
     width: 220px;
     padding: 24px;
@@ -33,14 +35,13 @@ body {
     overflow-y: auto;
     z-index: 1000;
     height: 100vh;
-    position:fixed;
+    position: fixed;
     top: 0;
-    left: 0 ;
-
+    left: 0;
 }
 
 .sidebar h2 {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .sidebar nav {
@@ -65,16 +66,30 @@ body {
     margin: 16px 0;
 }
 
-.activity-feed hr{
-    border: none;
-    border-top: 2px solid var(--border);
-    margin: 16px 0;
+/* ✅ MENU TOGGLE BUTTON (HIDDEN ON DESKTOP) */
+.menu-toggle {
+    display: none;
+    margin: 10px 0 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
 }
-/* MAIN */
+
+.menu-toggle:hover {
+    border-color: rgba(56, 189, 248, 0.55);
+}
+
+/* =========================
+   MAIN (DESKTOP)
+   ========================= */
 .main {
     flex: 1;
     padding: 32px;
-    margin-left: 240px;         /* SAME as sidebar width */
+    margin-left: 240px; /* keeps content away from sidebar */
     width: calc(100% - 240px);
 }
 
@@ -91,7 +106,7 @@ body {
     color: var(--muted);
 }
 
-/* HERO */
+/* HERO (if used) */
 .hero {
     margin-bottom: 70px;
 }
@@ -107,14 +122,18 @@ body {
     height: 400px;
 }
 
-.activity-feed{
+.activity-feed {
     padding: 30px;
     font-size: 15px;
-
-
 }
 
-/* ACTIONS */
+.activity-feed hr {
+    border: none;
+    border-top: 2px solid var(--border);
+    margin: 16px 0;
+}
+
+/* ACTIONS (unused in issuance page usually, but keep) */
 .actions {
     padding: 32px;
     display: flex;
@@ -148,50 +167,25 @@ body {
     color: var(--text);
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-    .app {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        display: flex;
-        overflow-x: auto;
-    }
-
-    .hero-glass {
-        grid-template-columns: 1fr;
-    }
-
-    .hero-image {
-        height: 220px;
-    }
-}
-
-/* WRAPPER */
-.issuance-wrapper {
-
-}
-
-/* CARD */
+/* =========================
+   ISSUANCE CARD
+   ========================= */
 .issuance-card {
     background: rgba(255,255,255,0.08);
     backdrop-filter: blur(16px);
     border-radius: 18px;
     padding: 24px;
     border: 1px solid rgba(255,255,255,0.18);
-
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-
-/* HEADER */
 .issuance-header h2 {
     margin-bottom: 16px;
     font-size: 20px;
     font-weight: 600;
 }
-
 
 .issuance-card label {
     font-size: 13px;
@@ -215,10 +209,6 @@ body {
 .issuance-card textarea {
     resize: none;
     height: 70px;
-}
-
-.issuance-card full-width {
-    grid-column: 1 / -1;
 }
 
 /* TABLE */
@@ -259,12 +249,6 @@ body {
     gap: 12px;
 }
 
-.issuance-card{
-     display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
 .issuance-actions button {
     padding: 12px;
     border-radius: 12px;
@@ -293,195 +277,18 @@ body {
     background: rgba(239,68,68,0.25);
 }
 
-/* LOGOUT FORM POSITIONING */
-.logout-form {
-    margin-top: auto;
-    padding-top: 24px;
-}
-.gridder{
+.gridder {
     display: grid;
     grid-template-columns: 1fr 160px;
     gap: 24px;
     align-items: flex-start;
 }
 
-/* Modal overlay */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
+/* LOGOUT FORM POSITIONING */
+.logout-form {
+    margin-top: auto;
+    padding-top: 24px;
 }
-
-/* Modal box */
-.modal-box {
-    background: #ffffff;
-    padding: 28px 24px;
-    border-radius: 15px;
-    width: 300px;
-    text-align: center;
-}
-
-/* Decorative lines */
-.modal-line {
-    height: 3px;
-    background-color: #0b2c5d; /* dark blue */
-    margin: 10px 0;
-}
-
-.top-line {
-    margin-bottom: 16px;
-    length: 100%;
-}
-
-.bottom-line {
-    margin-top: 16px;
-}
-
-/* Message text */
-.modal-message {
-    font-weight: 700;
-    color: #000000;
-    font-size: 16px;
-    line-height: 1.5;
-}
-
-/* OK button */
-.modal-ok-btn {
-    height:10px
-    width: 15px;
-    margin-top: 24px;
-    padding: 12px 36px;
-    font-size: 16px;
-    font-weight: 700;
-    background-color: #0b2c5d; /* dark blue */
-    color: #ffffff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.modal-ok-btn:hover {
-    opacity: 0.9;
-}
-
-/* =========================
-   MODAL CONTAINER
-   ========================= */
-
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* =========================
-   BACKDROP
-   ========================= */
-
-.modal__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-}
-
-/* =========================
-   MODAL CARD
-   ========================= */
-
-.modal__card {
-  position: relative;
-  z-index: 1001;
-
-  background-color: #ffffff;
-  width: 100%;
-  max-width: 420px;
-  padding: 1.5rem 1.75rem;
-  border-radius: 6px;
-
-  box-shadow: 0 12px 45px rgba(0, 0, 0, 0.25);
-}
-
-/* =========================
-   ERROR EMPHASIS
-   ========================= */
-
-.modal--error .modal__card {
-  border-top: 5px solid #b00020; /* deep red */
-}
-
-/* =========================
-   TITLE
-   ========================= */
-
-.modal__title {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #b00020;
-}
-
-/* =========================
-   RED DIVIDER
-   ========================= */
-
-.modal__divider {
-  height: 2px;
-  width: 100%;
-  background-color: #b00020;
-  margin: 0.75rem 0 1rem;
-  border-radius: 1px;
-}
-
-/* =========================
-   BODY TEXT
-   ========================= */
-
-.modal__body {
-  font-size: 0.95rem;
-  color: #333;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
-}
-
-/* =========================
-   ACTIONS
-   ========================= */
-
-.modal__actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* =========================
-   DANGER BUTTON
-   ========================= */
-
-.btn--danger {
-  background-color: #b00020;
-  color: #ffffff;
-  border: none;
-  padding: 0.5rem 1.25rem;
-  border-radius: 4px;
-
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-
-  transition: background-color 0.15s ease-in-out;
-}
-
-.btn--danger:hover {
-  background-color: #8a0019;
-}
-
 
 /* LOGOUT BUTTON */
 .logout-btn {
@@ -499,7 +306,6 @@ body {
     margin-top: 140px;
 }
 
-/* HOVER STATE */
 .logout-btn:hover {
     background: rgba(239,68,68,0.18);
     border-color: rgba(239,68,68,0.45);
@@ -507,121 +313,155 @@ body {
     box-shadow: 0 8px 20px rgba(239,68,68,0.25);
 }
 
-/* OPTIONAL FOCUS (ACCESSIBILITY) */
 .logout-btn:focus-visible {
     outline: 2px solid rgba(239,68,68,0.6);
-    outline-offset: 2px;}
-
-
-    /* =========================
-       UNIVERSAL MODAL
-       ========================= */
-
-    .modal--universal {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal--universal .modal__backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.55);
-    }
-
-    .modal--universal .modal__card {
-      position: relative;
-      z-index: 1001;
-      background-color: #ffffff;
-      width: 100%;
-      max-width: 420px;
-      padding: 1.5rem 1.75rem;
-      border-radius: 6px;
-      box-shadow: 0 12px 45px rgba(0, 0, 0, 0.25);
-    }
-
-    /* TITLE STYLING BASED ON MESSAGE TYPE */
-    .modal__title.success {
-      color: #2e7d32; /* green for success */
-    }
-
-    .modal__title.error {
-      color: #b00020; /* red for error */
-    }
-
-    /* DIVIDER BASED ON MESSAGE TYPE */
-    .modal__divider.success {
-      background-color: #2e7d32;
-      height: 2px;
-      margin: 0.75rem 0 1rem;
-      border-radius: 1px;
-    }
-
-    .modal__divider.error {
-      background-color: #b00020;
-      height: 2px;
-      margin: 0.75rem 0 1rem;
-      border-radius: 1px;
-    }
-
-    /* BODY TEXT */
-    .modal__body {
-      font-size: 0.95rem;
-      color: #333;
-      line-height: 1.5;
-      margin-bottom: 1.5rem;
-    }
-
-    /* ACTIONS */
-    .modal__actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    /* CLOSE BUTTON */
-    .btn--close {
-      background-color: #555;
-      color: #fff;
-      padding: 0.5rem 1.25rem;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .btn--close:hover {
-      background-color: #333;
-    }
-
-    /* MULTIPLE MESSAGES STACKING */
-    .modal__card .modal__title + .modal__divider + .modal__body {
-      margin-top: 0.5rem;
-    }
-
-    /* OPTIONAL: Scroll for many messages */
-    .modal__card {
-      max-height: 70vh;
-      overflow-y: auto;
-      padding-bottom: 1rem;
-    }
-
-    /* SUCCESS / ERROR COLORS REUSE */
-    .success {
-      color: #2e7d32;
-    }
-    .error {
-      color: #b00020;
-    }
+    outline-offset: 2px;
+}
 
 /* =========================
-   REMOVE BUTTON
+   MODALS (UNCHANGED)
    ========================= */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: #ffffff;
+    padding: 28px 24px;
+    border-radius: 15px;
+    width: 300px;
+    text-align: center;
+}
+
+.modal-line {
+    height: 3px;
+    background-color: #0b2c5d;
+    margin: 10px 0;
+}
+
+.modal-message {
+    font-weight: 700;
+    color: #000000;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.modal-ok-btn {
+    margin-top: 24px;
+    padding: 12px 36px;
+    font-size: 16px;
+    font-weight: 700;
+    background-color: #0b2c5d;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.modal-ok-btn:hover {
+    opacity: 0.9;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.modal__card {
+    position: relative;
+    z-index: 1001;
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 1.5rem 1.75rem;
+    border-radius: 6px;
+    box-shadow: 0 12px 45px rgba(0, 0, 0, 0.25);
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-bottom: 1rem;
+}
+
+.modal--error .modal__card {
+    border-top: 5px solid #b00020;
+}
+
+.modal__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #b00020;
+}
+
+.modal__divider {
+    height: 2px;
+    width: 100%;
+    background-color: #b00020;
+    margin: 0.75rem 0 1rem;
+    border-radius: 1px;
+}
+
+.modal__body {
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn--danger {
+    background-color: #b00020;
+    color: #ffffff;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.btn--danger:hover {
+    background-color: #8a0019;
+}
+
+.btn--close {
+    background-color: #555;
+    color: #fff;
+    padding: 0.5rem 1.25rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn--close:hover {
+    background-color: #333;
+}
+
+/* REMOVE BUTTON */
 .btn--remove {
-    background-color: #b00020; /* deep red */
+    background-color: #b00020;
     color: #fff;
     border: none;
     padding: 6px 12px;
@@ -636,8 +476,60 @@ body {
     background-color: #8a0019;
 }
 
-/* HIDE BUTTON WHEN ONLY ONE ROW (controlled via JS) */
 .btn--remove[style*="display: none"] {
     opacity: 0;
     pointer-events: none;
+}
+
+/* =========================
+   ✅ MOBILE: TOP BAR + TOGGLE
+   ========================= */
+@media (max-width: 900px) {
+    /* sidebar becomes top bar */
+    .sidebar {
+        position: sticky;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        display: block;
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* show the toggle button on mobile */
+    .menu-toggle {
+        display: inline-block;
+    }
+
+    /* hide nav by default on mobile */
+    .sidebar nav,
+    .sidebar .logout-form {
+        display: none;
+    }
+
+    /* show nav when sidebar has .active */
+    .sidebar.active nav,
+    .sidebar.active .logout-form {
+        display: flex;
+        flex-direction: column;
+        margin-top: 14px;
+    }
+
+    /* main becomes full width under top bar */
+    .main {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+    }
+
+    /* issuance layout: stack */
+    .gridder {
+        grid-template-columns: 1fr;
+    }
+
+    /* avoid huge gaps on mobile */
+    .logout-btn {
+        margin-top: 16px;
+    }
 }
