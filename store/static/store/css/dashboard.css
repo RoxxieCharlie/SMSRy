@@ -102,14 +102,43 @@ body {
 }
 
 /* =========================
-   LOW STOCK BAR
+   LOW STOCK BAR (FIXED)
+   One long horizontal pane + scroll when needed.
    ========================= */
 
 .low-stock-bar {
+    width: 100%;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;          /* FIX: stop wrapping */
     gap: 8px;
     margin-bottom: 20px;
+    overflow-x: auto;           /* FIX: allow horizontal scroll */
+    overflow-y: hidden;
+    padding-bottom: 6px;        /* gives space for scrollbar */
+    -webkit-overflow-scrolling: touch;
+}
+
+.low-stock-bar::-webkit-scrollbar {
+    height: 6px;
+}
+
+.low-stock-bar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+}
+
+/* Make chips behave well in a scrolling row */
+.alert-chip {
+    flex: 0 0 auto;             /* FIX: don’t shrink to fit */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    border: 1px solid transparent;
+    white-space: nowrap;        /* FIX: keep text on one line */
 }
 
 /* =========================
@@ -128,13 +157,19 @@ body {
     border-radius: 20px;
     backdrop-filter: blur(14px);
     overflow: hidden;
+
+    /* Keep a meaningful height so the activity area can scroll */
     min-height: 400px;
 }
 
+/* IMPORTANT: the feed should fill the panel height */
 .activity-feed {
     padding: 20px;
     font-size: 15px;
-    overflow-y: auto;
+
+    display: flex;              /* FIX: structure for scroll */
+    flex-direction: column;
+    min-height: 0;              /* FIX: allows child overflow in grid/flex */
 }
 
 .activity-feed h3 {
@@ -147,12 +182,17 @@ body {
     margin-bottom: 12px;
 }
 
+/* Make the LIST be the scrolling region */
 .activity-box {
     display: flex;
     flex-direction: column;
     gap: 12px;
     list-style: disc;
     padding-left: 20px;
+
+    overflow-y: auto;           /* FIX: scroll restored */
+    min-height: 0;              /* FIX: needed for scroll inside flex */
+    max-height: 100%;           /* stays within activity-feed */
 }
 
 .hero-image img {
@@ -193,19 +233,8 @@ body {
 }
 
 /* =========================
-   ALERT CHIPS
+   ALERT CHIPS (colors)
    ========================= */
-
-.alert-chip {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    border-radius: 14px;
-    font-weight: 500;
-    backdrop-filter: blur(10px);
-    border: 1px solid transparent;
-}
 
 .alert-chip--danger {
     background: rgba(239, 68, 68, 0.18);
@@ -253,6 +282,7 @@ body {
 
 /* =========================
    RESPONSIVE
+   Sidebar becomes toggle. Activity scroll still works.
    ========================= */
 
 @media (max-width: 900px) {
@@ -276,7 +306,9 @@ body {
 
     .hero-glass {
         grid-template-columns: 1fr;
-        min-height: auto;
+
+        /* FIX: keep a height so the activity list can scroll */
+        min-height: 420px;
     }
 
     .hero-image {
@@ -297,6 +329,11 @@ body {
 
     .menu-toggle {
         display: block;
+    }
+
+    /* Low stock bar still horizontal; just give it a little more comfort on small screens */
+    .low-stock-bar {
+        padding-bottom: 10px;
     }
 }
 

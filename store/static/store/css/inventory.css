@@ -380,3 +380,62 @@ body {
         flex-direction: column;
     }
 }
+@media (max-width: 900px) {
+
+    .app {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding: 16px;
+    }
+
+    .main {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .hero-glass {
+        grid-template-columns: 1fr;
+
+        /* FIX: keep a height so the activity list can scroll */
+        min-height: 420px;
+    }
+
+    .hero-image {
+        height: 220px;
+    }
+
+    /* NAV COLLAPSE */
+    .sidebar nav {
+        display: none;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .sidebar.active nav {
+        display: flex;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    /* Low stock bar still horizontal; just give it a little more comfort on small screens */
+    .low-stock-bar {
+        padding-bottom: 10px;
+    }
+}
+
+/* =========================
+   ANIMATION
+   ========================= */
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.6; }

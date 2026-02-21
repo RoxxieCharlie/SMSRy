@@ -6,6 +6,9 @@
     --muted: #94a3b8;
     --accent: #38bdf8;
 }
+.menu-toggle {
+    display: none;
+}
 
 * {
     box-sizing: border-box;
