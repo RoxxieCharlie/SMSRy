@@ -337,3 +337,26 @@ body {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.4); opacity: 0.6; }
 }
+
+/* ===== FORCE LOW STOCK BAR FULL WIDTH (FINAL OVERRIDE) ===== */
+.main .low-stock-bar{
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+.main .low-stock-bar > *{
+  flex: 0 0 auto !important;
+}
+
+/* If the bar still “looks short”, it’s because items are wrapping or shrinking.
+   This prevents that. */
+.main .low-stock-bar .alert-chip{
+  white-space: nowrap !important;
+}
