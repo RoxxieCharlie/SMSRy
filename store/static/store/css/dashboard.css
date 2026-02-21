@@ -102,23 +102,12 @@ body {
    LOW STOCK BAR
    One long horizontal pane + scroll
 ========================= */
-.low-stock-bar{
-  /* fill the available content width, regardless of parent quirks */
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 8px;
-
-  /* key: force it to behave like a block that spans the row */
-  width: 100%;
-  min-width: 0;
-
-  margin: 0 0 20px 0;
-  padding: 0 0 10px 0;
-
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
+.low-stock-bar {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;          /* allows wrapping instead of scrolling */
+    gap: 10px;
+    margin-bottom: 24px;
 }
 
 /* Make each chip keep its size and scroll horizontally */
@@ -135,16 +124,16 @@ body {
 }
 /* Chips behave in a single row */
 .alert-chip {
-    flex: 0 0 auto;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    border-radius: 14px;
+    gap: 8px;
+
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
     font-weight: 500;
-    backdrop-filter: blur(10px);
+
     border: 1px solid transparent;
-    white-space: nowrap;
 }
 
 /* =========================
