@@ -29,8 +29,7 @@ body {
 
 /* =========================
    SIDEBAR (DESKTOP)
-   ========================= */
-
+========================= */
 .sidebar {
     width: 220px;
     padding: 24px;
@@ -76,8 +75,7 @@ body {
 
 /* =========================
    MAIN
-   ========================= */
-
+========================= */
 .main {
     flex: 1;
     padding: 32px;
@@ -87,8 +85,7 @@ body {
 
 /* =========================
    HEADER
-   ========================= */
-
+========================= */
 .header {
     margin-bottom: 20px;
 }
@@ -102,23 +99,22 @@ body {
 }
 
 /* =========================
-   LOW STOCK BAR (FIXED)
-   One long horizontal pane + scroll when needed.
-   ========================= */
-
+   LOW STOCK BAR
+   One long horizontal pane + scroll
+========================= */
 .low-stock-bar {
     width: 100%;
-    max-width: none
+    max-width: none;
     display: flex;
-    flex-wrap: nowrap;          /* FIX: stop wrapping */
+    flex-wrap: nowrap;
+    align-items: center;
     gap: 8px;
     margin-bottom: 20px;
-    overflow-x: auto;           /* FIX: allow horizontal scroll */
+
+    overflow-x: auto;
     overflow-y: hidden;
-    padding-bottom: 6px;        /* gives space for scrollbar */
+    padding-bottom: 8px;
     -webkit-overflow-scrolling: touch;
-
-
 }
 
 .low-stock-bar::-webkit-scrollbar {
@@ -126,13 +122,13 @@ body {
 }
 
 .low-stock-bar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 10px;
 }
 
-/* Make chips behave well in a scrolling row */
+/* Chips behave in a single row */
 .alert-chip {
-    flex: 0 0 auto;             /* FIX: don’t shrink to fit */
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -141,13 +137,12 @@ body {
     font-weight: 500;
     backdrop-filter: blur(10px);
     border: 1px solid transparent;
-    white-space: nowrap;        /* FIX: keep text on one line */
+    white-space: nowrap;
 }
 
 /* =========================
    HERO PANEL
-   ========================= */
-
+========================= */
 .hero {
     margin-bottom: 70px;
 }
@@ -161,18 +156,19 @@ body {
     backdrop-filter: blur(14px);
     overflow: hidden;
 
-    /* Keep a meaningful height so the activity area can scroll */
-    min-height: 400px;
+    /* CRITICAL: fixed height enables scroll beside image */
+    height: 400px;
 }
 
-/* IMPORTANT: the feed should fill the panel height */
 .activity-feed {
     padding: 20px;
     font-size: 15px;
 
-    display: flex;              /* FIX: structure for scroll */
+    /* structure needed for nested scroll */
+    display: flex;
     flex-direction: column;
-    min-height: 0;              /* FIX: allows child overflow in grid/flex */
+    min-height: 0;
+    height: 100%;
 }
 
 .activity-feed h3 {
@@ -185,7 +181,7 @@ body {
     margin-bottom: 12px;
 }
 
-/* Make the LIST be the scrolling region */
+/* Scroll happens inside this list */
 .activity-box {
     display: flex;
     flex-direction: column;
@@ -193,9 +189,8 @@ body {
     list-style: disc;
     padding-left: 20px;
 
-    overflow-y: auto;           /* FIX: scroll restored */
-    min-height: 0;              /* FIX: needed for scroll inside flex */
-    max-height: 100%;           /* stays within activity-feed */
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .hero-image img {
@@ -206,8 +201,7 @@ body {
 
 /* =========================
    LOGOUT
-   ========================= */
-
+========================= */
 .logout-form {
     margin-top: auto;
 }
@@ -236,9 +230,8 @@ body {
 }
 
 /* =========================
-   ALERT CHIPS (colors)
-   ========================= */
-
+   ALERT CHIP COLORS
+========================= */
 .alert-chip--danger {
     background: rgba(239, 68, 68, 0.18);
     border: 1px solid rgba(239, 68, 68, 0.45);
@@ -264,32 +257,25 @@ body {
     animation: pulse 1.5s infinite;
 }
 
-.alert-dot--danger {
-    background: #ef4444;
-}
-
-.alert-dot--warn {
-    background: #f59e0b;
-}
+.alert-dot--danger { background: #ef4444; }
+.alert-dot--warn { background: #f59e0b; }
 
 /* =========================
-   HAMBURGER BUTTON
-   ========================= */
-
+   MENU TOGGLE
+   Hidden by default, visible only on small screens
+========================= */
 .menu-toggle {
-    display: none;
+    display: none !important;
     font-size: 22px;
     cursor: pointer;
     margin-bottom: 16px;
+    user-select: none;
 }
 
 /* =========================
    RESPONSIVE
-   Sidebar becomes toggle. Activity scroll still works.
-   ========================= */
-
+========================= */
 @media (max-width: 900px) {
-
     .app {
         flex-direction: column;
     }
@@ -307,18 +293,12 @@ body {
         padding: 20px;
     }
 
-    .hero-glass {
-        grid-template-columns: 1fr;
-
-        /* FIX: keep a height so the activity list can scroll */
-        min-height: 420px;
+    /* show toggle only on small screens */
+    .menu-toggle {
+        display: block !important;
     }
 
-    .hero-image {
-        height: 220px;
-    }
-
-    /* NAV COLLAPSE */
+    /* collapse nav */
     .sidebar nav {
         display: none;
         flex-direction: column;
@@ -330,11 +310,21 @@ body {
         display: flex;
     }
 
-    .menu-toggle {
-        display: block;
+    /* stack hero */
+    .hero-glass {
+        grid-template-columns: 1fr;
+        height: auto;
     }
 
-    /* Low stock bar still horizontal; just give it a little more comfort on small screens */
+    .hero-image {
+        height: 220px;
+    }
+
+    /* optional: keep activity scroll window on phone */
+    .activity-box {
+        max-height: 320px;
+    }
+
     .low-stock-bar {
         padding-bottom: 10px;
     }
@@ -342,8 +332,7 @@ body {
 
 /* =========================
    ANIMATION
-   ========================= */
-
+========================= */
 @keyframes pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.4); opacity: 0.6; }
