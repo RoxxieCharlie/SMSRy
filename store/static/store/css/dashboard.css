@@ -105,6 +105,10 @@ body {
 ========================= */
 .low-stock-bar {
     width: 100%;
+    display: flex;
+    flex-wrap: wrap;        /* ✅ wrap instead of scroll */
+    align-items: center;
+    gap: 10px;
     margin-bottom: 20px;
 
 }
