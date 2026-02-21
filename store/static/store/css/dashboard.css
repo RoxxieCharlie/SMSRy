@@ -108,6 +108,7 @@ body {
 
 .low-stock-bar {
     width: 100%;
+    max-width: none
     display: flex;
     flex-wrap: nowrap;          /* FIX: stop wrapping */
     gap: 8px;
@@ -116,6 +117,8 @@ body {
     overflow-y: hidden;
     padding-bottom: 6px;        /* gives space for scrollbar */
     -webkit-overflow-scrolling: touch;
+
+
 }
 
 .low-stock-bar::-webkit-scrollbar {
