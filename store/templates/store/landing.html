@@ -1,0 +1,205 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SMS • Store Management System</title>
+
+    <!-- optional: keep your base styles -->
+    <link rel="stylesheet" href="{% static 'store/css/base_v2.css' %}">
+    <link rel="stylesheet" href="{% static 'store/css/landing.css' %}">
+</head>
+
+<body class="ui landing-ui">
+<main class="landing">
+
+    <!-- Background -->
+    <div class="landing__bg" aria-hidden="true"></div>
+    <div class="landing__overlay" aria-hidden="true"></div>
+
+    <!-- Top nav -->
+    <header class="landing__nav">
+        <div class="nav__brand">
+            <img class="nav__logo" src="{% static 'store/images/sms_logo.png' %}" alt="SMS Logo">
+            <span class="nav__name">SMS</span>
+        </div>
+
+        <nav class="nav__links">
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
+            <a href="#security">Security</a>
+        </nav>
+
+        <div class="nav__cta">
+            <a class="btn btn--primary" href="{% url 'store:login' %}">Login</a>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero__panel">
+            <div class="hero__kicker">Store Management System</div>
+            <h1 class="hero__title">Control stock.<br>Track issuance.<br>Stop loss.</h1>
+            <p class="hero__sub">
+                SMS gives you real-time inventory visibility, issuance accountability, and weekly reporting —
+                built for maintenance stores where items are money.
+            </p>
+
+            <div class="hero__actions">
+                <a class="btn btn--primary btn--lg" href="{% url 'store:login' %}">
+                    Open Dashboard
+                </a>
+                <a class="btn btn--ghost btn--lg" href="#features">
+                    See features
+                </a>
+            </div>
+
+            <div class="hero__badges">
+                <div class="badge">✓ Audit trail</div>
+                <div class="badge">✓ Role-based access</div>
+                <div class="badge">✓ Export-ready reports</div>
+            </div>
+        </div>
+
+        <!-- Stats strip -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat__val">Inventory</div>
+                <div class="stat__label">Track every item + threshold</div>
+            </div>
+            <div class="stat">
+                <div class="stat__val">Issuance</div>
+                <div class="stat__label">Who collected + who issued</div>
+            </div>
+            <div class="stat">
+                <div class="stat__val">Reports</div>
+                <div class="stat__label">Weekly department usage</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="section">
+        <div class="section__head">
+            <h2>What SMS does</h2>
+            <p>Everything you need to run a store without excuses.</p>
+        </div>
+
+        <div class="grid">
+            <article class="card">
+                <div class="card__icon">📦</div>
+                <h3>Inventory control</h3>
+                <p>Know what you have, what’s low, and what’s gone — instantly.</p>
+            </article>
+
+            <article class="card">
+                <div class="card__icon">⇄</div>
+                <h3>Issuance accountability</h3>
+                <p>Every issuance is tied to staff + department + issuer. No ambiguity.</p>
+            </article>
+
+            <article class="card">
+                <div class="card__icon">🧾</div>
+                <h3>Stock-in history</h3>
+                <p>Track incoming items with traceable records and optional documents.</p>
+            </article>
+
+            <article class="card">
+                <div class="card__icon">📊</div>
+                <h3>Weekly reporting</h3>
+                <p>See what left the store and which departments collected what.</p>
+            </article>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="section section--tight">
+        <div class="section__head">
+            <h2>How it works</h2>
+            <p>Simple flow, strict records.</p>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step__num">1</div>
+                <div class="step__body">
+                    <h3>Stock items in</h3>
+                    <p>Add items, quantities, categories, and reorder levels.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step__num">2</div>
+                <div class="step__body">
+                    <h3>Issue items out</h3>
+                    <p>Issue to staff/department, reduce stock automatically, log activity.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step__num">3</div>
+                <div class="step__body">
+                    <h3>Review history + reports</h3>
+                    <p>Search by item/staff/department. Export weekly summaries.</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step__num">4</div>
+                <div class="step__body">
+                    <h3>Inventory + Monitoring</h3>
+                    <p>Keep Track of Inventory records, at your convenience</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step__num">5</div>
+                <div class="step__body">
+                    <h3>Low Stocks + Stock Outs</h3>
+                    <p>Never be taken by surprise by stockouts that stops workflow.</p>
+                        <p>Always get warnings and alert</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security -->
+    <section id="security" class="section section--tight">
+        <div class="security">
+            <div class="security__panel">
+                <h2>Built for control</h2>
+                <p>
+                    Role-based access ensures Management sees management pages, Storekeeper sees operations.
+                    Every action is immutably logged and traceable.
+                </p>
+                <a class="btn btn--primary" href="{% url 'store:login' %}">Login</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div>© {{ now|default:"2026" }} SMS • Store Management System</div>
+        <div class="footer__links">
+            <a href="#features">Features</a>
+            <a href="#how">How it works</a>
+            <a href="{% url 'store:login' %}">Login</a>
+        </div>
+    </footer>
+
+</main>
+
+<script>
+    // Smooth scroll for in-page anchors
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener("click", (e) => {
+        const id = a.getAttribute("href");
+        const el = document.querySelector(id);
+        if (!el) return;
+        e.preventDefault();
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+{% extends "store/mgt_base_v2.html" %}
+{% load static %}
+
+{% block title %}Stock In History{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/history_stockin_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/base_v2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page">
+
+    <header class="hero">
+        <div class="hero-left">
+            <h1>Stock In History</h1>
+            <p>Store Management System</p>
+        </div>
+
+        <div class="hero-right">
+            <div class="user-chip">
+
+                <!--<img src="{% static 'store/img/avatar.png' %}" class="avatar" alt="User">-->
+            </div>
+        </div>
+    </header>
+
+    <section class="glass-card">
+        <div class="card-head">
+            <h2>Stock In History</h2>
+
+            <form class="filter" method="get">
+                <div class="search-wrap">
+                    <span class="ic" aria-hidden="true">&#128269;</span>
+                    <input type="text" name="q" value="{{ q }}" placeholder="Search item or receiver...">
+                </div>
+
+                <button class="btn-filter" type="submit">Filter</button>
+
+                {% if q %}
+                <a class="btn-clear" href="{% url 'store:history_stockin_store_v2' %}">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th class="col-date">Date</th>
+                    <th>Items</th>
+                    <th class="col-by">Received By</th>
+                    <th class="col-comment">Comment</th>
+                    <th class="col-doc">Document</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for stockin in page_obj %}
+                <!-- MAIN ROW -->
+                <tr class="expandable">
+                    <td class="mono">
+                        {{ stockin.received_at|date:"d M Y" }}
+                    </td>
+
+                    <td>
+                        <button class="items-btn" type="button" data-toggle-items aria-expanded="false">
+                            <span class="items-ic">▸</span>
+                            <span>View Items</span>
+                        </button>
+                    </td>
+
+                    <td>
+                        {{ stockin.received_by.get_full_name|default:stockin.received_by.username }}
+                    </td>
+
+                    <td class="comment">
+                        {{ stockin.comment|default:"-" }}
+                    </td>
+
+                    <td>
+                        {% if stockin.document %}
+                        <a class="btn-doc" href="{{ stockin.document.url }}" download>Download</a>
+                        {% else %}
+                        <span class="muted">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <!-- EXPANDABLE DETAILS ROW -->
+                <tr class="details-row" hidden>
+                    <td colspan="5">
+                        <div class="items-panel">
+                            <div class="items-panel-head">
+                                <div class="items-title">Stocked Items</div>
+                                <div class="items-sub">Click “View Items” again to collapse</div>
+                            </div>
+
+                            <ul class="items-list">
+                                {% for line in stockin.lines.all %}
+                                <li class="items-row">
+                                    <span class="item-name">{{ line.item.name }}</span>
+                                    <span class="item-meta">
+              {{ line.quantity }}{% if line.item.unit %} {{ line.item.unit }}{% endif %}
+            </span>
+                                </li>
+                                {% empty %}
+                                <li class="items-row items-empty">No items</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty">No stock-in records found.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pager">
+            <div class="pager-left">
+                {% if page_obj.paginator.count %}
+                {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+                {% endif %}
+            </div>
+
+            {% if page_obj.paginator.num_pages > 1 %}
+            <nav class="pager-right">
+                {% if page_obj.has_previous %}
+                <a class="pg-btn" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}">Prev</a>
+                {% else %}
+                <span class="pg-btn disabled">Prev</span>
+                {% endif %}
+
+                <div class="pg-pages">
+                    {% for p in page_range %}
+                    {% if p == page_obj.number %}
+                    <span class="pg-page active">{{ p }}</span>
+                    {% elif p == "…" %}
+                    <span class="pg-ellipsis">…</span>
+                    {% else %}
+                    <a class="pg-page" href="?page={{ p }}{% if q %}&q={{ q|urlencode }}{% endif %}">{{ p }}</a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+
+                {% if page_obj.has_next %}
+                <a class="pg-btn" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}">Next</a>
+                {% else %}
+                <span class="pg-btn disabled">Next</span>
+                {% endif %}
+            </nav>
+            {% endif %}
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'store/js/history_stockin_v2.js' %}"></script>
+{% endblock %}

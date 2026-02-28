@@ -1,0 +1,140 @@
+<!--{# templates/store/issue_item_v2.html #}-->
+{% extends "store/base_v2.html" %}
+{% load static %}
+
+{% block title %}Issue Item{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/base_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/issue_item_v2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page">
+
+    <!-- TOP BAR (NO SEARCH BAR) -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <h1 class="page-title">ISSUE ITEM</h1>
+            <p class="page-subtitle">Store Management System</p>
+        </div>
+
+        <div class="topbar-right">
+            <div class="user-chip">
+
+                <!--<img class="avatar" src="{% static 'store/img/avatar.png' %}" alt="User">-->
+                <button class="caret" type="button" aria-label="User menu">▾</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CARD -->
+    <section class="card glass">
+        <div class="card-head">
+            <h2>Item Issuance</h2>
+        </div>
+
+        <form id="issuanceForm" method="post" action="{% url 'store:issuance_create_v2' %}">
+            {% csrf_token %}
+
+            <!-- Staff + Comment -->
+            <div class="grid-2">
+                <div class="field">
+                    <label for="staff">Staff</label>
+                    <select id="staff" name="staff_id" required>
+                        <option value="" selected disabled>Select staff</option>
+                        {% for s in staff_list %}
+                        <option value="{{ s.id }}">{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="comment">Comment</label>
+                    <input id="comment" name="comment" type="text" placeholder="Optional comment..." />
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Items to Issue -->
+            <div class="section-head">
+                <div class="section-title">
+                    <h3>Items to Issue</h3>
+                    <span id="itemsCount" class="pill">1 item</span>
+                </div>
+
+                <!--<button type="button" id="addRowBtnTop" class="btn btn-ghost">
+                    <span class="icon">+</span> Add More Items
+                </button>-->
+            </div>
+
+            <div class="table-wrap">
+                <div class="table-head">
+                    <div>Item</div>
+                    <div class="col-qty">Quantity</div>
+                    <div class="col-stock">Available Stock</div>
+                    <div class="col-actions">Actions</div>
+                </div>
+
+                <div id="rows" class="rows">
+                    <!-- Row template instance #1 -->
+                    <div class="row" data-row>
+                        <div class="cell">
+                            <div class="select-wrap">
+                                <span class="magnify">⌕</span>
+                                <select name="items[0][item_id]" class="item-select" required>
+                                    <option value="" selected disabled>Select item</option>
+                                    {% for it in items_list %}
+                                    <option value="{{ it.id }}" data-stock="{{ it.quantity }}">{{ it.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="cell cell-qty">
+                            <div class="stepper">
+                                <button class="step-btn" type="button" data-step="-1" aria-label="Decrease">–</button>
+                                <input class="qty-input" type="number" name="items[0][qty]" value="1" min="1" inputmode="numeric" required>
+                                <button class="step-btn step-plus" type="button" data-step="1" aria-label="Increase">+</button>
+                            </div>
+                        </div>
+
+                        <div class="cell cell-stock">
+                            <span class="stock-pill stock-unknown" data-stockpill>--</span>
+                        </div>
+
+                        <div class="cell cell-actions">
+                            <button class="trash" type="button" data-remove aria-label="Remove row">🗑</button>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="footer">
+                <div class="totals">
+                    Total Items: <span id="totalItems">1</span>
+                </div>
+
+                <div class="actions">
+                    <button type="button" class="btn btn-cancel" id="cancelBtn">✕ Cancel</button>
+                    <button type="submit" class="btn btn-primary">💾 Save Issuance</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <!-- Floating + (stationary) -->
+    <button type="button" id="fabAdd" class="fab" aria-label="Add item row">
+        +
+        <span class="fab-tooltip">Add Item</span>
+    </button>
+
+</div>
+
+{% block extra_js %}
+<script src="{% static 'store/js/issue_item_v2.js' %}"></script>
+{% endblock %}
+{% endblock %}

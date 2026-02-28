@@ -1,0 +1,151 @@
+{% extends "store/mgt_base_v2.html" %}
+{% load static %}
+
+{% block title %}Weekly Report • SMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/weekly_v2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page weekly">
+
+    <!-- Header -->
+    <header class="weekly__head">
+        <div>
+            <div class="weekly__kicker">Store Management System</div>
+            <h1 class="weekly__title">Weekly Report</h1>
+            <div class="weekly__sub">Management Dashboard</div>
+        </div>
+
+        <div class="weekly__range">
+            <div class="weekly__rangeLabel">Report period</div>
+            <div class="weekly__rangeValue">
+                {{ start_date }} → {{ end_date }}
+            </div>
+
+            {# Optional hint: when the report "switches" on Sunday 6PM #}
+            {% if next_cutover_hint %}
+            <div class="weekly__rangeHint muted">{{ next_cutover_hint }}</div>
+            {% endif %}
+        </div>
+    </header>
+
+    <!------------------------------------------------------------
+    CLOSED STATE (OPTIONAL)
+    Your current view always sets report_closed=False.
+    Keep this only if you later re-enable access windows.
+    ------------------------------------------------------------
+
+    {% if report_closed %}
+    <section class="weekly__card">
+        <div class="weekly__closed">
+            <h2>Weekly Report (Closed)</h2>
+            <p class="muted">Report not available yet.</p>
+            {% if window_label %}
+            <div class="weekly__window">
+                <div class="weekly__windowLabel">Access Window</div>
+                <div class="weekly__windowValue">{{ window_label }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    {% else %}
+    -->
+
+    <!-- KPI Strip -->
+    <section class="weekly__kpis">
+        <div class="wkpi">
+            <div class="wkpi__label">Total issued (this report)</div>
+            <div class="wkpi__value">{{ weekly_total|default:"0" }}</div>
+            <div class="wkpi__meta">Total quantity that left the store</div>
+        </div>
+
+        <div class="wkpi wkpi--soft">
+            <div class="wkpi__label">Departments involved</div>
+            <div class="wkpi__value">{{ dept_summary|length }}</div>
+            <div class="wkpi__meta">Departments that collected items</div>
+        </div>
+
+        <div class="wkpi wkpi--actions">
+            <a class="btn" href="{% url 'store:weekly_v2' %}?export=1">Export CSV</a>
+        </div>
+    </section>
+
+    <!-- TABLE 1 (TOP): Department Summary -->
+    <section class="panel">
+        <div class="panel__head">
+            <div>
+                <div class="panel__kicker">Department summary</div>
+                <div class="panel__title">Who collected the most</div>
+            </div>
+        </div>
+
+        <div class="tableWrap">
+            <table class="tbl" aria-label="Department collections table">
+                <thead>
+                <tr>
+                    <th>Department</th>
+                    <th class="num" style="width:200px">Total Collected</th>
+                    <th class="num" style="width:120px">Share</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for d in dept_summary %}
+                <tr>
+                    <td class="strong">{{ d.department }}</td>
+                    <td class="num strong">{{ d.total_quantity }}</td>
+                    <td class="num">
+                        <span class="pillPct">{{ d.pct }}%</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="empty">No department activity for this report.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- TABLE 2 (BOTTOM): Item Breakdown -->
+    <section class="panel">
+        <div class="panel__head">
+            <div>
+                <div class="panel__kicker">Item breakdown</div>
+                <div class="panel__title">Items that left the store</div>
+            </div>
+        </div>
+
+        <div class="tableWrap">
+            <table class="tbl" aria-label="Weekly items issued table">
+                <thead>
+                <tr>
+                    <th style="width:72px">S/N</th>
+                    <th>Item</th>
+                    <th class="num" style="width:160px">Total Issued</th>
+                    <th>Departments with Usage</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for line in report_list %}
+                <tr>
+                    <td class="muted">{{ forloop.counter }}</td>
+                    <td class="strong">{{ line.item }}</td>
+                    <td class="num strong">{{ line.total_quantity }}</td>
+                    <td class="muted">{{ line.departments_with_usage }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="empty">No issuances recorded for this report.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!--{% endif %} -->
+</div>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "store/base_v2.html" %}
+{% load static %}
+
+{% block title %}Issuance History{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/history_issuance_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/base_v2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page">
+
+    <div class="sticky-shell">
+        <header class="topbar">
+            <div>
+                <h1>Issuance History</h1>
+                <p>Store Management System</p>
+            </div>
+        </header>
+
+        <!-- KPI CARDS (clickable filters) -->
+        <section class="cards">
+            <a class="card stat {% if not state %}is-active{% endif %}"
+               href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}{% if department_id %}department={{ department_id }}&{% endif %}{% if start %}start={{ start }}&{% endif %}{% if end %}end={{ end }}&{% endif %}">
+                <h4>Total Issuances</h4>
+                <h2>{{ kpi_total }}</h2>
+            </a>
+
+            <a class="card stat success {% if state == 'today' %}is-active{% endif %}"
+               href="?state=today{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if department_id %}&department={{ department_id }}{% endif %}{% if start %}&start={{ start }}{% endif %}{% if end %}&end={{ end }}{% endif %}">
+                <h4>Issued Today</h4>
+                <h2>{{ kpi_today }}</h2>
+            </a>
+
+            <a class="card stat warn {% if state == 'locked' %}is-active{% endif %}"
+               href="?state=locked{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if department_id %}&department={{ department_id }}{% endif %}{% if start %}&start={{ start }}{% endif %}{% if end %}&end={{ end }}{% endif %}">
+                <h4>Locked Records</h4>
+                <h2>{{ kpi_locked }}</h2>
+            </a>
+
+            <a class="card stat danger {% if state == 'reversed' %}is-active{% endif %}"
+               href="?state=reversed{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if department_id %}&department={{ department_id }}{% endif %}{% if start %}&start={{ start }}{% endif %}{% if end %}&end={{ end }}{% endif %}">
+                <h4>Reversed Records</h4>
+                <h2>{{ kpi_reversed }}</h2>
+            </a>
+        </section>
+
+        <!-- FILTER BAR -->
+        <form method="get" class="filter-bar">
+            <input type="text" name="q" placeholder="Search staff or item..." value="{{ search_query }}">
+
+            <select name="department">
+                <option value="">All Departments</option>
+                {% for dept in departments %}
+                <option value="{{ dept.id }}" {% if department_id == dept.id %}selected{% endif %}>
+                    {{ dept.name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <input type="date" name="start" value="{{ start }}">
+            <input type="date" name="end" value="{{ end }}">
+
+            {# keep state when filtering #}
+            {% if state %}<input type="hidden" name="state" value="{{ state }}">{% endif %}
+
+            <button type="submit">Filter</button>
+
+            {% if search_query or department_id or start or end or state %}
+            <a class="btn-clear" href="{% url 'store:history_issuance_storekeeper_v2' %}">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrapper">
+        <div class="table-scroll">
+        <table>
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Staff</th>
+                <th>Department</th>
+                <th>Issued By</th>
+                <th>Items</th>
+                <th>Comment</th>
+                <th>Status / Action</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for issuance in page_obj %}
+            <tr class="expandable">
+                <td>{{ issuance.issued_at|date:"d M Y" }}</td>
+                <td>{{ issuance.staff.name }}</td>
+                <td>{{ issuance.staff.department.name|default:"-" }}</td>
+                <td>{{ issuance.issued_by.username }}</td>
+
+                <td>
+                    <button class="items-btn" type="button" data-toggle-items aria-expanded="false">
+                        <span class="items-ic">▸</span>
+                        <span>View Items</span>
+                    </button>
+                </td>
+
+                <td>{{ issuance.comment|default:"-" }}</td>
+
+                <td class="status-action">
+                    {% if issuance.is_reversed %}
+                    <span class="status reversed">Reversed</span>
+
+                    {% elif issuance.can_reverse_ui %}
+                    <form method="post" action="{% url 'store:issuance_reverse' issuance.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-reverse">Reverse</button>
+                    </form>
+
+                    {% else %}
+                    <span class="status locked">Locked</span>
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr class="details-row" hidden>
+                <td colspan="7">
+                    <ul class="items-list">
+                        {% for line in issuance.items.all %}
+                        <li>{{ line.item.name }} ({{ line.quantity }})</li>
+                        {% empty %}
+                        <li>-</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="empty">No issuances found for this filter.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <!-- PAGINATION (preserve filters) -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination">
+        {% if page_obj.has_previous %}
+        <a class="pg-btn" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if department_id %}&department={{ department_id }}{% endif %}{% if start %}&start={{ start }}{% endif %}{% if end %}&end={{ end }}{% endif %}{% if state %}&state={{ state }}{% endif %}">Prev</a>
+        {% else %}
+        <span class="pg-btn is-disabled">Prev</span>
+        {% endif %}
+
+        <div class="pg-pages">
+            {% for p in page_range %}
+            {% if p == page_obj.number %}
+            <span class="pg-page is-active">{{ p }}</span>
+            {% elif p == "…" %}
+            <span class="pg-ellipsis">…</span>
+            {% else %}
+            <a class="pg-page" href="?page={{ p }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if department_id %}&department={{ department_id }}{% endif %}{% if start %}&start={{ start }}{% endif %}{% if end %}&end={{ end }}{% endif %}{% if state %}&state={{ state }}{% endif %}">{{ p }}</a>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_next %}
+        <a class="pg-btn" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if department_id %}&department={{ department_id }}{% endif %}{% if start %}&start={{ start }}{% endif %}{% if end %}&end={{ end }}{% endif %}{% if state %}&state={{ state }}{% endif %}">Next</a>
+        {% else %}
+        <span class="pg-btn is-disabled">Next</span>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+</div>
+
+{% block extra_js %}
+<script src="{% static 'store/js/history_issuance_v2.js' %}"></script>
+{% endblock %}
+{% endblock %}

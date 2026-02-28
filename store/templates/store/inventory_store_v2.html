@@ -1,0 +1,145 @@
+{% extends "store/base_v2.html" %}
+{% load static %}
+
+{% block title %}Inventory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/inventory_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/base_v2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page__head">
+    <div>
+        <h1 class="page__title">Inventory</h1>
+        <div class="page__subtitle">Store Management System</div>
+    </div>
+
+    <div class="breadcrumbs">
+        <span>Dashboard</span>
+        <span class="crumb-sep">›</span>
+        <span class="crumb-current">Inventory</span>
+    </div>
+</div>
+
+<div class="glass panel">
+
+    <!-- KPI CARDS -->
+    <div class="kpis">
+
+        <a class="kpi kpi--blue {% if status == 'all' %}kpi--active{% endif %}"
+           href="?q={{ search_query }}&category={{ category_id }}&status=all">
+            <div class="kpi__icon">🧊</div>
+            <div class="kpi__label">Total Items</div>
+            <div class="kpi__value">{{ total_items }}</div>
+        </a>
+
+        <a class="kpi kpi--amber {% if status == 'low' %}kpi--active{% endif %}"
+           href="?q={{ search_query }}&category={{ category_id }}&status=low">
+            <div class="kpi__icon">⚠</div>
+            <div class="kpi__label">Low Stock</div>
+            <div class="kpi__value">{{ low_stock }}</div>
+        </a>
+
+        <a class="kpi kpi--red {% if status == 'out' %}kpi--active{% endif %}"
+           href="?q={{ search_query }}&category={{ category_id }}&status=out">
+            <div class="kpi__icon">🧱</div>
+            <div class="kpi__label">Out of Stock</div>
+            <div class="kpi__value">{{ out_of_stock }}</div>
+        </a>
+
+        <a class="kpi kpi--green {% if status == 'in' %}kpi--active{% endif %}"
+           href="?q={{ search_query }}&category={{ category_id }}&status=in">
+            <div class="kpi__icon">✅</div>
+            <div class="kpi__label">In Stock</div>
+            <div class="kpi__value">{{ in_stock }}</div>
+        </a>
+
+    </div>
+
+    <!-- FILTER BAR -->
+    <form class="filters" method="get">
+        <div class="search">
+            <span class="search__icon">⌕</span>
+            <input class="search__input" type="text" name="q" placeholder="Search item..." value="{{ search_query }}">
+        </div>
+
+        <div class="select">
+            <select name="category">
+                <option value="">All Categories</option>
+                {% for c in categories %}
+                <option value="{{ c.id }}" {% if category_id == c.id %}selected{% endif %}>
+                    {{ c.name }}
+                </option>
+                {% endfor %}
+            </select>
+            <span class="select__chev">▾</span>
+        </div>
+
+        <button class="btn btn--primary" type="submit">Filter</button>
+    </form>
+
+    <!-- TABLE -->
+    <!-- TABLE -->
+    <div class="table">
+        <div class="table__head">
+            <div class="th th--num">#</div>
+            <div class="th">Item</div>
+            <div class="th th--sort">Category <span class="sort">↕</span></div>
+            <div class="th th--sort">Quantity <span class="sort">↕</span></div>
+            <div class="th">Unit</div>
+            <div class="th th--sort">Status <span class="sort">↕</span></div>
+        </div>
+
+        {% for item in page_obj %}
+        <div class="table__row">
+            <div class="td td--num">{{ forloop.counter }}</div>
+            <div class="td">{{ item.name }}</div>
+            <div class="td">{{ item.category.name }}</div>
+            <div class="td">{{ item.quantity }}</div>
+            <div class="td">{{ item.unit|default:"pcs" }}</div>
+
+            <div class="td">
+                {% if item.quantity == 0 %}
+                <span class="badge badge--red">Out of Stock</span>
+                {% elif item.quantity <= item.reorder_level %}
+                <span class="badge badge--amber">Low Stock</span>
+                {% else %}
+                <span class="badge badge--green">In Stock</span>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="table__empty">No items found.</div>
+        {% endfor %}
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pager">
+        <div class="pager__info">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </div>
+
+        <div class="pager__controls">
+            {% if page_obj.has_previous %}
+            <a class="pager__btn" href="?q={{ search_query }}&category={{ category_id }}&page={{ page_obj.previous_page_number }}">‹</a>
+            {% else %}
+            <span class="pager__btn is-disabled">‹</span>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+            <a class="pager__btn" href="?q={{ search_query }}&category={{ category_id }}&page={{ page_obj.next_page_number }}">›</a>
+            {% else %}
+            <span class="pager__btn is-disabled">›</span>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- FLOATING ADD BUTTON (UI ONLY) -->
+<!--<a class="fab" href="#" title="Add Item">
+    <span class="fab__label">Add Item</span>
+    <span class="fab__plus">+</span>
+</a>-->
+{% endblock %}

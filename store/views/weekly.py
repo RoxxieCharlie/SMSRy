@@ -4,6 +4,7 @@ import csv
 from datetime import datetime, timedelta, time
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import render
 from django.utils import timezone
@@ -11,86 +12,99 @@ from django.utils import timezone
 from store.models import IssuanceItem
 
 
-# Access window: Sunday 6:00 PM → Tuesday 11:59 PM
+# New-report cutover time: Sunday 6:00 PM
 SUNDAY_EVENING_START_HOUR = 18  # 6 PM
 
 
-def _weekly_report_window_open(now):
+# ------------------------------------------------------------
+# OLD TIME-BOUND ACCESS WINDOW (COMMENTED OUT FOR NOW)
+# Keep it here so you can re-enable later if you truly want.
+# ------------------------------------------------------------
+# def _weekly_report_window_open(now):
+#     weekday = now.weekday()  # Mon=0 ... Sun=6
+#     hour = now.hour
+#     if weekday == 6:
+#         return (hour >= SUNDAY_EVENING_START_HOUR, "Sunday 6:00 PM → Tuesday 11:59 PM")
+#     if weekday in (0, 1):
+#         return (True, "Sunday 6:00 PM → Tuesday 11:59 PM")
+#     return (False, "Sunday 6:00 PM → Tuesday 11:59 PM")
+
+
+def _week_bounds_from_monday(monday_date, tzinfo):
     """
-    Returns (is_open: bool, window_label: str)
-    Django weekday: Monday=0 ... Sunday=6
+    monday_date: date object for Monday
+    returns aware datetimes:
+      start: Monday 00:00:00
+      end:   Sunday 23:59:59.999999
     """
-    weekday = now.weekday()
-    hour = now.hour
-
-    # Sunday: open only from 18:00 onward
-    if weekday == 6:
-        return (hour >= SUNDAY_EVENING_START_HOUR, "Sunday 6:00 PM → Tuesday 11:59 PM")
-
-    # Monday and Tuesday: open
-    if weekday in (0, 1):
-        return (True, "Sunday 6:00 PM → Tuesday 11:59 PM")
-
-    return (False, "Sunday 6:00 PM → Tuesday 11:59 PM")
-
-
-def _monday_to_sunday_range_for_report(now):
-    """
-    Report week definition:
-    - Start: Monday 00:00:00
-    - End: Sunday 17:59:59 (because report is produced at Sunday 6:00 PM)
-    We compute the Monday/Sunday of the week containing `now`.
-    """
-    # Monday of current week (00:00)
-    monday_date = (now - timedelta(days=now.weekday())).date()
-    start_dt = timezone.make_aware(datetime.combine(monday_date, time.min), now.tzinfo)
-
-    # Sunday 17:59:59 of current week
+    start_dt = timezone.make_aware(datetime.combine(monday_date, time.min), tzinfo)
     sunday_date = monday_date + timedelta(days=6)
-    end_dt = timezone.make_aware(datetime.combine(sunday_date, time(17, 59, 59)), now.tzinfo)
-
+    end_dt = timezone.make_aware(datetime.combine(sunday_date, time.max), tzinfo)
     return start_dt, end_dt
+
+
+def _report_week_range(now_local):
+    """
+    Rule you asked for:
+      - Reports are Monday → Sunday (full week)
+      - A new one becomes available ONLY on Sunday 6PM.
+      - Until Sunday 6PM, users keep seeing the PREVIOUS completed week.
+      - From Sunday 6PM onward, users see the CURRENT week (Mon→Sun) as the "just concluded" week.
+
+    Returns: (start_dt, end_dt, window_label, is_new_week_available)
+    """
+    tzinfo = now_local.tzinfo
+
+    # Monday of the current week
+    this_monday_date = (now_local - timedelta(days=now_local.weekday())).date()
+
+    is_sunday = (now_local.weekday() == 6)
+    is_after_cutoff = is_sunday and (now_local.hour >= SUNDAY_EVENING_START_HOUR)
+
+    if is_after_cutoff:
+        # New report is available: show current week Mon→Sun
+        start_dt, end_dt = _week_bounds_from_monday(this_monday_date, tzinfo)
+        window_label = f"{start_dt.date()} → {end_dt.date()}"
+        return start_dt, end_dt, window_label, True
+
+    # Not yet Sunday 6PM: show previous completed week Mon→Sun
+    prev_monday_date = this_monday_date - timedelta(days=7)
+    start_dt, end_dt = _week_bounds_from_monday(prev_monday_date, tzinfo)
+    window_label = f"{start_dt.date()} → {end_dt.date()}"
+    return start_dt, end_dt, window_label, False
 
 
 @login_required
 def weekly_report(request):
     user = request.user
 
-    # Management only
-    if not user.groups.filter(name="Management").exists():
+    # Management only (case-insensitive safer)
+    if not user.groups.filter(name__iexact="Management").exists():
         return HttpResponseForbidden("You do not have access to this page.")
 
     now = timezone.localtime(timezone.now())
-    is_open, window_label = _weekly_report_window_open(now)
 
-    # Compute Monday→Sunday(5:59:59 PM) range for *this* week
-    start_dt, end_dt = _monday_to_sunday_range_for_report(now)
+    # ✅ Correct weekly range per your spec
+    start_dt, end_dt, window_label, new_week_available = _report_week_range(now)
 
-    # If within the access window but it's still before Sunday 6PM,
-    # the range's end_dt may be in the future. We must clamp it to "now"
-    # to avoid counting future records. But you said "produce by Sunday 6pm",
-    # so we should NOT show partial weekly totals earlier than Sunday 6pm anyway.
-    # Therefore: if not open, show message page.
-    if not is_open:
-        return render(request, "store/weekly.html", {
-            "report_closed": True,
-            "window_label": window_label,
-            "start_date": start_dt.date(),
-            "end_date": end_dt.date(),
-        })
-
-    # When open (Sun 6pm+ / Mon / Tue), the week has ended.
-    # Ensure we don't exceed now (in case someone opens on Sunday 6:01 PM, fine)
-    effective_end = min(end_dt, now)
-
+    # Only count valid (non-reversed) issuances
     qs = (
         IssuanceItem.objects
-        .filter(issuance__issued_at__gte=start_dt, issuance__issued_at__lte=effective_end)
+        .filter(
+            issuance__is_reversed=False,
+            issuance__issued_at__gte=start_dt,
+            issuance__issued_at__lte=end_dt,
+        )
         .select_related("item", "issuance__staff__department")
     )
 
+    # Weekly total (all quantities issued)
+    weekly_total = qs.aggregate(total=Sum("quantity"))["total"] or 0
+
+    # Aggregate:
     # item_name -> {"total": int, "dept_counts": {dept_name: int}}
     agg = {}
+    dept_totals = {}  # dept_name -> total_qty
 
     for line in qs:
         item_name = line.item.name
@@ -108,6 +122,9 @@ def weekly_report(request):
             agg[item_name]["dept_counts"].get(dept_name, 0) + line.quantity
         )
 
+        dept_totals[dept_name] = dept_totals.get(dept_name, 0) + line.quantity
+
+    # Build item rows
     report_list = []
     for item_name, data in agg.items():
         dept_parts = [
@@ -122,7 +139,17 @@ def weekly_report(request):
 
     report_list.sort(key=lambda r: (-r["total_quantity"], r["item"]))
 
-    # Export CSV (include departments with usage)
+    # Build department summary rows
+    dept_summary = []
+    for dept_name, qty in sorted(dept_totals.items(), key=lambda x: (-x[1], x[0])):
+        pct = 0 if weekly_total == 0 else round((qty / weekly_total) * 100)
+        dept_summary.append({
+            "department": dept_name,
+            "total_quantity": qty,
+            "pct": pct,
+        })
+
+    # Export CSV (Item + Total + Department usage string)
     if request.GET.get("export") == "1":
         response = HttpResponse(content_type="text/csv")
         filename = f"weekly_report_{start_dt.date()}_to_{end_dt.date()}.csv"
@@ -132,14 +159,27 @@ def weekly_report(request):
         writer.writerow(["Item", "Total Issued", "Departments with Usage"])
         for row in report_list:
             writer.writerow([row["item"], row["total_quantity"], row["departments_with_usage"]])
-
         return response
 
-    return render(request, "store/weekly.html", {
+    return render(request, "store/weekly_v2.html", {
+        "active_nav": "weekly",
+
+        # always accessible
         "report_closed": False,
-        "report_list": report_list,
-        "window_label": window_label,
+
+        # period
         "start_date": start_dt.date(),
         "end_date": end_dt.date(),
-    })
+        "window_label": window_label,
 
+        # whether current week's report has switched in (Sun 6PM+)
+        "new_week_available": new_week_available,
+        "next_cutover_hint": "New report becomes available Sunday 6:00 PM.",
+
+        # totals
+        "weekly_total": weekly_total,
+
+        # tables
+        "report_list": report_list,
+        "dept_summary": dept_summary,
+    })

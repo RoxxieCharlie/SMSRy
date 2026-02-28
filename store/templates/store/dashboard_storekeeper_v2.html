@@ -1,0 +1,189 @@
+{% extends "store/base_v2.html" %}
+{% load static %}
+
+{% block title %}Dashboard • SMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/dashboard_v2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page">
+
+    <!-- Top bar -->
+    <header class="topbar">
+        <div class="search">
+            <span class="search__icon" aria-hidden="true">⌕</span>
+            <input
+                    id="globalSearch"
+                    class="search__input"
+                    type="search"
+                    placeholder="Search item, staff, department…"
+                    autocomplete="off"
+                    data-search-url="{% url 'store:global_search' %}"
+            />
+            <div id="searchDropdown" class="search__dropdown" hidden></div>
+        </div>
+
+        <div class="topbar__right">
+            <div class="hello">
+                Hello, {{ request.user.first_name|default:request.user.username|default:"User" }}
+            </div>
+            <!--<img class="avatar" src="{% static 'store/img/avatar.png' %}" alt="User">-->
+        </div>
+    </header>
+
+    <!-- KPI Cards -->
+    <section class="kpis">
+
+        <!-- Total Items -->
+        <a class="card card--blue" href="{% url 'store:inventory_store_v2' %}">
+            <div class="card__left">
+                <div class="card__icon" aria-hidden="true">📦</div>
+                <div>
+                    <div class="card__title">Total Items</div>
+                    <div class="card__value">{{ total_items|default:"0" }}</div>
+                    <div class="card__meta">Inventory count</div>
+                </div>
+            </div>
+            <div class="card__hint">View inventory →</div>
+        </a>
+
+        <!-- Most Issued Item -->
+        <a class="card card--green"
+           href="{% url 'store:history_issuance_storekeeper_v2' %}{% if most_issued_item_id %}?item={{ most_issued_item_id }}{% endif %}">
+            <div class="card__left">
+                <div class="card__icon" aria-hidden="true">💡</div>
+                <div>
+                    <div class="card__title">Most Issued Item</div>
+                    <div class="card__value card__value--text">
+                        {{ most_issued_item_name|default:"—" }}
+                    </div>
+                    <div class="card__meta">
+                        {{ most_issued_count|default:"0" }} issued
+                        {% if most_issued_delta_pct is not None %}
+                        <span class="delta {% if most_issued_delta_pct >= 0 %}is-up{% else %}is-down{% endif %}">
+                {% if most_issued_delta_pct >= 0 %}+{% endif %}{{ most_issued_delta_pct }}%
+              </span>
+                        <span class="delta__note">vs last period</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="card__hint">Open issuance →</div>
+        </a>
+
+        <!-- Low Stock -->
+        <a class="card card--amber {% if low_stock_count|default:0|add:0 > 0 %}is-alert is-alert--amber{% endif %}"
+           href="{% url 'store:inventory_store_v2' %}?status=low">
+            <div class="card__left">
+                <div class="card__icon" aria-hidden="true">⚠</div>
+                <div>
+                    <div class="card__title">Low Stock</div>
+                    <div class="card__value">{{ low_stock_count|default:"0" }}</div>
+                    <div class="card__meta">Below threshold</div>
+                </div>
+            </div>
+            <div class="card__hint">Review →</div>
+        </a>
+
+        <!-- Out of Stock -->
+        <a class="card card--red {% if out_of_stock_count|default:0|add:0 > 0 %}is-alert is-alert--red{% endif %}"
+           href="{% url 'store:inventory_store_v2' %}?status=out">
+            <div class="card__left">
+                <div class="card__icon" aria-hidden="true">⛔</div>
+                <div>
+                    <div class="card__title">Out of Stock</div>
+                    <div class="card__value">{{ out_of_stock_count|default:"0" }}</div>
+                    <div class="card__meta">Needs restocking</div>
+                </div>
+            </div>
+            <div class="card__hint">Review →</div>
+        </a>
+
+    </section>
+
+    <!-- Main grid -->
+    <section class="grid">
+
+        <!-- Top Issued Items (SHORTER) -->
+        <div class="panel panel--short">
+            <div class="panel__head">
+                <div class="panel__title">Top Issued Items</div>
+
+                <div class="panel__tools">
+                    <a class="chip {% if timeframe == '7d' %}is-active{% endif %}"
+                       href="{% url 'store:dashboard_storekeeper_v2' %}?t=7d">7d</a>
+                    <a class="chip {% if timeframe == '30d' %}is-active{% endif %}"
+                       href="{% url 'store:dashboard_storekeeper_v2' %}?t=30d">30d</a>
+                </div>
+            </div>
+
+            <div class="list list--scroll">
+                {% for row in top_issued_items %}
+                <a class="row" href="{% url 'store:history_issuance_storekeeper_v2' %}?item={{ row.item_id }}">
+                    <div class="row__left">
+                        <div class="row__badge" aria-hidden="true">●</div>
+                        <div class="row__name">{{ row.name }}</div>
+                    </div>
+
+                    <div class="row__right">
+                        <div class="row__qty">{{ row.issued }}</div>
+                        <div class="row__unit">issued</div>
+                        {% if row.delta_pct is not None %}
+                        <div class="row__delta {% if row.delta_pct >= 0 %}is-up{% else %}is-down{% endif %}">
+                            {% if row.delta_pct >= 0 %}+{% endif %}{{ row.delta_pct }}%
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row__bar">
+                        <div class="row__barFill" style="width: {{ row.bar_pct|default:0 }}%"></div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="empty">No issuance data yet.</div>
+                {% endfor %}
+            </div>
+
+            <div class="panel__foot">
+                <a class="link" href="{% url 'store:history_issuance_storekeeper_v2' %}">View all →</a>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="panel">
+            <div class="panel__head">
+                <div class="panel__title">Recent Activity</div>
+            </div>
+
+            <div class="activity">
+                {% for a in recent_activity %}
+                <div class="activity__item">
+                    <div class="activity__dot {% if a.type == 'warning' %}is-warn{% elif a.type == 'danger' %}is-danger{% else %}is-ok{% endif %}"></div>
+                    <div class="activity__body">
+                        <div class="activity__line">
+                            <strong>{{ a.actor }}</strong> {{ a.action }}
+                            {% if a.object %}<span class="activity__object">{{ a.object }}</span>{% endif %}
+                        </div>
+                        <div class="activity__time">{{ a.time_ago }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty">No recent activity.</div>
+                {% endfor %}
+            </div>
+
+            <div class="panel__foot panel__foot--center">
+                <span class="muted"></span>
+            </div>
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'store/js/dashboard_v2.js' %}"></script>
+{% endblock %}
