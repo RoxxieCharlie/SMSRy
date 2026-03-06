@@ -7,13 +7,15 @@ from .models import (
     Category,
     Item,
     StockIn,
+    StockInItem,
     Issuance,
     IssuanceItem,
-    StockInItem
+    Request,
+    RequestItem,
+    RequestActivity,
 )
 
 from store.services.stockin_service import create_bulk_stockin
-from store.services.issuance_service import create_issuance_service
 
 
 # ===============================
@@ -26,20 +28,9 @@ admin.site.register(Category)
 admin.site.register(Item)
 
 
-
 # ===============================
 # STOCK IN ADMIN
 # ===============================
-
-
-
-
-from django.contrib import admin, messages
-from django.core.exceptions import ValidationError
-
-from store.models import StockIn, StockInItem
-from store.services.stockin_service import create_bulk_stockin
-
 
 class StockInLineInline(admin.TabularInline):
     model = StockInItem
@@ -59,8 +50,6 @@ class StockInAdmin(admin.ModelAdmin):
         if change:
             raise ValidationError("Stock-in records cannot be edited.")
 
-        # Intentionally do nothing.
-        # Stock-in is created in save_related via the service layer.
         return
 
     def save_related(self, request, form, formsets, change):
@@ -97,7 +86,7 @@ class StockInAdmin(admin.ModelAdmin):
             return
 
         try:
-            create_stockin(
+            create_bulk_stockin(
                 received_by=request.user,
                 items_with_qty=items_with_qty,
                 comment=form.instance.comment or "",
@@ -113,85 +102,102 @@ class StockInAdmin(admin.ModelAdmin):
             self.message_user(request, str(e), level=messages.ERROR)
 
 
+# ===============================
+# REQUEST ADMIN
+# ===============================
+
+class RequestItemInline(admin.TabularInline):
+    model = RequestItem
+    extra = 0
+    readonly_fields = ("requested_qty", "fulfilled_qty")
 
 
+class RequestActivityInline(admin.TabularInline):
+    model = RequestActivity
+    extra = 0
+    readonly_fields = (
+        "actor",
+        "action",
+        "description",
+        "created_at",
+    )
+    can_delete = False
 
+
+@admin.register(Request)
+class RequestAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "id",
+        "requester",
+        "status",
+        "created_at",
+        "submitted_at",
+        "fulfilled_at",
+    )
+
+    list_filter = ("status", "created_at")
+
+    search_fields = (
+        "requester__name",
+        "requester__staff_id",
+    )
+
+    readonly_fields = (
+        "status",
+        "created_at",
+        "submitted_at",
+        "fulfilled_at",
+        "editable_until",
+        "fulfilled_by",
+        "last_edited_by",
+    )
+
+    inlines = [
+        RequestItemInline,
+        RequestActivityInline,
+    ]
+
+    def has_add_permission(self, request):
+        return False  # Requests are created from the app, not admin
 
 
 # ===============================
-# ISSUANCE ADMIN
+# ISSUANCE ADMIN (READ ONLY)
 # ===============================
 
 class IssuanceItemInline(admin.TabularInline):
     model = IssuanceItem
-    extra = 1
-    can_delete = True
+    extra = 0
+    readonly_fields = ("item", "quantity")
+    can_delete = False
 
 
 @admin.register(Issuance)
 class IssuanceAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "id",
+        "staff",
+        "issued_by",
+        "issued_at",
+    )
+
+    readonly_fields = (
+        "request",
+        "staff",
+        "issued_by",
+        "issued_at",
+        "comment",
+    )
+
     inlines = [IssuanceItemInline]
-    readonly_fields = ("issued_by", "issued_at")
 
-    def save_model(self, request, obj, form, change):
+    def has_add_permission(self, request):
         """
-        Block Django from saving Issuance.
-        The service will create it instead.
+        Issuances must only be created from fulfilled requests.
         """
-        if change:
-            raise ValidationError("Issuance records cannot be edited.")
+        return False
 
-        # DO NOTHING — intentional
-        return
-
-    def save_related(self, request, form, formsets, change):
-        if change:
-            return
-
-        items_with_qty = []
-
-        for formset in formsets:
-            if formset.model is IssuanceItem:
-                for f in formset.forms:
-                    if not f.cleaned_data:
-                        continue
-                    if f.cleaned_data.get("DELETE"):
-                        continue
-
-                    item = f.cleaned_data.get("item")
-                    quantity = f.cleaned_data.get("quantity")
-
-                    if not item or not quantity:
-                        continue
-
-                    items_with_qty.append({
-                        "item": item,
-                        "quantity": quantity,
-                    })
-
-        if not items_with_qty:
-            self.message_user(
-                request,
-                "At least one item is required for issuance.",
-                level=messages.ERROR,
-            )
-            return
-
-
-
-        try:
-            create_issuance(
-                staff=form.instance.staff,
-                issued_by=request.user,
-                items_with_qty=items_with_qty,
-                comment=form.instance.comment or "",
-            )
-
-            self.message_user(
-                request,
-                "Issuance created successfully.",
-                level=messages.SUCCESS,
-            )
-
-        except (ValueError, PermissionError, ValidationError) as e:
-            self.message_user(request, str(e), level=messages.ERROR)
+    def has_change_permission(self, request, obj=None):
+        return False

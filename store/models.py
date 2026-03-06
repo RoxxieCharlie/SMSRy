@@ -69,6 +69,13 @@ class Item(models.Model):
 # Staff
 # =========================
 class Staff(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="staff_profile",
+    )
     staff_id = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=150)
     department = models.ForeignKey(
@@ -153,9 +160,197 @@ class StockInItem(models.Model):
 
 
 # =========================
+# Request
+# =========================
+class Request(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        SUBMITTED = "submitted", "Submitted"
+        FULFILLED = "fulfilled", "Fulfilled"
+        LOCKED = "locked", "Locked"
+
+    requester = models.ForeignKey(
+        Staff,
+        on_delete=models.PROTECT,
+        related_name="requests",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        db_index=True,
+    )
+    purpose = models.TextField(blank=True)
+    store_note = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    fulfilled_at = models.DateTimeField(null=True, blank=True)
+    editable_until = models.DateTimeField(null=True, blank=True)
+
+    fulfilled_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="fulfilled_requests",
+    )
+    last_edited_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="edited_requests",
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["status"]),
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["submitted_at"]),
+            models.Index(fields=["fulfilled_at"]),
+        ]
+
+    def __str__(self):
+        return f"Request #{self.id} by {self.requester.name}"
+
+    @property
+    def is_fulfilled(self):
+        return self.status == self.Status.FULFILLED
+
+    @property
+    def is_locked(self):
+        return self.status == self.Status.LOCKED
+
+    @property
+    def can_staff_edit(self):
+        return self.status in {self.Status.DRAFT, self.Status.SUBMITTED} and self.fulfilled_at is None
+
+    @property
+    def can_store_edit_fulfillment(self):
+        if self.fulfilled_at is None or self.editable_until is None:
+            return False
+        return timezone.now() <= self.editable_until
+
+    def mark_submitted(self):
+        now = timezone.now()
+        self.status = self.Status.SUBMITTED
+        self.submitted_at = now
+        self.save(update_fields=["status", "submitted_at", "updated_at"])
+
+    def mark_fulfilled(self, user):
+        now = timezone.now()
+        self.status = self.Status.FULFILLED
+        self.fulfilled_at = now
+        self.editable_until = now + timedelta(hours=6)
+        self.fulfilled_by = user
+        self.last_edited_by = user
+        self.save(
+            update_fields=[
+                "status",
+                "fulfilled_at",
+                "editable_until",
+                "fulfilled_by",
+                "last_edited_by",
+                "updated_at",
+            ]
+        )
+
+    def lock_if_due(self):
+        if self.status == self.Status.FULFILLED and self.editable_until and timezone.now() > self.editable_until:
+            self.status = self.Status.LOCKED
+            self.save(update_fields=["status", "updated_at"])
+
+
+class RequestItem(models.Model):
+    request = models.ForeignKey(
+        Request,
+        on_delete=models.CASCADE,
+        related_name="items",
+    )
+    item = models.ForeignKey(
+        Item,
+        on_delete=models.PROTECT,
+        related_name="request_items",
+    )
+    requested_qty = models.PositiveIntegerField()
+    fulfilled_qty = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["request", "item"],
+                name="unique_item_per_request",
+            ),
+            models.CheckConstraint(
+                check=Q(requested_qty__gt=0),
+                name="requestitem_requested_qty_gt_zero",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.item.name} on Request #{self.request.id}"
+
+    @property
+    def can_increase_fulfilled_qty(self):
+        return self.fulfilled_qty < self.requested_qty
+
+
+class RequestActivity(models.Model):
+    class Action(models.TextChoices):
+        CREATED = "created", "Created"
+        STAFF_EDITED = "staff_edited", "Staff edited"
+        STORE_EDITED = "store_edited", "Store edited"
+        SUBMITTED = "submitted", "Submitted"
+        FULFILLED = "fulfilled", "Fulfilled"
+        FULFILLMENT_EDITED = "fulfillment_edited", "Fulfillment edited"
+        LOCKED = "locked", "Locked"
+
+    request = models.ForeignKey(
+        Request,
+        on_delete=models.CASCADE,
+        related_name="activities",
+    )
+    actor = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="request_activities",
+    )
+    action = models.CharField(
+        max_length=50,
+        choices=Action.choices,
+        db_index=True,
+    )
+    description = models.CharField(max_length=255)
+    metadata = models.JSONField(blank=True, default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["action"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.get_action_display()} on Request #{self.request.id}"
+
+
+# =========================
 # Issuance
 # =========================
 class Issuance(models.Model):
+    request = models.OneToOneField(
+        Request,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="issuance",
+    )
     staff = models.ForeignKey(
         Staff,
         on_delete=models.PROTECT,
@@ -167,6 +362,9 @@ class Issuance(models.Model):
         related_name="issued_issuances",
     )
 
+    # Transitional legacy fields.
+    # Keep them for now so existing pages do not immediately break.
+    # We will stop using reversal completely in later phases.
     is_reversed = models.BooleanField(default=False)
     reversed_at = models.DateTimeField(null=True, blank=True)
     reversed_by = models.ForeignKey(
@@ -180,21 +378,38 @@ class Issuance(models.Model):
     comment = models.TextField(blank=True)
     issued_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ["-issued_at"]
+        indexes = [
+            models.Index(fields=["issued_at"]),
+        ]
+
     @property
     def can_reverse(self):
+        # Transitional compatibility for old UI.
         if self.is_reversed:
             return False
+        return timezone.now() <= self.issued_at + timedelta(hours=6)
+
+    @property
+    def can_edit(self):
+        if self.is_reversed:
+            return False
+        if self.request and self.request.editable_until:
+            return timezone.now() <= self.request.editable_until
         return timezone.now() <= self.issued_at + timedelta(hours=6)
 
     @property
     def status(self):
         if self.is_reversed:
             return "Reversed"
-        if self.can_reverse:
-            return "Active"
+        if self.can_edit:
+            return "Editable"
         return "Locked"
 
     def __str__(self):
+        if self.request_id:
+            return f"Issuance #{self.id} for Request #{self.request_id}"
         return f"Issuance #{self.id} to {self.staff.name}"
 
 
@@ -234,9 +449,14 @@ class Activity(models.Model):
     class Verb(models.TextChoices):
         STOCKIN_CREATED = "STOCKIN_CREATED", "Stock-in created"
         ISSUANCE_CREATED = "ISSUANCE_CREATED", "Issuance created"
+        ISSUANCE_UPDATED = "ISSUANCE_UPDATED", "Issuance updated"
         ISSUANCE_REVERSED = "ISSUANCE_REVERSED", "Issuance reversed"
         ISSUANCE_FAILED = "ISSUANCE_FAILED", "Issuance failed"
         LOW_STOCK_ALERT = "LOW_STOCK_ALERT", "Low stock alert"
+        REQUEST_CREATED = "REQUEST_CREATED", "Request created"
+        REQUEST_UPDATED = "REQUEST_UPDATED", "Request updated"
+        REQUEST_SUBMITTED = "REQUEST_SUBMITTED", "Request submitted"
+        REQUEST_FULFILLED = "REQUEST_FULFILLED", "Request fulfilled"
 
     actor = models.ForeignKey(
         User,
@@ -251,7 +471,7 @@ class Activity(models.Model):
 
     target_type = models.CharField(
         max_length=50,
-        help_text="Model name e.g. Issuance, StockIn, Item",
+        help_text="Model name e.g. Issuance, StockIn, Item, Request",
     )
     target_id = models.PositiveIntegerField(
         help_text="Primary key of the affected object",
