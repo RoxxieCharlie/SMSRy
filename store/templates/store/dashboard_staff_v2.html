@@ -1,0 +1,152 @@
+{% extends "store/staff_base_v2.html" %}
+{% load static %}
+
+{% block title %}Staff Dashboard - SMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/issue_item_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/staff_dashboard_v2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="staff-page" data-live-root="staff-dashboard" data-live-topics="requests,activity,dashboard">
+    <header class="staff-topbar glass">
+        <div>
+            <p class="staff-kicker">Store Management System</p>
+            <h1 class="staff-title">Staff Dashboard</h1>
+            <p class="staff-subtitle">Welcome, {{ staff.name }}. Manage your requests and track status.</p>
+        </div>
+        <a href="{% url 'store:request_create' %}" class="btn btn-primary">New Request</a>
+    </header>
+
+    <section class="summary-panels">
+        <article class="panel glass summary-panel overview-panel">
+            <div class="panel-head panel-head-stack">
+                <div>
+                    <p class="panel-kicker">Workspace Health</p>
+                    <h2>Request Overview</h2>
+                </div>
+                <a href="{% url 'store:request_list' %}" class="panel-link">Open requests</a>
+            </div>
+            <div class="summary-metrics summary-metrics-3up dashboard-kpis">
+                <a class="kpi-link" href="{% url 'store:dashboard_staff_v2' %}?kpi=all">
+                    <article class="summary-metric tone-total {% if selected_filter == 'all' %}is-active{% endif %}">
+                        <span class="summary-label">Total Requests</span>
+                        <strong class="summary-value">{{ total_requests }}</strong>
+                        <span class="summary-foot">All recorded requests</span>
+                    </article>
+                </a>
+                <a class="kpi-link" href="{% url 'store:dashboard_staff_v2' %}?kpi=open">
+                    <article class="summary-metric tone-open {% if selected_filter == 'open' %}is-active{% endif %}">
+                        <span class="summary-label">Open Requests</span>
+                        <strong class="summary-value">{{ open_requests }}</strong>
+                        <span class="summary-foot">Draft or submitted</span>
+                    </article>
+                </a>
+                <a class="kpi-link" href="{% url 'store:dashboard_staff_v2' %}?kpi=archived">
+                    <article class="summary-metric tone-archive {% if selected_filter == 'archived' %}is-active{% endif %}">
+                        <span class="summary-label">Archived Requests</span>
+                        <strong class="summary-value">{{ archived_requests }}</strong>
+                        <span class="summary-foot">Fulfilled or locked</span>
+                    </article>
+                </a>
+            </div>
+            <div class="overview-results">
+                <div class="panel-head overview-results-head">
+                    <h3>Filtered Requests{% if selected_filter == 'open' %} - Open{% elif selected_filter == 'archived' %} - Archived{% endif %}</h3>
+                    <a href="{% url 'store:request_list' %}" class="panel-link">View all</a>
+                </div>
+                <div class="table-wrap request-table-wrap">
+                    <table class="rq-table request-table">
+                        <thead>
+                            <tr>
+                                <th>Request</th>
+                                <th>Status</th>
+                                <th>Purpose</th>
+                                <th>Updated</th>
+                                <th class="cell-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in recent_requests %}
+                            <tr>
+                                <td>
+                                    <div class="request-id-cell">
+                                        <strong>#{{ req.id }}</strong>
+                                        <span>{{ req.created_at|date:"d M Y" }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-chip status-{{ req.display_status_slug }}">{{ req.display_status_label }}</span>
+                                    {% if req.status == 'submitted' and req.needs_resubmission %}
+                                        <span class="resubmit-badge">Resubmission Required</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="request-purpose-cell">{{ req.purpose|default:"No purpose provided." }}</div>
+                                </td>
+                                <td>
+                                    <div class="request-date-cell">
+                                        <strong>{{ req.updated_at|date:"d M Y" }}</strong>
+                                        <span>{{ req.updated_at|date:"H:i" }}</span>
+                                    </div>
+                                </td>
+                                <td class="cell-right"><a href="{% url 'store:request_edit' req.id %}" class="btn btn-ghost">Open</a></td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5">No requests yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </article>
+
+        <aside class="panel panel-side glass panel-side-full">
+            <div class="panel-head">
+                <h2>Recent Activity</h2>
+            </div>
+
+            <ul class="activity-list">
+                {% for activity in recent_request_activity %}
+                <li class="activity-item">
+                    <span class="activity-dot"></span>
+                    <div>
+                        <p class="activity-title">Request #{{ activity.request_id }} - {{ activity.get_action_display }}</p>
+                        <p class="activity-desc">{{ activity.description }}</p>
+                        <p class="activity-time">{{ activity.created_at|timesince }} ago</p>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="empty">No request activity yet.</li>
+                {% endfor %}
+            </ul>
+        </aside>
+    </section>
+
+    <section class="staff-grid staff-grid-single">
+        <article class="panel glass summary-panel items-panel">
+            <div class="panel-head panel-head-stack">
+                <div>
+                    <p class="panel-kicker">Demand Snapshot</p>
+                    <h2>Top Requested Items</h2>
+                </div>
+            </div>
+            <ul class="top-items-list">
+                {% for item_row in top_requested_items %}
+                    <li class="top-item-row">
+                        <span class="top-item-rank">{{ forloop.counter }}</span>
+                        <div class="top-item-copy">
+                            <strong>{{ item_row.item__name }}</strong>
+                            <span>{{ item_row.request_count }} request{{ item_row.request_count|pluralize }}</span>
+                        </div>
+                        <span class="top-item-qty">{{ item_row.total_qty }} {{ item_row.item__unit_of_measurement }}</span>
+                    </li>
+                {% empty %}
+                    <li class="top-item-empty">No requested items yet.</li>
+                {% endfor %}
+            </ul>
+        </article>
+    </section>
+</div>
+{% endblock %}

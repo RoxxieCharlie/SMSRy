@@ -2,204 +2,117 @@
 {% load static %}
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SMS • Store Management System</title>
-
-    <!-- optional: keep your base styles -->
-    <link rel="stylesheet" href="{% static 'store/css/base_v2.css' %}">
-    <link rel="stylesheet" href="{% static 'store/css/landing.css' %}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SMS - Store Management System</title>
+    <link rel="stylesheet" href="{% static 'store/css/landing.css' %}?v=20260407b">
 </head>
-
-<body class="ui landing-ui">
-<main class="landing">
-
-    <!-- Background -->
-    <div class="landing__bg" aria-hidden="true"></div>
-    <div class="landing__overlay" aria-hidden="true"></div>
-
-    <!-- Top nav -->
-    <header class="landing__nav">
-        <div class="nav__brand">
-            <img class="nav__logo" src="{% static 'store/images/sms_logo.png' %}" alt="SMS Logo">
-            <span class="nav__name">SMS</span>
-        </div>
-
-        <nav class="nav__links">
+<body class="landing-ui">
+<main class="landing-shell">
+    <header class="landing-nav">
+        <a class="landing-brand" href="{% url 'store:landing' %}" aria-label="SMS home">
+            <span class="landing-brand__mark">S</span>
+            <span>SMS</span>
+        </a>
+        <nav class="landing-links" aria-label="Landing navigation">
             <a href="#features">Features</a>
-            <a href="#how">How it works</a>
-            <a href="#security">Security</a>
+            <a href="#workflow">Workflow</a>
+            <a href="#control">Control</a>
         </nav>
-
-        <div class="nav__cta">
-            <a class="btn btn--primary" href="{% url 'store:login' %}">Login</a>
-        </div>
+        <a class="landing-login" href="{% url 'store:login' %}">Login</a>
     </header>
 
-    <!-- Hero -->
-    <section class="hero">
-        <div class="hero__panel">
-            <div class="hero__kicker">Store Management System</div>
-            <h1 class="hero__title">Control stock.<br>Track issuance.<br>Stop loss.</h1>
-            <p class="hero__sub">
-                SMS gives you real-time inventory visibility, issuance accountability, and weekly reporting —
-                built for maintenance stores where items are money.
+    <section class="landing-hero">
+        <div class="landing-hero__content">
+            <p class="landing-kicker">Your optimised store solution</p>
+            <h1>Control stock. Track requests. Stop loss.</h1>
+            <p class="landing-copy">
+                SMS gives your store a cleaner workflow for requests, fulfillment, stock-in,
+                inventory visibility, and audit history.
             </p>
-
-            <div class="hero__actions">
-                <a class="btn btn--primary btn--lg" href="{% url 'store:login' %}">
-                    Open Dashboard
-                </a>
-                <a class="btn btn--ghost btn--lg" href="#features">
-                    See features
-                </a>
-            </div>
-
-            <div class="hero__badges">
-                <div class="badge">✓ Audit trail</div>
-                <div class="badge">✓ Role-based access</div>
-                <div class="badge">✓ Export-ready reports</div>
+            <div class="landing-actions">
+                <a class="landing-button landing-button--primary" href="{% url 'store:login' %}">Open SMS</a>
+                <a class="landing-button landing-button--ghost" href="#features">See features</a>
             </div>
         </div>
 
-        <!-- Stats strip -->
-        <div class="stats">
-            <div class="stat">
-                <div class="stat__val">Inventory</div>
-                <div class="stat__label">Track every item + threshold</div>
-            </div>
-            <div class="stat">
-                <div class="stat__val">Issuance</div>
-                <div class="stat__label">Who collected + who issued</div>
-            </div>
-            <div class="stat">
-                <div class="stat__val">Reports</div>
-                <div class="stat__label">Weekly department usage</div>
-            </div>
-        </div>
+        <aside class="landing-hero__card" aria-label="System summary">
+            <span>Store Management System</span>
+            <strong>SMS</strong>
+            <em>Inventory, requests, and history in one place.</em>
+        </aside>
     </section>
 
-    <!-- Features -->
-    <section id="features" class="section">
-        <div class="section__head">
-            <h2>What SMS does</h2>
-            <p>Everything you need to run a store without excuses.</p>
+    <section class="landing-stats" aria-label="System areas">
+        <article>
+            <strong>Inventory</strong>
+            <span>Know what is available, low, or out.</span>
+        </article>
+        <article>
+            <strong>Requests</strong>
+            <span>Submit, fulfill, edit, and track requests.</span>
+        </article>
+        <article>
+            <strong>History</strong>
+            <span>Review issuance, stock-in, and activity trails.</span>
+        </article>
+    </section>
+
+    <section id="features" class="landing-section">
+        <div class="landing-section__head">
+            <p>Features</p>
+            <h2>Built for daily store operations.</h2>
         </div>
-
-        <div class="grid">
-            <article class="card">
-                <div class="card__icon">📦</div>
-                <h3>Inventory control</h3>
-                <p>Know what you have, what’s low, and what’s gone — instantly.</p>
+        <div class="landing-cards">
+            <article>
+                <span>01</span>
+                <h3>Request flow</h3>
+                <p>Staff submit material requests while storekeepers manage fulfillment from a clear queue.</p>
             </article>
-
-            <article class="card">
-                <div class="card__icon">⇄</div>
-                <h3>Issuance accountability</h3>
-                <p>Every issuance is tied to staff + department + issuer. No ambiguity.</p>
+            <article>
+                <span>02</span>
+                <h3>Stock visibility</h3>
+                <p>Track item quantities, low-stock conditions, stock-outs, and stock-in records.</p>
             </article>
-
-            <article class="card">
-                <div class="card__icon">🧾</div>
-                <h3>Stock-in history</h3>
-                <p>Track incoming items with traceable records and optional documents.</p>
+            <article>
+                <span>03</span>
+                <h3>Audit history</h3>
+                <p>Keep traceable records for fulfillment edits, issuance, stock-in, and recent activity.</p>
             </article>
-
-            <article class="card">
-                <div class="card__icon">📊</div>
-                <h3>Weekly reporting</h3>
-                <p>See what left the store and which departments collected what.</p>
+            <article>
+                <span>04</span>
+                <h3>Role access</h3>
+                <p>Separate dashboards and actions for staff, storekeepers, and management users.</p>
             </article>
         </div>
     </section>
 
-    <!-- How it works -->
-    <section id="how" class="section section--tight">
-        <div class="section__head">
-            <h2>How it works</h2>
-            <p>Simple flow, strict records.</p>
+    <section id="workflow" class="landing-section landing-workflow">
+        <div class="landing-section__head">
+            <p>Workflow</p>
+            <h2>Simple path from request to record.</h2>
         </div>
-
-        <div class="steps">
-            <div class="step">
-                <div class="step__num">1</div>
-                <div class="step__body">
-                    <h3>Stock items in</h3>
-                    <p>Add items, quantities, categories, and reorder levels.</p>
-                </div>
-            </div>
-
-            <div class="step">
-                <div class="step__num">2</div>
-                <div class="step__body">
-                    <h3>Issue items out</h3>
-                    <p>Issue to staff/department, reduce stock automatically, log activity.</p>
-                </div>
-            </div>
-
-            <div class="step">
-                <div class="step__num">3</div>
-                <div class="step__body">
-                    <h3>Review history + reports</h3>
-                    <p>Search by item/staff/department. Export weekly summaries.</p>
-                </div>
-            </div>
-
-            <div class="step">
-                <div class="step__num">4</div>
-                <div class="step__body">
-                    <h3>Inventory + Monitoring</h3>
-                    <p>Keep Track of Inventory records, at your convenience</p>
-                </div>
-            </div>
-
-            <div class="step">
-                <div class="step__num">5</div>
-                <div class="step__body">
-                    <h3>Low Stocks + Stock Outs</h3>
-                    <p>Never be taken by surprise by stockouts that stops workflow.</p>
-                        <p>Always get warnings and alert</p>
-                </div>
-            </div>
+        <div class="landing-steps">
+            <article><span>1</span><p>Staff creates and submits a request.</p></article>
+            <article><span>2</span><p>Storekeeper fulfills from available stock.</p></article>
+            <article><span>3</span><p>Inventory and activity update automatically.</p></article>
+            <article><span>4</span><p>History remains available for review and reporting.</p></article>
         </div>
     </section>
 
-    <!-- Security -->
-    <section id="security" class="section section--tight">
-        <div class="security">
-            <div class="security__panel">
-                <h2>Built for control</h2>
-                <p>
-                    Role-based access ensures Management sees management pages, Storekeeper sees operations.
-                    Every action is immutably logged and traceable.
-                </p>
-                <a class="btn btn--primary" href="{% url 'store:login' %}">Login</a>
-            </div>
+    <section id="control" class="landing-control">
+        <div>
+            <p>Control</p>
+            <h2>One system for accountability.</h2>
+            <span>Use SMS to reduce missing stock, clarify responsibility, and keep material movement visible.</span>
         </div>
+        <a class="landing-button landing-button--primary" href="{% url 'store:login' %}">Login</a>
     </section>
 
-    <footer class="footer">
-        <div>© {{ now|default:"2026" }} SMS • Store Management System</div>
-        <div class="footer__links">
-            <a href="#features">Features</a>
-            <a href="#how">How it works</a>
-            <a href="{% url 'store:login' %}">Login</a>
-        </div>
+    <footer class="landing-footer">
+        <span>SMS - Store Management System</span>
+        <a href="{% url 'store:login' %}">Login</a>
     </footer>
-
 </main>
-
-<script>
-    // Smooth scroll for in-page anchors
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener("click", (e) => {
-        const id = a.getAttribute("href");
-        const el = document.querySelector(id);
-        if (!el) return;
-        e.preventDefault();
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    });
-</script>
 </body>
 </html>

@@ -20,9 +20,9 @@
 }
 
 .page{
-  padding: 30px;
+  padding: 34px 36px;
   color: var(--text);
-  max-width: 1400px;
+  max-width: 1640px;
   margin: 0 auto;
 }
 
@@ -32,7 +32,7 @@
 
 .topbar h1{
   margin: 0;
-  font-size: 30px;
+  font-size: 34px;
   letter-spacing: .2px;
 }
 
@@ -209,7 +209,7 @@
   border-radius: 12px;
   background: rgba(255,255,255,0.10);
   border: 1px solid rgba(255,255,255,0.12);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text);
 }
 
@@ -228,7 +228,7 @@
 table{
   width: 100%;
   border-collapse: collapse;
-  min-width: 1000px;
+  min-width: 1340px;
 }
 
 /* only header sticky */
@@ -244,13 +244,13 @@ thead th{
 th{
   text-align: left;
   font-weight: 650;
-  font-size: 13px;
-  color: rgba(229,231,235,.72);
-  padding: 14px 16px;
+  font-size: 14px;
+  color: rgba(229,231,235,.78);
+  padding: 18px 18px;
 }
 
 td{
-  padding: 14px 16px;
+  padding: 18px 18px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
@@ -349,7 +349,7 @@ tbody tr:hover{
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.10);
   color: rgba(229,231,235,.85);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .pg-page.is-active{
@@ -412,7 +412,7 @@ tbody tr:hover{
   transform: rotate(90deg);
 }
 
-/* details row background already present, but we’ll enhance it */
+/* details row background already present, but weÃ¢â‚¬â„¢ll enhance it */
 .details-row td{
   padding: 0;
   border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -522,3 +522,29 @@ select option:hover {
     background-color: #1e293b;
     color: #ffffff;
 }
+
+.table-scroll{overflow-x:auto;}
+
+table th:nth-child(1), table td:nth-child(1){min-width:110px;}
+
+table th:nth-child(2), table td:nth-child(2){min-width:130px;}
+
+table th:nth-child(3), table td:nth-child(3), table th:nth-child(4), table td:nth-child(4){min-width:150px;}
+
+table th:nth-child(5), table td:nth-child(5){min-width:130px;}
+
+table th:nth-child(6), table td:nth-child(6){min-width:220px; line-height:1.45;}
+
+table th:nth-child(7), table td:nth-child(7){min-width:190px; line-height:1.45;}
+
+
+.items-btn{padding:10px 16px; min-width:96px; justify-content:center; font-size:13px;}
+
+.items-list{padding:16px 22px 18px 34px; margin:0; font-size:15px; line-height:1.6;}
+
+tbody td{font-size:15px; vertical-align:top;}
+.card.stat{transition:transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease}
+.card.stat:hover,.card.stat:focus-visible{transform:translateY(-2px);box-shadow:0 22px 44px rgba(0,0,0,.34)}
+.card.stat.is-active{transform:translateY(-4px) scale(1.02);box-shadow:0 0 0 1px rgba(133,177,245,.2),0 24px 48px rgba(73,141,230,.22),0 0 26px rgba(98,177,255,.18)}
+.cards:has(.card.stat.is-active) .card.stat:not(.is-active){opacity:.66;transform:scale(.985);filter:saturate(.82)}
+.card.stat.is-active{position:relative;transform:translateY(-6px) scale(1.04);box-shadow:0 0 0 1px rgba(173,216,255,.26),0 28px 56px rgba(73,141,230,.28),0 0 34px rgba(98,177,255,.30)}

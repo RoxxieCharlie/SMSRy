@@ -17,50 +17,41 @@
 
     <div class="breadcrumbs">
         <span>Dashboard</span>
-        <span class="crumb-sep">›</span>
+        <span class="crumb-sep">&gt;</span>
         <span class="crumb-current">Inventory</span>
     </div>
 </div>
 
-<div class="glass panel">
-
-    <!-- KPI CARDS -->
+<div class="glass panel" data-live-root="inventory" data-live-topics="inventory,activity">
     <div class="kpis">
-
-        <a class="kpi kpi--blue {% if status == 'all' %}kpi--active{% endif %}"
-           href="?q={{ search_query }}&category={{ category_id }}&status=all">
-            <div class="kpi__icon">🧊</div>
+        <a class="kpi kpi--blue {% if status == 'all' %}kpi--active{% endif %}" href="?q={{ search_query }}&category={{ category_id }}&status=all">
+            <div class="kpi__icon">#</div>
             <div class="kpi__label">Total Items</div>
             <div class="kpi__value">{{ total_items }}</div>
         </a>
 
-        <a class="kpi kpi--amber {% if status == 'low' %}kpi--active{% endif %}"
-           href="?q={{ search_query }}&category={{ category_id }}&status=low">
-            <div class="kpi__icon">⚠</div>
+        <a class="kpi kpi--amber {% if status == 'low' %}kpi--active{% endif %}" href="?q={{ search_query }}&category={{ category_id }}&status=low">
+            <div class="kpi__icon">!</div>
             <div class="kpi__label">Low Stock</div>
             <div class="kpi__value">{{ low_stock }}</div>
         </a>
 
-        <a class="kpi kpi--red {% if status == 'out' %}kpi--active{% endif %}"
-           href="?q={{ search_query }}&category={{ category_id }}&status=out">
-            <div class="kpi__icon">🧱</div>
+        <a class="kpi kpi--red {% if status == 'out' %}kpi--active{% endif %}" href="?q={{ search_query }}&category={{ category_id }}&status=out">
+            <div class="kpi__icon">x</div>
             <div class="kpi__label">Out of Stock</div>
             <div class="kpi__value">{{ out_of_stock }}</div>
         </a>
 
-        <a class="kpi kpi--green {% if status == 'in' %}kpi--active{% endif %}"
-           href="?q={{ search_query }}&category={{ category_id }}&status=in">
-            <div class="kpi__icon">✅</div>
+        <a class="kpi kpi--green {% if status == 'in' %}kpi--active{% endif %}" href="?q={{ search_query }}&category={{ category_id }}&status=in">
+            <div class="kpi__icon">OK</div>
             <div class="kpi__label">In Stock</div>
             <div class="kpi__value">{{ in_stock }}</div>
         </a>
-
     </div>
 
-    <!-- FILTER BAR -->
     <form class="filters" method="get">
         <div class="search">
-            <span class="search__icon">⌕</span>
+            <span class="search__icon">Q</span>
             <input class="search__input" type="text" name="q" placeholder="Search item..." value="{{ search_query }}">
         </div>
 
@@ -68,27 +59,23 @@
             <select name="category">
                 <option value="">All Categories</option>
                 {% for c in categories %}
-                <option value="{{ c.id }}" {% if category_id == c.id %}selected{% endif %}>
-                    {{ c.name }}
-                </option>
+                <option value="{{ c.id }}" {% if category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
                 {% endfor %}
             </select>
-            <span class="select__chev">▾</span>
+            <span class="select__chev">v</span>
         </div>
 
         <button class="btn btn--primary" type="submit">Filter</button>
     </form>
 
-    <!-- TABLE -->
-    <!-- TABLE -->
-    <div class="table">
+    <div class="table" id="inventoryTable">
         <div class="table__head">
             <div class="th th--num">#</div>
             <div class="th">Item</div>
-            <div class="th th--sort">Category <span class="sort">↕</span></div>
-            <div class="th th--sort">Quantity <span class="sort">↕</span></div>
+            <div class="th th--sort">Category <span class="sort">^</span></div>
+            <div class="th th--sort">Quantity <span class="sort">^</span></div>
             <div class="th">Unit</div>
-            <div class="th th--sort">Status <span class="sort">↕</span></div>
+            <div class="th th--sort">Status <span class="sort">^</span></div>
         </div>
 
         {% for item in page_obj %}
@@ -98,7 +85,6 @@
             <div class="td">{{ item.category.name }}</div>
             <div class="td">{{ item.quantity }}</div>
             <div class="td">{{ item.unit|default:"pcs" }}</div>
-
             <div class="td">
                 {% if item.quantity == 0 %}
                 <span class="badge badge--red">Out of Stock</span>
@@ -114,32 +100,22 @@
         {% endfor %}
     </div>
 
-    <!-- PAGINATION -->
     <div class="pager">
-        <div class="pager__info">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-        </div>
+        <div class="pager__info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
 
         <div class="pager__controls">
             {% if page_obj.has_previous %}
-            <a class="pager__btn" href="?q={{ search_query }}&category={{ category_id }}&page={{ page_obj.previous_page_number }}">‹</a>
+            <a class="pager__btn" href="?q={{ search_query }}&category={{ category_id }}&page={{ page_obj.previous_page_number }}">&lt;</a>
             {% else %}
-            <span class="pager__btn is-disabled">‹</span>
+            <span class="pager__btn is-disabled">&lt;</span>
             {% endif %}
 
             {% if page_obj.has_next %}
-            <a class="pager__btn" href="?q={{ search_query }}&category={{ category_id }}&page={{ page_obj.next_page_number }}">›</a>
+            <a class="pager__btn" href="?q={{ search_query }}&category={{ category_id }}&page={{ page_obj.next_page_number }}">&gt;</a>
             {% else %}
-            <span class="pager__btn is-disabled">›</span>
+            <span class="pager__btn is-disabled">&gt;</span>
             {% endif %}
         </div>
     </div>
-
 </div>
-
-<!-- FLOATING ADD BUTTON (UI ONLY) -->
-<!--<a class="fab" href="#" title="Add Item">
-    <span class="fab__label">Add Item</span>
-    <span class="fab__plus">+</span>
-</a>-->
 {% endblock %}

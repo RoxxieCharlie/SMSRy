@@ -1,0 +1,108 @@
+{% extends base_template|default:"store/base_v2.html" %}
+{% load static %}
+
+{% block title %}Incoming Requests - SMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/staff_dashboard_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/request_list_v2.css' %}">
+<style>
+
+.kpi-editable{border-color:rgba(255,198,88,.45);background:linear-gradient(180deg,rgba(120,94,34,.45),rgba(95,72,24,.52))}
+.kpi-today{border-color:rgba(112,214,154,.35);background:linear-gradient(180deg,rgba(40,96,74,.5),rgba(24,69,53,.54))}
+.queue-main{grid-column:1 / -1}
+.staff-kpis:has(.kpi-card.is-active) .kpi-card:not(.is-active){opacity:.66;transform:scale(.985);filter:saturate(.82)}
+.staff-kpis .kpi-card.is-active{position:relative;transform:translateY(-6px) scale(1.04);border-color:rgba(154,205,255,.92);box-shadow:0 0 0 1px rgba(173,216,255,.26),0 28px 56px rgba(73,141,230,.28),0 0 34px rgba(98,177,255,.30);filter:brightness(1.08)}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="staff-page" data-live-root="storekeeper-requests" data-live-topics="requests,activity,history,inventory">
+    <header class="staff-topbar glass">
+        <div>
+            <p class="staff-kicker">Store Operations</p>
+            <h1 class="staff-title">Incoming Requests</h1>
+            <p class="staff-subtitle">Fulfillment queue for submitted requests.</p>
+        </div>
+    </header>
+
+    <section class="staff-kpis">
+        <a class="kpi-link" href="{% url 'store:request_list' %}?kpi=pending">
+            <article class="kpi-card kpi-submitted {% if selected_kpi == 'pending' %}is-active{% endif %}">
+                <div class="kpi-label">Pending Requests</div>
+                <div class="kpi-value">{{ pending_count }}</div>
+                <div class="kpi-note">{{ pending_note }}</div>
+            </article>
+        </a>
+        <a class="kpi-link" href="{% url 'store:request_list' %}?kpi=editable">
+            <article class="kpi-card kpi-editable {% if selected_kpi == 'editable' %}is-active{% endif %}">
+                <div class="kpi-label">Editable Fulfilled</div>
+                <div class="kpi-value">{{ editable_count }}</div>
+                <div class="kpi-note">Within 6-hour window</div>
+            </article>
+        </a>
+        <a class="kpi-link" href="{% url 'store:request_list' %}?kpi=today">
+            <article class="kpi-card kpi-today {% if selected_kpi == 'today' %}is-active{% endif %}">
+                <div class="kpi-label">Fulfilled Today</div>
+                <div class="kpi-value">{{ fulfilled_today_count }}</div>
+                <div class="kpi-note">Completed today</div>
+            </article>
+        </a>
+        <a class="kpi-link" href="{% url 'store:request_history' %}">
+            <article class="kpi-card kpi-locked">
+                <div class="kpi-label">Total Fulfilled</div>
+                <div class="kpi-value">{{ total_fulfilled_count }}</div>
+                <div class="kpi-note">Open fulfilled/locked history</div>
+            </article>
+        </a>
+    </section>
+
+    <section class="staff-grid">
+        <section class="panel panel-main glass rqh-main queue-main">
+            <div class="panel-head"><h2>{{ active_title }}</h2></div>
+            <div class="table-wrap">
+                <table class="rq-table">
+                    <thead>
+                        <tr>
+                            <th>Requester</th>
+                            <th>Department</th>
+                            <th>Purpose</th>
+                            <th>{% if selected_kpi == 'pending' %}Submitted{% else %}Fulfilled{% endif %}</th>
+                            <th class="cell-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for request_obj in active_requests %}
+                        <tr>
+                            <td>{{ request_obj.requester.name }}</td>
+                            <td>{{ request_obj.requester.department.name|default:"-" }}</td>
+                            <td>{{ request_obj.purpose|default:"-" }}</td>
+                            <td>
+                                {% if selected_kpi == 'pending' %}
+                                    {{ request_obj.submitted_at|date:"d M Y H:i" }}
+                                {% else %}
+                                    {{ request_obj.fulfilled_at|date:"d M Y H:i"|default:"-" }}
+                                {% endif %}
+                            </td>
+                            <td class="cell-right">
+                                {% if selected_kpi == 'pending' %}
+                                    <a href="{% url 'store:request_fulfill' request_obj.id %}" class="btn btn-ghost">View Request</a>
+                                {% elif selected_kpi == 'editable' %}
+                                    <a href="{% url 'store:request_edit_issuance' request_obj.id %}" class="btn btn-ghost">View Fulfillment</a>
+                                {% else %}
+                                    <a href="{% url 'store:request_history' %}" class="btn btn-ghost">View History</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5">{{ active_empty_message }}</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+</div>
+{% endblock %}
+

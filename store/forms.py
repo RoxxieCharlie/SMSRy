@@ -27,12 +27,14 @@ class RequestItemForm(forms.Form):
         queryset=Item.objects.all().order_by("name"),
         empty_label="Select item",
     )
-    requested_qty = forms.IntegerField(min_value=1)
+    requested_qty = forms.IntegerField(error_messages={"invalid": "Enter a whole number."})
 
     def clean_requested_qty(self):
         qty = self.cleaned_data["requested_qty"]
-        if qty <= 0:
-            raise ValidationError("Quantity must be greater than zero.")
+        if qty == 0:
+            raise ValidationError("Quantity cannot be zero.")
+        if qty < 0:
+            raise ValidationError("Quantity cannot be negative.")
         return qty
 
 
@@ -75,6 +77,13 @@ RequestItemFormSet = forms.formset_factory(
     can_delete=True,
 )
 
+StorekeeperRequestItemFormSet = forms.formset_factory(
+    RequestItemForm,
+    formset=BaseRequestItemFormSet,
+    extra=0,
+    can_delete=True,
+)
+
 
 # =========================
 # STORE FULFILLMENT FORMS
@@ -83,6 +92,7 @@ RequestItemFormSet = forms.formset_factory(
 class FulfillmentLineForm(forms.Form):
     request_item_id = forms.IntegerField(widget=forms.HiddenInput())
     item_name = forms.CharField(required=False, disabled=True)
+    in_stock = forms.IntegerField(required=False, disabled=True)
     requested_qty = forms.IntegerField(required=False, disabled=True)
     fulfilled_qty = forms.IntegerField(min_value=0)
 
@@ -94,6 +104,7 @@ class FulfillmentLineForm(forms.Form):
         if request_item is not None:
             self.fields["request_item_id"].initial = request_item.id
             self.fields["item_name"].initial = request_item.item.name
+            self.fields["in_stock"].initial = request_item.item.quantity
             self.fields["requested_qty"].initial = request_item.requested_qty
             self.fields["fulfilled_qty"].initial = request_item.requested_qty
 
@@ -115,13 +126,12 @@ class FulfillmentLineForm(forms.Form):
         if fulfilled_qty < 0:
             raise ValidationError("Fulfilled quantity cannot be negative.")
 
-        if fulfilled_qty > self.request_item.requested_qty:
+        max_allowed_qty = self.request_item.original_requested_qty or self.request_item.requested_qty
+        if fulfilled_qty > max_allowed_qty:
             raise ValidationError(
-                f"Fulfilled quantity for {self.request_item.item.name} "
-                f"cannot exceed requested quantity ({self.request_item.requested_qty})."
+                f"Updated quantity for {self.request_item.item.name} "
+                f"cannot exceed allowed quantity ({max_allowed_qty})."
             )
-
-        return cleaned
 
 
 class BaseFulfillmentFormSet(forms.BaseFormSet):
@@ -220,12 +230,12 @@ class IssuanceEditLineForm(forms.Form):
         if fulfilled_qty < 0:
             raise ValidationError("Updated quantity cannot be negative.")
 
-        if fulfilled_qty > self.request_item.requested_qty:
+        max_allowed_qty = self.request_item.original_requested_qty or self.request_item.requested_qty
+        if fulfilled_qty > max_allowed_qty:
             raise ValidationError(
                 f"Updated quantity for {self.request_item.item.name} "
-                f"cannot exceed requested quantity ({self.request_item.requested_qty})."
+                f"cannot exceed allowed quantity ({max_allowed_qty})."
             )
-
         return cleaned
 
 
@@ -298,3 +308,8 @@ class IssuanceEditReasonForm(forms.Form):
         if not reason:
             raise ValidationError("Edit reason is required.")
         return reason
+
+
+
+
+

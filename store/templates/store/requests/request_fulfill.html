@@ -1,0 +1,117 @@
+{% extends base_template|default:"store/base_v2.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} - SMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/issue_item_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/request_form_v2.css' %}">
+<style>
+.fulfill-page .rq-grid{display:block}
+.fulfill-page .rq-main{width:100%}
+.fulfill-page .rq-actions{justify-content:flex-end}
+.fulfill-page .table-wrap{overflow:auto}
+.fulfill-page .errorlist{margin:6px 0 0;padding-left:16px;color:#ffb7b7;font-size:12px}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rq-page fulfill-page">
+    <header class="rq-topbar glass">
+        <div>
+            <p class="rq-kicker">Store Management System</p>
+            <h1 class="rq-title">{{ page_title }}</h1>
+        </div>
+        <div class="rq-status-wrap">
+            <span class="rq-status">Submitted</span>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="rq-messages">
+        {% for message in messages %}
+        <div class="rq-message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="rq-grid">
+        <section class="rq-main">
+            <div class="glass rq-card">
+                <h2>Requester Info</h2>
+                <div class="rq-meta">
+                    <div><span>Name</span><strong>{{ request_obj.requester.name }}</strong></div>
+                    <div><span>Department</span><strong>{{ request_obj.requester.department.name|default:"-" }}</strong></div>
+                    <div><span>Request</span><strong>#{{ request_obj.id }}</strong></div>
+                    <div><span>Purpose</span><strong>{{ request_obj.purpose|default:"-" }}</strong></div>
+                </div>
+            </div>
+
+            <form method="post" class="rq-form">
+                {% csrf_token %}
+                {{ formset.management_form }}
+
+                <div class="glass rq-card">
+                    <div class="rq-card-head">
+                        <h2>Fulfillment Lines</h2>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="rq-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>In Stock</th>
+                                    <th>Requested Qty</th>
+                                    <th>Fulfilled Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for line_form in formset %}
+                                    <tr>
+                                        <td>
+                                            {{ line_form.request_item_id }}
+                                            {{ line_form.item_name.value }}
+                                            {{ line_form.item_name.errors }}
+                                        </td>
+                                        <td>
+                                            {{ line_form.in_stock.value }}
+                                            {{ line_form.in_stock.errors }}
+                                        </td>
+                                        <td>
+                                            {{ line_form.requested_qty.value }}
+                                            {{ line_form.requested_qty.errors }}
+                                        </td>
+                                        <td>
+                                            {{ line_form.fulfilled_qty }}
+                                            {{ line_form.fulfilled_qty.errors }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if formset.non_form_errors %}
+                        <ul class="errorlist">
+                            {% for err in formset.non_form_errors %}
+                                <li>{{ err }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="glass rq-card">
+                    <h2>Store Comment</h2>
+                    <div class="rq-field">
+                        <textarea id="comment" name="comment" rows="3">{{ comment }}</textarea>
+                    </div>
+                </div>
+
+                <div class="rq-actions">
+                    <a href="{% url 'store:request_list' %}" class="btn btn-ghost">Back</a>
+                    <button type="submit" class="btn btn-primary-alt">Fulfill Request</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -42,6 +42,7 @@ class Command(BaseCommand):
                     # 1) Ensure groups exist
                     mgmt_group, _ = Group.objects.get_or_create(name="Management")
                     sk_group, _ = Group.objects.get_or_create(name="StoreKeeper")
+                    Group.objects.get_or_create(name="Staff")
 
                     # 2) Ensure users exist
                     created_users = {}

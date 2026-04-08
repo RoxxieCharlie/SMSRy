@@ -3,10 +3,10 @@ from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.core.paginator import Paginator
-from django.db.models import Q, Case, When, Value, BooleanField
+from django.db.models import Q, Case, When, Value, BooleanField, Exists, OuterRef
 from django.utils import timezone
 
-from store.models import Issuance, Department
+from store.models import Issuance, Department, RequestActivity
 from store.decorators import group_required
 
 
@@ -19,10 +19,20 @@ def history_issuance_management(request):
 
     issuances = (
         Issuance.objects
-        .select_related("staff", "issued_by", "staff__department")
+        .select_related("staff", "issued_by", "staff__department", "request__requester")
         .prefetch_related("items__item")
         .order_by("-issued_at")
         .annotate(
+            is_edited_ui=Exists(
+                RequestActivity.objects.filter(
+                    request_id=OuterRef("request_id"),
+                    action__in=[
+                        RequestActivity.Action.STAFF_EDITED,
+                        RequestActivity.Action.STORE_EDITED,
+                        RequestActivity.Action.FULFILLMENT_EDITED,
+                    ],
+                )
+            ),
             can_reverse_ui=Case(
                 When(is_reversed=False, issued_at__gte=cutoff, then=Value(True)),
                 default=Value(False),
@@ -48,7 +58,7 @@ def history_issuance_management(request):
 
     start = (request.GET.get("start") or "").strip()
     end = (request.GET.get("end") or "").strip()
-    state = (request.GET.get("state") or "").strip().lower()  # "" | today | locked | reversed
+    state = (request.GET.get("state") or "").strip().lower()  # "" | today | locked | edited
 
     if search_query:
         issuances = issuances.filter(
@@ -58,6 +68,8 @@ def history_issuance_management(request):
             | Q(issued_by__username__icontains=search_query)
             | Q(issued_by__first_name__icontains=search_query)
             | Q(issued_by__last_name__icontains=search_query)
+            | Q(request__requester__name__icontains=search_query)
+            | Q(request__purpose__icontains=search_query)
         ).distinct()
 
     if department_id.isdigit():
@@ -82,18 +94,17 @@ def history_issuance_management(request):
     base_qs = issuances
     kpi_total = base_qs.count()
     kpi_today = base_qs.filter(issued_at__date=today).count()
-    kpi_reversed = base_qs.filter(is_reversed=True).count()
+    kpi_edited = base_qs.filter(is_edited_ui=True).count()
     kpi_locked = base_qs.filter(is_reversed=False, issued_at__lt=cutoff).count()
 
     if state == "today":
         issuances = base_qs.filter(issued_at__date=today)
-    elif state == "reversed":
-        issuances = base_qs.filter(is_reversed=True)
+    elif state == "edited":
+        issuances = base_qs.filter(is_edited_ui=True)
     elif state == "locked":
         issuances = base_qs.filter(is_reversed=False, issued_at__lt=cutoff)
     else:
         issuances = base_qs
-
     paginator = Paginator(issuances, 30)
     page_obj = paginator.get_page(request.GET.get("page"))
     page_range = paginator.get_elided_page_range(number=page_obj.number, on_each_side=1, on_ends=1)
@@ -117,6 +128,8 @@ def history_issuance_management(request):
         "kpi_total": kpi_total,
         "kpi_today": kpi_today,
         "kpi_locked": kpi_locked,
-        "kpi_reversed": kpi_reversed,
+        "kpi_edited": kpi_edited,
     }
     return render(request, "store/history_issuance_management_v2.html", context)
+
+

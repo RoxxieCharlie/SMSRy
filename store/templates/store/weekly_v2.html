@@ -1,10 +1,10 @@
 {% extends "store/mgt_base_v2.html" %}
 {% load static %}
 
-{% block title %}Weekly Report • SMS{% endblock %}
+{% block title %}Weekly Report - SMS{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'store/css/weekly_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/weekly_v2.css' %}?v=20260407">
 {% endblock %}
 
 {% block content %}
@@ -21,7 +21,7 @@
         <div class="weekly__range">
             <div class="weekly__rangeLabel">Report period</div>
             <div class="weekly__rangeValue">
-                {{ start_date }} → {{ end_date }}
+                {{ start_date }} to {{ end_date }}
             </div>
 
             {# Optional hint: when the report "switches" on Sunday 6PM #}
@@ -67,12 +67,55 @@
             <div class="wkpi__meta">Departments that collected items</div>
         </div>
 
+        <div class="wkpi wkpi--soft">
+            <div class="wkpi__label">Unique items</div>
+            <div class="wkpi__value">{{ report_list|length }}</div>
+            <div class="wkpi__meta">Item types issued in this report</div>
+        </div>
+
         <div class="wkpi wkpi--actions">
-            <a class="btn" href="{% url 'store:weekly_v2' %}?export=1">Export CSV</a>
+            <a class="btn" href="{% url 'store:weekly_v2' %}?export=1">Export Excel</a>
         </div>
     </section>
 
-    <!-- TABLE 1 (TOP): Department Summary -->
+    <!-- TABLE 1 (TOP): Item Breakdown -->
+    <section class="panel">
+        <div class="panel__head">
+            <div>
+                <div class="panel__kicker">Item breakdown</div>
+                <div class="panel__title">Items that left the store</div>
+            </div>
+        </div>
+
+        <div class="tableWrap">
+            <table class="tbl" aria-label="Weekly items issued table">
+                <thead>
+                <tr>
+                    <th class="serial" style="width:72px">S/N</th>
+                    <th>Item</th>
+                    <th class="num" style="width:160px">Total Issued</th>
+                    <th>Departments with Usage</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for line in report_list %}
+                <tr>
+                    <td class="muted serial">{{ forloop.counter }}</td>
+                    <td class="strong">{{ line.item }}</td>
+                    <td class="num strong">{{ line.total_quantity }}</td>
+                    <td class="muted">{{ line.departments_with_usage }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="empty">No issued items were found for {{ start_date }} to {{ end_date }}.</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- TABLE 2 (BOTTOM): Department Summary -->
     <section class="panel">
         <div class="panel__head">
             <div>
@@ -102,43 +145,6 @@
                 {% empty %}
                 <tr>
                     <td colspan="3" class="empty">No department activity for this report.</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- TABLE 2 (BOTTOM): Item Breakdown -->
-    <section class="panel">
-        <div class="panel__head">
-            <div>
-                <div class="panel__kicker">Item breakdown</div>
-                <div class="panel__title">Items that left the store</div>
-            </div>
-        </div>
-
-        <div class="tableWrap">
-            <table class="tbl" aria-label="Weekly items issued table">
-                <thead>
-                <tr>
-                    <th style="width:72px">S/N</th>
-                    <th>Item</th>
-                    <th class="num" style="width:160px">Total Issued</th>
-                    <th>Departments with Usage</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for line in report_list %}
-                <tr>
-                    <td class="muted">{{ forloop.counter }}</td>
-                    <td class="strong">{{ line.item }}</td>
-                    <td class="num strong">{{ line.total_quantity }}</td>
-                    <td class="muted">{{ line.departments_with_usage }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="empty">No issuances recorded for this report.</td>
                 </tr>
                 {% endfor %}
                 </tbody>

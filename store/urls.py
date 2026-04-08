@@ -15,6 +15,7 @@ from store.views.dashboard import (
     dashboard_router,
     dashboard_management,
     dashboard_storekeeper,
+    dashboard_staff,
 )
 
 # Core modules
@@ -23,8 +24,10 @@ from store.views.inventory_mgt import inventory_view_mgt
 from store.views.stockin import stockin_view
 
 # Request system
-from store.views.requests import (
+from store.views.request import (
     request_list,
+    request_history,
+    request_history_table,
     request_create,
     request_edit,
     request_submit,
@@ -69,6 +72,7 @@ urlpatterns = [
 
     path("dashboard/management/", dashboard_management, name="dashboard_management_v2"),
     path("dashboard/storekeeper/", dashboard_storekeeper, name="dashboard_storekeeper_v2"),
+    path("dashboard/staff/", dashboard_staff, name="dashboard_staff_v2"),
 
     path("dashboard/management/", dashboard_management, name="dashboard_management"),
     path("dashboard/storekeeper/", dashboard_storekeeper, name="dashboard_storekeeper"),
@@ -97,6 +101,8 @@ urlpatterns = [
 
     # staff request list
     path("requests/", request_list, name="request_list"),
+    path("requests/history/", request_history, name="request_history"),
+    path("requests/history/table/", request_history_table, name="request_history_table"),
 
     # staff create request
     path("requests/new/", request_create, name="request_create"),

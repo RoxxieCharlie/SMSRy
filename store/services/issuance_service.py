@@ -20,10 +20,30 @@ class IssuanceError(Exception):
     pass
 
 
+def _summarize_change_log(change_log: List[Dict[str, Any]]) -> str:
+    parts = []
+    for change in change_log:
+        direction = "increased" if change["new_qty"] > change["old_qty"] else "reduced"
+        parts.append(
+            f'{direction} {change["item_name"]} from {change["old_qty"]} to {change["new_qty"]}'
+        )
+
+    if not parts:
+        return ""
+
+    if len(parts) == 1:
+        return parts[0]
+
+    if len(parts) == 2:
+        return f'{parts[0]} and {parts[1]}'
+
+    return f'{", ".join(parts[:-1])}, and {parts[-1]}'
+
 def _normalize_edit_lines(
     *,
     request_obj: Request,
     items_with_qty: List[Dict[str, Any]],
+    quantity_cap_attr: str = "requested_qty",
 ) -> List[Dict[str, int]]:
     """
     Normalize edit payload for request fulfillment / issuance edit.
@@ -38,7 +58,7 @@ def _normalize_edit_lines(
     - request_item_id must belong to the request
     - no new items can be introduced
     - fulfilled_qty must be >= 0
-    - fulfilled_qty must be <= requested_qty
+    - fulfilled_qty must be <= the configured request quantity cap
     """
     if not items_with_qty:
         raise IssuanceError("At least one request item is required.")
@@ -74,12 +94,12 @@ def _normalize_edit_lines(
         if fulfilled_qty < 0:
             raise IssuanceError(f"Row {idx}: Quantity cannot be less than zero.")
 
-        if fulfilled_qty > request_item.requested_qty:
+        max_allowed_qty = getattr(request_item, quantity_cap_attr, 0) or request_item.requested_qty
+        if fulfilled_qty > max_allowed_qty:
             raise IssuanceError(
                 f"Row {idx}: Fulfilled quantity for {request_item.item.name} "
-                f"cannot exceed requested quantity ({request_item.requested_qty})."
+                f"cannot exceed allowed quantity ({max_allowed_qty})."
             )
-
         normalized.append(
             {
                 "request_item_id": request_item_id,
@@ -118,7 +138,7 @@ def fulfill_request_service(
     ]
     """
     request_obj = (
-        Request.objects.select_for_update()
+        Request.objects.select_for_update(of=("self",))
         .select_related("requester", "requester__department")
         .get(pk=request_obj.pk)
     )
@@ -275,7 +295,7 @@ def edit_issuance_service(
         raise IssuanceError("Edit reason is required.")
 
     request_obj = (
-        Request.objects.select_for_update()
+        Request.objects.select_for_update(of=("self",))
         .select_related("requester", "requester__department")
         .get(pk=request_obj.pk)
     )
@@ -298,6 +318,7 @@ def edit_issuance_service(
     normalized = _normalize_edit_lines(
         request_obj=request_obj,
         items_with_qty=items_with_qty,
+        quantity_cap_attr="original_requested_qty",
     )
 
     request_items = {
@@ -315,7 +336,7 @@ def edit_issuance_service(
 
     change_log = []
 
-    # First pass: validate delta increases against available stock
+    # First pass: validate stock for any increase.
     for row in normalized:
         request_item = request_items[row["request_item_id"]]
         item = item_map[row["item_id"]]
@@ -327,7 +348,7 @@ def edit_issuance_service(
         if delta > 0 and item.quantity < delta:
             raise IssuanceError(
                 f"Not enough stock to increase {item.name}. "
-                f"Available: {item.quantity}, Needed: {delta}"
+                f"Available: {item.quantity}, Additional needed: {delta}."
             )
 
     # Second pass: apply delta
@@ -339,10 +360,10 @@ def edit_issuance_service(
         new_qty = row["fulfilled_qty"]
         delta = new_qty - old_qty
 
-        if delta > 0:
-            item.quantity -= delta
-        elif delta < 0:
+        if delta < 0:
             item.quantity += abs(delta)
+        elif delta > 0:
+            item.quantity -= delta
 
         item.save(update_fields=["quantity"])
 
@@ -379,6 +400,8 @@ def edit_issuance_service(
     if not change_log:
         raise IssuanceError("No changes were made.")
 
+    change_summary = _summarize_change_log(change_log)
+
     request_obj.last_edited_by = edited_by
     request_obj.save(update_fields=["last_edited_by", "updated_at"])
 
@@ -386,7 +409,11 @@ def edit_issuance_service(
         request=request_obj,
         actor=edited_by,
         action=RequestActivity.Action.FULFILLMENT_EDITED,
-        description=f"Fulfillment edited by {edited_by.get_full_name() or edited_by.username}.",
+        description=(
+            f"Storekeeper {change_summary}."
+            if change_summary
+            else f"Fulfillment edited by {edited_by.get_full_name() or edited_by.username}."
+        ),
         metadata={
             "reason": reason,
             "changes": change_log,
@@ -398,8 +425,9 @@ def edit_issuance_service(
         verb=Activity.Verb.ISSUANCE_UPDATED,
         target=issuance,
         summary=(
-            f"{edited_by.get_full_name() or edited_by.username} edited issuance "
-            f"for Request #{request_obj.id}"
+            f"{edited_by.get_full_name() or edited_by.username} {change_summary} for Request #{request_obj.id}"
+            if change_summary
+            else f"{edited_by.get_full_name() or edited_by.username} edited issuance for Request #{request_obj.id}"
         ),
         metadata={
             "request_id": request_obj.id,
@@ -412,7 +440,11 @@ def edit_issuance_service(
         actor=edited_by,
         verb=Activity.Verb.REQUEST_UPDATED,
         target=request_obj,
-        summary=f"Fulfillment for Request #{request_obj.id} was edited",
+        summary=(
+            f"Request #{request_obj.id}: {change_summary}"
+            if change_summary
+            else f"Fulfillment for Request #{request_obj.id} was edited"
+        ),
         metadata={
             "reason": reason,
             "changes": change_log,
@@ -434,3 +466,12 @@ def emit_failed_issuance_activity(*, actor, error: str):
         summary=f"{actor.get_full_name() or actor.username} attempted an issuance but failed: {error}",
         metadata={"error": error},
     )
+
+
+
+
+
+
+
+
+

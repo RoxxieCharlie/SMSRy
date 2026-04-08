@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="page">
+<div class="page" data-live-root="stockin-history" data-live-topics="history,inventory,activity">
 
     <header class="hero">
         <div class="hero-left">
@@ -65,7 +65,7 @@
 
                     <td>
                         <button class="items-btn" type="button" data-toggle-items aria-expanded="false">
-                            <span class="items-ic">▸</span>
+                            <span class="items-ic">&gt;</span>
                             <span>View Items</span>
                         </button>
                     </td>
@@ -82,7 +82,7 @@
                         {% if stockin.document %}
                         <a class="btn-doc" href="{{ stockin.document.url }}" download>Download</a>
                         {% else %}
-                        <span class="muted">—</span>
+                        <span class="muted">-</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -93,7 +93,7 @@
                         <div class="items-panel">
                             <div class="items-panel-head">
                                 <div class="items-title">Stocked Items</div>
-                                <div class="items-sub">Click “View Items” again to collapse</div>
+                                <div class="items-sub">Click "View Items" again to collapse</div>
                             </div>
 
                             <ul class="items-list">
@@ -139,8 +139,8 @@
                     {% for p in page_range %}
                     {% if p == page_obj.number %}
                     <span class="pg-page active">{{ p }}</span>
-                    {% elif p == "…" %}
-                    <span class="pg-ellipsis">…</span>
+                    {% elif p == "..." %}
+                    <span class="pg-ellipsis">...</span>
                     {% else %}
                     <a class="pg-page" href="?page={{ p }}{% if q %}&q={{ q|urlencode }}{% endif %}">{{ p }}</a>
                     {% endif %}

@@ -1,0 +1,160 @@
+{% extends base_template|default:"store/staff_base_v2.html" %}
+{% load static %}
+
+{% block title %}Request History - SMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/staff_dashboard_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/request_list_v2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="staff-page history-page" data-live-root="request-history" data-live-topics="requests,activity">
+    <header class="staff-topbar glass history-topbar">
+        <div>
+            <p class="staff-kicker">Store Management System</p>
+            <h1 class="staff-title">Request History</h1>
+            <p class="staff-subtitle">Tabular archive of all your requests and their current workflow state.</p>
+        </div>
+        <a href="{% url 'store:request_list' %}" class="btn btn-ghost">Back to Requests</a>
+    </header>
+
+    <section class="staff-kpis history-kpis">
+        <a class="kpi-link" href="{% url 'store:request_history_table' %}">
+            <article class="kpi-card kpi-draft {% if not selected_status %}is-active{% endif %}">
+                <div class="kpi-label">All Requests</div>
+                <div class="kpi-value">{{ total_count }}</div>
+                <div class="kpi-note">Complete request record</div>
+            </article>
+        </a>
+        <a class="kpi-link" href="{% url 'store:request_history_table' %}?status=draft">
+            <article class="kpi-card kpi-draft {% if selected_status == 'draft' %}is-active{% endif %}">
+                <div class="kpi-label">Draft</div>
+                <div class="kpi-value">{{ draft_count }}</div>
+                <div class="kpi-note">Editable drafts</div>
+            </article>
+        </a>
+        <a class="kpi-link" href="{% url 'store:request_history_table' %}?status=submitted">
+            <article class="kpi-card kpi-submitted {% if selected_status == 'submitted' %}is-active{% endif %}">
+                <div class="kpi-label">Submitted</div>
+                <div class="kpi-value">{{ submitted_count }}</div>
+                <div class="kpi-note">Waiting fulfillment</div>
+            </article>
+        </a>
+        <a class="kpi-link" href="{% url 'store:request_history_table' %}?status=fulfilled">
+            <article class="kpi-card kpi-fulfilled {% if selected_status == 'fulfilled' %}is-active{% endif %}">
+                <div class="kpi-label">Fulfilled</div>
+                <div class="kpi-value">{{ fulfilled_count }}</div>
+                <div class="kpi-note">Completed requests</div>
+            </article>
+        </a>
+        <a class="kpi-link" href="{% url 'store:request_history_table' %}?status=locked">
+            <article class="kpi-card kpi-locked {% if selected_status == 'locked' %}is-active{% endif %}">
+                <div class="kpi-label">Locked</div>
+                <div class="kpi-value">{{ locked_count }}</div>
+                <div class="kpi-note">Archived history</div>
+            </article>
+        </a>
+    </section>
+
+    <section class="panel glass history-panel">
+        <div class="panel-head history-panel-head">
+            <div>
+                <h2>Request Table</h2>
+                <p class="history-panel-note">Review status, items, timestamps, and open the appropriate next action.</p>
+            </div>
+        </div>
+
+        <div class="glass rqh-filter">
+            <form method="get" class="filter-form">
+                <label for="status">Filter status</label>
+                <select name="status" id="status">
+                    <option value="">All statuses</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-ghost">Apply</button>
+                {% if selected_status %}
+                    <a href="{% url 'store:request_history_table' %}" class="btn btn-ghost">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <div class="table-wrap history-table-wrap">
+            <table class="rq-table history-table">
+                <thead>
+                    <tr>
+                        <th>Request</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                        <th>Items</th>
+                        <th>Created</th>
+                        <th>Updated</th>
+                        <th class="cell-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request_obj in requests %}
+                    <tr>
+                        <td>
+                            <div class="history-person-cell">
+                                <strong>#{{ request_obj.id }}</strong>
+                                <span>{{ request_obj.requester.staff_id|default:"-" }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="history-purpose-cell">{{ request_obj.purpose|default:"-" }}</div>
+                        </td>
+                        <td>
+                            <span class="status-chip status-{{ request_obj.display_status_slug }}">{{ request_obj.display_status_label }}</span>
+                        </td>
+                        <td>
+                            <div class="history-items">
+                                {% for line in request_obj.items.all %}
+                                    <div class="history-item-row">
+                                        <span class="history-item-name">{{ line.item.name }}</span>
+                                        <span class="history-item-qty">{{ line.requested_qty }}</span>
+                                    </div>
+                                {% empty %}
+                                    <span class="history-empty-inline">-</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="history-date-cell">
+                                <strong>{{ request_obj.created_at|date:"d M Y" }}</strong>
+                                <span>{{ request_obj.created_at|date:"H:i" }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="history-date-cell">
+                                <strong>{{ request_obj.updated_at|date:"d M Y" }}</strong>
+                                <span>{{ request_obj.updated_at|date:"H:i" }}</span>
+                            </div>
+                        </td>
+                        <td class="cell-right">
+                            {% if request_obj.can_staff_edit %}
+                                <a href="{% url 'store:request_edit' request_obj.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ghost">Open</a>
+                            {% else %}
+                                <button type="button" class="btn btn-ghost" disabled>Locked</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="history-empty-state">
+                                <h3>No request history yet.</h3>
+                                <p>Your requests will appear here once records exist.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}
+

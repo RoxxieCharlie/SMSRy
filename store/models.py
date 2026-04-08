@@ -15,6 +15,7 @@ class Department(models.Model):
         return self.name
 
 
+
 # =========================
 # Category
 # =========================
@@ -180,6 +181,8 @@ class Request(models.Model):
         default=Status.DRAFT,
         db_index=True,
     )
+    # True means a submitted request was edited and needs explicit re-submission.
+    needs_resubmission = models.BooleanField(default=False)
     purpose = models.TextField(blank=True)
     store_note = models.TextField(blank=True)
 
@@ -228,6 +231,32 @@ class Request(models.Model):
     def can_staff_edit(self):
         return self.status in {self.Status.DRAFT, self.Status.SUBMITTED} and self.fulfilled_at is None
 
+
+    @property
+    def can_staff_submit(self):
+        if self.status == self.Status.DRAFT:
+            return True
+        if self.status == self.Status.SUBMITTED:
+            return self.needs_resubmission
+        return False
+
+    @property
+    def was_edited_before_fulfillment(self):
+        if self.status not in {self.Status.FULFILLED, self.Status.LOCKED}:
+            return False
+        edited_qs = self.activities.filter(action__in=[RequestActivity.Action.STAFF_EDITED, RequestActivity.Action.STORE_EDITED])
+        if self.fulfilled_at is not None:
+            edited_qs = edited_qs.filter(created_at__lte=self.fulfilled_at)
+        return edited_qs.exists()
+
+    @property
+    def display_status_slug(self):
+        return "edited" if self.was_edited_before_fulfillment else self.status
+
+    @property
+    def display_status_label(self):
+        return "Edited" if self.was_edited_before_fulfillment else self.get_status_display()
+
     @property
     def can_store_edit_fulfillment(self):
         if self.fulfilled_at is None or self.editable_until is None:
@@ -238,7 +267,8 @@ class Request(models.Model):
         now = timezone.now()
         self.status = self.Status.SUBMITTED
         self.submitted_at = now
-        self.save(update_fields=["status", "submitted_at", "updated_at"])
+        self.needs_resubmission = False
+        self.save(update_fields=["status", "submitted_at", "needs_resubmission", "updated_at"])
 
     def mark_fulfilled(self, user):
         now = timezone.now()
@@ -276,6 +306,9 @@ class RequestItem(models.Model):
         related_name="request_items",
     )
     requested_qty = models.PositiveIntegerField()
+    # Immutable cap used for storekeeper pre-fulfillment edits.
+    # Storekeeper may decrease and later increase, but never beyond this value.
+    original_requested_qty = models.PositiveIntegerField(default=0)
     fulfilled_qty = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -293,6 +326,11 @@ class RequestItem(models.Model):
     def __str__(self):
         return f"{self.item.name} on Request #{self.request.id}"
 
+
+    def save(self, *args, **kwargs):
+        if not self.original_requested_qty:
+            self.original_requested_qty = self.requested_qty
+        super().save(*args, **kwargs)
     @property
     def can_increase_fulfilled_qty(self):
         return self.fulfilled_qty < self.requested_qty
@@ -362,9 +400,7 @@ class Issuance(models.Model):
         related_name="issued_issuances",
     )
 
-    # Transitional legacy fields.
-    # Keep them for now so existing pages do not immediately break.
-    # We will stop using reversal completely in later phases.
+    # Transitional legacy fields kept only for compatibility with historical records.\n    # They are intentionally unused by the active request-based issuance workflow.\n    # Do not re-enable reversal/manual issuance paths.
     is_reversed = models.BooleanField(default=False)
     reversed_at = models.DateTimeField(null=True, blank=True)
     reversed_by = models.ForeignKey(
@@ -493,3 +529,7 @@ class Activity(models.Model):
 
     def __str__(self):
         return f"{self.get_verb_display()} by {self.actor}"
+
+
+
+

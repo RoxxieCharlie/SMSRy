@@ -9,21 +9,15 @@
 
 {% block content %}
 <div class="page">
-
     <header class="topbar">
         <div class="topbar-left">
             <h1 class="page-title">STOCK IN ITEM</h1>
             <p class="page-subtitle">Store Management System</p>
         </div>
 
-        <div class="topbar-right">
-            <div class="user-chip">
-
-            </div>
-        </div>
     </header>
 
-    {# ✅ Success / Error messages (Django messages) #}
+    {# Success / Error messages (Django messages) #}
     {% if messages %}
     <div class="toast-wrap">
         {% for message in messages %}
@@ -34,7 +28,7 @@
                 </strong>
                 <div class="toast-text">{{ message }}</div>
             </div>
-            <button type="button" class="toast-close" aria-label="Close" data-toast-close>✕</button>
+            <button type="button" class="toast-close" aria-label="Close" data-toast-close>x</button>
         </div>
         {% endfor %}
     </div>
@@ -82,7 +76,6 @@
                     <div class="row" data-row>
                         <div class="cell">
                             <div class="select-wrap">
-                                <span class="magnify">⌕</span>
                                 <select name="items[0][item_id]" class="item-select" required>
                                     <option value="" selected disabled>Select item</option>
                                     {% for it in items_list %}
@@ -94,7 +87,7 @@
 
                         <div class="cell cell-qty">
                             <div class="stepper">
-                                <button class="step-btn" type="button" data-step="-1" aria-label="Decrease">–</button>
+                                <button class="step-btn" type="button" data-step="-1" aria-label="Decrease">-</button>
                                 <input class="qty-input" type="number" name="items[0][qty]" value="1" min="1" inputmode="numeric" required>
                                 <button class="step-btn step-plus" type="button" data-step="1" aria-label="Increase">+</button>
                             </div>
@@ -105,7 +98,7 @@
                         </div>
 
                         <div class="cell cell-actions">
-                            <button class="trash" type="button" data-remove aria-label="Remove row">🗑</button>
+                            <button class="trash" type="button" data-remove aria-label="Remove row">X</button>
                         </div>
                     </div>
                 </div>
@@ -117,8 +110,8 @@
                 </div>
 
                 <div class="actions">
-                    <button type="button" class="btn btn-cancel" id="cancelBtn">✕ Cancel</button>
-                    <button type="submit" class="btn btn-primary">💾 Save Stock</button>
+                    <button type="button" class="btn btn-cancel" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Stock</button>
                 </div>
             </div>
         </form>
@@ -128,10 +121,12 @@
         +
         <span class="fab-tooltip">Add Item</span>
     </button>
-
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'store/js/stockin_v2.js' %}"></script>
 {% endblock %}
+
+
+

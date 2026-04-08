@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+from io import BytesIO
 from datetime import datetime, timedelta, time
 
 from django.contrib.auth.decorators import login_required
@@ -14,6 +15,130 @@ from store.models import IssuanceItem
 
 # New-report cutover time: Sunday 6:00 PM
 SUNDAY_EVENING_START_HOUR = 18  # 6 PM
+
+
+def _style_weekly_sheet(ws, title, subtitle, headers, rows, totals=None):
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.utils import get_column_letter
+
+    dark = "0F172A"
+    blue = "1D4ED8"
+    muted = "64748B"
+    soft = "EAF2FF"
+    line = "CBD5E1"
+
+    ws.sheet_view.showGridLines = False
+
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws["A1"] = title.upper()
+    ws["A1"].font = Font(size=20, bold=True, color="FFFFFF")
+    ws["A1"].fill = PatternFill("solid", fgColor=dark)
+    ws["A1"].alignment = Alignment(horizontal="left", vertical="center")
+    ws.row_dimensions[1].height = 28
+
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=len(headers))
+    ws["A2"] = subtitle
+    ws["A2"].font = Font(size=12, bold=True, color=dark)
+    ws["A2"].fill = PatternFill("solid", fgColor=soft)
+    ws["A2"].alignment = Alignment(horizontal="left", vertical="center")
+    ws.row_dimensions[2].height = 24
+
+    current_row = 4
+    if totals:
+        for idx, (label, value) in enumerate(totals, start=1):
+            cell = ws.cell(row=current_row, column=idx)
+            cell.value = f"{label}: {value}"
+            cell.font = Font(bold=True, color=dark)
+            cell.fill = PatternFill("solid", fgColor=soft)
+            cell.alignment = Alignment(horizontal="center")
+            cell.border = Border(bottom=Side(style="thin", color=line))
+        current_row += 2
+
+    header_row = current_row
+    ws.freeze_panes = f"A{header_row + 1}"
+    for col, header in enumerate(headers, start=1):
+        cell = ws.cell(row=header_row, column=col)
+        cell.value = header
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill("solid", fgColor=blue)
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        cell.border = Border(bottom=Side(style="thin", color="93C5FD"))
+
+    for row_index, row in enumerate(rows, start=header_row + 1):
+        fill = PatternFill("solid", fgColor="F8FAFC" if row_index % 2 == 0 else "FFFFFF")
+        for col, value in enumerate(row, start=1):
+            cell = ws.cell(row=row_index, column=col)
+            cell.value = value
+            cell.fill = fill
+            header = headers[col - 1].lower()
+            is_centered = header in {"s/n", "total issued", "total collected", "share"}
+            cell.alignment = Alignment(
+                horizontal="center" if is_centered else "left",
+                vertical="top",
+                wrap_text=True,
+            )
+            cell.border = Border(bottom=Side(style="thin", color="E2E8F0"))
+
+    last_row = max(header_row + len(rows), header_row)
+    ws.auto_filter.ref = f"A{header_row}:{get_column_letter(len(headers))}{last_row}"
+
+    for col in range(1, len(headers) + 1):
+        letter = get_column_letter(col)
+        max_len = len(str(headers[col - 1]))
+        for row in range(header_row + 1, last_row + 1):
+            value = ws.cell(row=row, column=col).value
+            max_len = max(max_len, len(str(value or "")))
+        ws.column_dimensions[letter].width = min(max(max_len + 4, 14), 44)
+
+
+def _build_weekly_excel(report_list, dept_summary, weekly_total, start_dt, end_dt, generated_at):
+    from openpyxl import Workbook
+
+    wb = Workbook()
+    summary = wb.active
+    summary.title = "Weekly Report"
+
+    period = f"{start_dt.date()} to {end_dt.date()}"
+    generated = generated_at.strftime("%d %b %Y %H:%M")
+
+    item_rows = [
+        [idx, row["item"], row["total_quantity"], row["departments_with_usage"]]
+        for idx, row in enumerate(report_list, start=1)
+    ]
+    _style_weekly_sheet(
+        summary,
+        "SMS WEEKLY REPORT",
+        f"REPORT PERIOD: {period} | GENERATED: {generated}",
+        ["S/N", "Item", "Total Issued", "Departments with Usage"],
+        item_rows,
+        totals=[
+            ("Total issued", weekly_total),
+            ("Unique items", len(report_list)),
+            ("Departments", len(dept_summary)),
+        ],
+    )
+
+    departments = wb.create_sheet("Department Summary")
+    dept_rows = [
+        [idx, row["department"], row["total_quantity"], f'{row["pct"]}%']
+        for idx, row in enumerate(dept_summary, start=1)
+    ]
+    _style_weekly_sheet(
+        departments,
+        "SMS WEEKLY DEPARTMENT SUMMARY",
+        f"REPORT PERIOD: {period} | GENERATED: {generated}",
+        ["S/N", "Department", "Total Collected", "Share"],
+        dept_rows,
+        totals=[
+            ("Total issued", weekly_total),
+            ("Departments", len(dept_summary)),
+        ],
+    )
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
 
 
 # ------------------------------------------------------------
@@ -149,16 +274,34 @@ def weekly_report(request):
             "pct": pct,
         })
 
-    # Export CSV (Item + Total + Department usage string)
+    # Export a styled Excel workbook for management reporting.
     if request.GET.get("export") == "1":
-        response = HttpResponse(content_type="text/csv")
-        filename = f"weekly_report_{start_dt.date()}_to_{end_dt.date()}.csv"
-        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        try:
+            workbook = _build_weekly_excel(
+                report_list,
+                dept_summary,
+                weekly_total,
+                start_dt,
+                end_dt,
+                now,
+            )
+        except ImportError:
+            response = HttpResponse(content_type="text/csv")
+            filename = f"weekly_report_{start_dt.date()}_to_{end_dt.date()}.csv"
+            response["Content-Disposition"] = f'attachment; filename="{filename}"'
 
-        writer = csv.writer(response)
-        writer.writerow(["Item", "Total Issued", "Departments with Usage"])
-        for row in report_list:
-            writer.writerow([row["item"], row["total_quantity"], row["departments_with_usage"]])
+            writer = csv.writer(response)
+            writer.writerow(["Item", "Total Issued", "Departments with Usage"])
+            for row in report_list:
+                writer.writerow([row["item"], row["total_quantity"], row["departments_with_usage"]])
+            return response
+
+        response = HttpResponse(
+            workbook.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        filename = f"weekly_report_{start_dt.date()}_to_{end_dt.date()}.xlsx"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
 
     return render(request, "store/weekly_v2.html", {

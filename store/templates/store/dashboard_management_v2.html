@@ -1,24 +1,24 @@
 {% extends "store/mgt_base_v2.html" %}
 {% load static %}
 
-{% block title %}Dashboard • SMS{% endblock %}
+{% block title %}Dashboard - SMS{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'store/css/dashboard_v2.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="page">
+<div class="page" data-live-root="dashboard" data-live-topics="activity,inventory,history,requests,dashboard">
 
     <!-- Top bar -->
     <header class="topbar">
         <div class="search">
-            <span class="search__icon" aria-hidden="true">⌕</span>
+            <span class="search__icon" aria-hidden="true">Q</span>
             <input
                     id="globalSearch"
                     class="search__input"
                     type="search"
-                    placeholder="Search item, staff, department…"
+                    placeholder="Search item, staff, department..."
                     autocomplete="off"
                     data-search-url="{% url 'store:global_search' %}"
             />
@@ -39,25 +39,25 @@
         <!-- Total Items (Management inventory) -->
         <a class="card card--blue" href="{% url 'store:inventory_mgt_v2' %}">
             <div class="card__left">
-                <div class="card__icon" aria-hidden="true">📦</div>
+                <div class="card__icon" aria-hidden="true">#</div>
                 <div>
                     <div class="card__title">Total Items</div>
                     <div class="card__value">{{ total_items|default:"0" }}</div>
                     <div class="card__meta">Inventory count</div>
                 </div>
             </div>
-            <div class="card__hint">View inventory →</div>
+                <div class="card__hint">View inventory -></div>
         </a>
 
         <!-- Most Issued Item (Management issuance history) -->
         <a class="card card--green"
            href="{% url 'store:history_issuance_management_v2' %}{% if most_issued_item_id %}?item={{ most_issued_item_id }}{% endif %}">
             <div class="card__left">
-                <div class="card__icon" aria-hidden="true">💡</div>
+                <div class="card__icon" aria-hidden="true">*</div>
                 <div>
                     <div class="card__title">Most Issued Item</div>
                     <div class="card__value card__value--text">
-                        {{ most_issued_item_name|default:"—" }}
+                    {{ most_issued_item_name|default:"-" }}
                     </div>
                     <div class="card__meta">
                         {{ most_issued_count|default:"0" }} issued
@@ -70,35 +70,35 @@
                     </div>
                 </div>
             </div>
-            <div class="card__hint">Open issuance →</div>
+                <div class="card__hint">Open issuance -></div>
         </a>
 
         <!-- Low Stock (Management inventory) -->
         <a class="card card--amber {% if low_stock_count|default:0|add:0 > 0 %}is-alert is-alert--amber{% endif %}"
            href="{% url 'store:inventory_mgt_v2' %}?status=low">
             <div class="card__left">
-                <div class="card__icon" aria-hidden="true">⚠</div>
+                <div class="card__icon" aria-hidden="true">!</div>
                 <div>
                     <div class="card__title">Low Stock</div>
                     <div class="card__value">{{ low_stock_count|default:"0" }}</div>
                     <div class="card__meta">Below threshold</div>
                 </div>
             </div>
-            <div class="card__hint">Review →</div>
+                <div class="card__hint">Review -></div>
         </a>
 
         <!-- Out of Stock (Management inventory) -->
         <a class="card card--red {% if out_of_stock_count|default:0|add:0 > 0 %}is-alert is-alert--red{% endif %}"
            href="{% url 'store:inventory_mgt_v2' %}?status=out">
             <div class="card__left">
-                <div class="card__icon" aria-hidden="true">⛔</div>
+                <div class="card__icon" aria-hidden="true">x</div>
                 <div>
                     <div class="card__title">Out of Stock</div>
                     <div class="card__value">{{ out_of_stock_count|default:"0" }}</div>
                     <div class="card__meta">Needs restocking</div>
                 </div>
             </div>
-            <div class="card__hint">Review →</div>
+                <div class="card__hint">Review -></div>
         </a>
 
     </section>
@@ -123,7 +123,7 @@
                 {% for row in top_issued_items %}
                 <a class="row" href="{% url 'store:history_issuance_management_v2' %}?item={{ row.item_id }}">
                     <div class="row__left">
-                        <div class="row__badge" aria-hidden="true">●</div>
+                        <div class="row__badge" aria-hidden="true">*</div>
                         <div class="row__name">{{ row.name }}</div>
                     </div>
 
@@ -147,7 +147,7 @@
             </div>
 
             <div class="panel__foot">
-                <a class="link" href="{% url 'store:history_issuance_management_v2' %}">View all →</a>
+                <a class="link" href="{% url 'store:history_issuance_management_v2' %}">View all -></a>
             </div>
         </div>
 

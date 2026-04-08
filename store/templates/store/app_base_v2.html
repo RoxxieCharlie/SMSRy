@@ -1,0 +1,55 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}SMS{% endblock %}</title>
+
+    {% block base_css %}
+    <link rel="stylesheet" href="{% static 'store/css/base_v2.css' %}">
+    <link rel="stylesheet" href="{% static 'store/css/sidebar_v2.css' %}">
+    {% endblock %}
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="ui">
+<div class="layout">
+    <aside class="sidebar">
+        {% block sidebar %}
+        {% include "store/includes/sidebar_v2.html" with sidebar_variant="storekeeper" %}
+        {% endblock %}
+    </aside>
+    <main class="main">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+{% if messages %}
+<div id="djMessages" hidden data-redirect-url="{{ modal_redirect_url|default:'' }}">
+    {% for message in messages %}
+    <div class="dj-msg" data-tags="{{ message.tags|default:'' }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+<div id="appModal" class="app-modal" hidden aria-hidden="true">
+    <div class="app-modal__overlay" data-modal-close></div>
+    <div class="app-modal__card" role="dialog" aria-modal="true" aria-labelledby="appModalTitle">
+        <div class="app-modal__head">
+            <div class="app-modal__icon" aria-hidden="true">!</div>
+            <div class="app-modal__titles">
+                <div id="appModalTitle" class="app-modal__title">Notice</div>
+                <div class="app-modal__subtitle" id="appModalSubtitle"></div>
+            </div>
+            <button class="app-modal__close" type="button" data-modal-close aria-label="Close">x</button>
+        </div>
+        <div class="app-modal__body" id="appModalBody"></div>
+        <div class="app-modal__actions">
+            <button type="button" class="app-modal__btn" data-modal-close>Okay</button>
+        </div>
+    </div>
+</div>
+<script src="{% static 'store/js/modal_v2.js' %}?v=20260322"></script>
+<script src="{% static 'store/js/store_live_updates.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

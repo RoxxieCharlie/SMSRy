@@ -1,0 +1,119 @@
+{% extends base_template|default:"store/staff_base_v2.html" %}
+{% load static %}
+
+{% block title %}{{ page_title|default:"My Requests" }} - SMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/staff_dashboard_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/request_list_v2.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="staff-page" data-live-root="requests" data-live-topics="requests,activity">
+    <header class="staff-topbar glass">
+        <div>
+            <p class="staff-kicker">Store Management System</p>
+            <h1 class="staff-title">{{ page_title|default:"My Requests" }}</h1>
+            <p class="staff-subtitle">Request History and Status Tracking</p>
+        </div>
+        <div class="req-actions">
+            <a href="{% url 'store:request_history_table' %}" class="btn btn-ghost">Request History</a>
+            <a href="{% url 'store:request_create' %}" class="btn btn-primary">New Request</a>
+        </div>
+    </header>
+
+    <section class="staff-kpis">
+        <a class="kpi-link" href="{% url 'store:request_list' %}?status=draft">
+            <article class="kpi-card kpi-draft {% if selected_status == 'draft' %}is-active{% endif %}">
+                <div class="kpi-label">Draft</div>
+                <div class="kpi-value">{{ draft_count }}</div>
+                <div class="kpi-note">Not submitted yet</div>
+            </article>
+        </a>
+        <a class="kpi-link" href="{% url 'store:request_list' %}?status=submitted">
+            <article class="kpi-card kpi-submitted {% if selected_status == 'submitted' %}is-active{% endif %}">
+                <div class="kpi-label">Submitted</div>
+                <div class="kpi-value">{{ submitted_count }}</div>
+                <div class="kpi-note">Waiting fulfillment</div>
+            </article>
+        </a>
+        <a class="kpi-link" href="{% url 'store:request_list' %}?status=fulfilled">
+            <article class="kpi-card kpi-fulfilled {% if selected_status == 'fulfilled' %}is-active{% endif %}">
+                <div class="kpi-label">Fulfilled</div>
+                <div class="kpi-value">{{ fulfilled_count }}</div>
+                <div class="kpi-note">Issued from request</div>
+            </article>
+        </a>
+        <a class="kpi-link" href="{% url 'store:request_list' %}?status=locked">
+            <article class="kpi-card kpi-locked {% if selected_status == 'locked' %}is-active{% endif %}">
+                <div class="kpi-label">Locked</div>
+                <div class="kpi-value">{{ locked_count }}</div>
+                <div class="kpi-note">Historical record</div>
+            </article>
+        </a>
+    </section>
+
+    <section class="staff-grid">  
+        <section class="panel panel-main glass">
+            <div class="panel-head">
+                <h2>Workspace Summary</h2>
+                <a href="{% url 'store:request_history_table' %}" class="panel-link">Open request history</a>
+            </div>
+            <div class="rqh-list">
+                {% for request_obj in summary_requests %}
+                <article class="glass req-card">
+                    <div class="req-card-head">
+                        <div>
+                            <h2>Request #{{ request_obj.id }}</h2>
+                            <p class="req-purpose">{{ request_obj.purpose|default:"No purpose provided." }}</p>
+                        </div>
+                        <span class="status-chip status-{{ request_obj.display_status_slug }}">{{ request_obj.display_status_label }}</span>
+                    </div>
+                    <div class="req-meta">
+                        <span>Items: <strong>{{ request_obj.items.count }}</strong></span>
+                        <span>Created: <strong>{{ request_obj.created_at|date:"d M Y H:i" }}</strong></span>
+                        <span>Updated: <strong>{{ request_obj.updated_at|date:"d M Y H:i" }}</strong></span>
+                    </div>
+                    <div class="req-actions">
+                        <a href="{% url 'store:request_edit' request_obj.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ghost">Open</a>
+                    </div>
+                </article>
+                {% empty %}
+                <article class="glass req-card">
+                    <div class="req-card-head">
+                        <div>
+                            <h2>No requests yet</h2>
+                            <p class="req-purpose">Create a new request to start your workspace history.</p>
+                        </div>
+                    </div>
+                    <div class="req-actions">
+                        <a href="{% url 'store:request_create' %}" class="btn btn-primary-alt">New Request</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <aside class="panel panel-side glass">
+            <div class="panel-head">
+                <h2>Recent Activity</h2>
+            </div>
+            <ul class="activity-list">
+                {% for activity in recent_activities %}
+                    <li class="activity-item">
+                        <span class="activity-dot"></span>
+                        <div>
+                            <p class="activity-title">Request #{{ activity.request_id }} - {{ activity.get_action_display }}</p>
+                            <p class="activity-desc">{{ activity.description }}</p>
+                            <p class="activity-time">{{ activity.created_at|timesince }} ago</p>
+                        </div>
+                    </li>
+                {% empty %}
+                    <li class="empty">No request activity yet.</li>
+                {% endfor %}
+            </ul>
+        </aside>
+    </section>
+</div>
+{% endblock %}
+
