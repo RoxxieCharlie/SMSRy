@@ -24,6 +24,14 @@ from store.services.stockin_service import create_bulk_stockin
 # ===============================
 
 class SuperuserOnlyAdminAuthenticationForm(AdminAuthenticationForm):
+    error_messages = {
+        **AdminAuthenticationForm.error_messages,
+        "invalid_login": (
+            "Please enter the correct superuser username and password. "
+            "Note that both fields may be case-sensitive."
+        ),
+    }
+
     def confirm_login_allowed(self, user):
         if not user.is_active:
             raise ValidationError(
