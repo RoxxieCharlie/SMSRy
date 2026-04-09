@@ -239,3 +239,45 @@
   .weekly__range{ text-align:left; }
   .tbl{ min-width: 760px; }
 }
+
+@media (max-width: 720px){
+  .weekly__head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .weekly__title{
+    font-size:28px;
+  }
+  .weekly__range{
+    width:100%;
+  }
+  .wkpi--actions{
+    justify-content:stretch;
+  }
+  .wkpi--actions .btn{
+    width:100%;
+  }
+  .panel__head{
+    flex-direction:column;
+    align-items:flex-start;
+    padding:14px 14px 8px;
+  }
+  .tableWrap{
+    padding:8px 10px 14px;
+  }
+}
+
+@media (max-width: 520px){
+  .weekly__title{
+    font-size:24px;
+  }
+  .wkpi{
+    padding:12px;
+  }
+  .wkpi__value{
+    font-size:24px;
+  }
+  .tbl{
+    min-width:680px;
+  }
+}

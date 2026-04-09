@@ -60,3 +60,23 @@
 .overview-results-head h3{margin:0;font-size:16px;color:#dce9ff}
 .staff-grid-single{grid-template-columns:1fr}
 .panel-side-full{max-height:none}
+
+@media (max-width:900px){
+  .staff-page{padding-bottom:8px}
+  .staff-topbar{padding:16px 16px}
+  .summary-panel,.requests-panel,.panel{padding:14px}
+  .summary-metrics-3up{grid-template-columns:1fr}
+  .request-table-wrap{padding:8px 10px 0;overflow-x:auto}
+  .request-table{min-width:640px}
+}
+
+@media (max-width:640px){
+  .staff-title{font-size:26px}
+  .staff-subtitle{font-size:12px}
+  .panel-head{flex-direction:column;align-items:flex-start;gap:8px}
+  .summary-panel{padding:12px}
+  .top-items-list{gap:8px}
+  .top-item-row{padding:10px 12px}
+  .request-table{min-width:580px}
+  .activity-list{gap:10px}
+}

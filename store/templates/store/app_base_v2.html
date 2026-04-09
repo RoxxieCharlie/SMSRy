@@ -14,6 +14,15 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="ui">
+<div class="mobile-shell">
+    <button class="mobile-shell__toggle" type="button" aria-label="Open navigation" aria-expanded="false" data-mobile-nav-toggle>
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="mobile-shell__brand">SMS</div>
+</div>
+<button class="mobile-overlay" type="button" hidden aria-label="Close navigation" data-mobile-nav-close></button>
 <div class="layout">
     <aside class="sidebar">
         {% block sidebar %}
@@ -50,6 +59,7 @@
 </div>
 <script src="{% static 'store/js/modal_v2.js' %}?v=20260322"></script>
 <script src="{% static 'store/js/store_live_updates.js' %}"></script>
+<script src="{% static 'store/js/mobile_shell_v2.js' %}"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

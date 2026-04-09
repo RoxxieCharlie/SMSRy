@@ -412,6 +412,13 @@
     flex-direction: column;
     align-items:flex-start;
   }
+  .page__title{
+    font-size:28px;
+  }
+  .breadcrumbs{
+    width:100%;
+    justify-content:flex-start;
+  }
   .filters{
     flex-direction: column;
     align-items: stretch;
@@ -422,6 +429,50 @@
   .table__row{
     grid-template-columns: 1fr;
     gap: 8px;
+    padding:14px;
   }
+  .table__row .td{
+    display:grid;
+    grid-template-columns:minmax(110px,auto) 1fr;
+    gap:10px;
+    align-items:start;
+  }
+  .table__row .td::before{
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:rgba(234,240,255,.55);
+    font-weight:800;
+  }
+  .table__row .td:nth-child(1)::before{content:"#";}
+  .table__row .td:nth-child(2)::before{content:"Item";}
+  .table__row .td:nth-child(3)::before{content:"Category";}
+  .table__row .td:nth-child(4)::before{content:"Quantity";}
+  .table__row .td:nth-child(5)::before{content:"Unit";}
+  .table__row .td:nth-child(6)::before{content:"Status";}
   .td--num{ opacity:.7; }
+  .pager{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+}
+
+@media (max-width: 560px){
+  .page__title{
+    font-size:24px;
+  }
+  .kpis{
+    grid-template-columns:1fr;
+  }
+  .kpi{
+    grid-template-columns:40px 1fr;
+    padding:14px;
+  }
+  .table__row .td{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+  .table__row .td::before{
+    margin-bottom:2px;
+  }
 }

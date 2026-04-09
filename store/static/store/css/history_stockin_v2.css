@@ -311,6 +311,52 @@ tbody tr:hover{
   .col-by{ width:auto; }
 }
 
+@media (max-width: 820px){
+  .page{
+    padding:18px 14px 22px;
+  }
+  .hero{
+    flex-direction:column;
+    align-items:flex-start;
+    margin-bottom:14px;
+  }
+  .hero h1{
+    font-size:28px;
+  }
+  .filter{
+    align-items:stretch;
+  }
+  .search-wrap{
+    min-width:0;
+  }
+  .btn-filter,.btn-clear{
+    width:100%;
+    justify-content:center;
+  }
+  .table-wrap{
+    overflow-x:auto;
+    padding:10px;
+  }
+  .table{
+    min-width:760px;
+  }
+}
+
+@media (max-width: 560px){
+  .page{
+    padding:14px 10px 18px;
+  }
+  .hero h1{
+    font-size:24px;
+  }
+  .card-head{
+    padding:16px 14px 12px;
+  }
+  .table-wrap{
+    padding:8px;
+  }
+}
+
 /* =========================
    VIEW ITEMS (Stock-In History)
 ========================= */
