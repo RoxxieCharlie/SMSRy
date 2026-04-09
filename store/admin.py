@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.contrib.admin.forms import AdminAuthenticationForm
 from django.core.exceptions import ValidationError
 
 from .models import (
@@ -16,6 +17,33 @@ from .models import (
 )
 
 from store.services.stockin_service import create_bulk_stockin
+
+
+# ===============================
+# ADMIN ACCESS POLICY
+# ===============================
+
+class SuperuserOnlyAdminAuthenticationForm(AdminAuthenticationForm):
+    def confirm_login_allowed(self, user):
+        if not user.is_active:
+            raise ValidationError(
+                self.error_messages["inactive"],
+                code="inactive",
+            )
+        if not user.is_superuser:
+            raise ValidationError(
+                "Please enter the correct superuser username and password. "
+                "Note that both fields may be case-sensitive.",
+                code="invalid_login",
+            )
+
+
+def _superuser_only_has_permission(request):
+    return request.user.is_active and request.user.is_superuser
+
+
+admin.site.login_form = SuperuserOnlyAdminAuthenticationForm
+admin.site.has_permission = _superuser_only_has_permission
 
 
 # ===============================
