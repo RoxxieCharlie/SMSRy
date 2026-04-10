@@ -393,9 +393,16 @@ def dashboard_staff(request):
         .order_by("-request_count", "-total_qty", "item__name")[:5]
     )
 
+    display_name = (
+        getattr(staff, "name", "").strip()
+        or request.user.get_full_name().strip()
+        or request.user.username
+    )
+
     context = {
         "active_nav": "dashboard",
         "staff": staff,
+        "display_name": display_name,
         "total_requests": total_requests,
         "draft_count": draft_count,
         "submitted_count": submitted_count,

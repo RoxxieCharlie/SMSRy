@@ -14,7 +14,7 @@
         <div>
             <p class="staff-kicker">Smart Management Solution</p>
             <h1 class="staff-title">Staff Dashboard</h1>
-            <p class="staff-subtitle">Welcome, {{ staff.name }}. Manage your requests and track status.</p>
+            <p class="staff-subtitle">Welcome, {{ display_name }}. Manage your requests and track status.</p>
         </div>
         <a href="{% url 'store:request_create' %}" class="btn btn-primary">New Request</a>
     </header>
