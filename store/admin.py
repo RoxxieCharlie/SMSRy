@@ -58,8 +58,20 @@ admin.site.has_permission = _superuser_only_has_permission
 # BASIC REGISTRATIONS
 # ===============================
 
-admin.site.register(Department)
-admin.site.register(Staff)
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
+
+@admin.register(Staff)
+class StaffAdmin(admin.ModelAdmin):
+    list_display = ("name", "staff_id", "department", "job_roles", "user")
+    search_fields = ("name", "staff_id", "user__username", "department__name")
+    list_filter = ("department", "job_roles")
+    fields = ("user", "staff_id", "name", "department", "job_roles")
+
+
 admin.site.register(Category)
 admin.site.register(Item)
 
