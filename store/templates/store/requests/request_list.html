@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="staff-page" data-live-root="requests" data-live-topics="requests,activity">
+<div class="staff-page {% if is_management %}staff-page--management{% endif %}" data-live-root="requests" data-live-topics="requests,activity">
     <header class="staff-topbar glass">
         <div>
             <p class="staff-kicker">Smart Management Solution</p>
@@ -53,8 +53,8 @@
         </a>
     </section>
 
-    <section class="staff-grid">  
-        <section class="panel panel-main glass">
+    <section class="staff-grid {% if is_management %}staff-grid--single{% endif %}">  
+        <section class="panel panel-main glass {% if is_management %}panel-main--full{% endif %}">
             <div class="panel-head">
                 <h2>Workspace Summary</h2>
                 <a href="{% url 'store:request_history_table' %}" class="panel-link">Open request history</a>
@@ -94,6 +94,7 @@
             </div>
         </section>
 
+        {% if not is_management %}
         <aside class="panel panel-side glass">
             <div class="panel-head">
                 <h2>Recent Activity</h2>
@@ -113,6 +114,7 @@
                 {% endfor %}
             </ul>
         </aside>
+        {% endif %}
     </section>
 </div>
 {% endblock %}

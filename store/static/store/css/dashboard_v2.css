@@ -50,8 +50,10 @@ body.ui::before{
 
 /* page container */
 .page{
-  max-width: 1120px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-width: 0;
 }
 
 /* topbar */
@@ -61,12 +63,14 @@ body.ui::before{
   justify-content:space-between;
   gap: 18px;
   margin-bottom: 18px;
+  flex-wrap: wrap;
 }
 
 .topbar__right{
   display:flex;
   align-items:center;
   gap: 12px;
+  margin-left: auto;
 }
 
 .hello{
@@ -87,6 +91,7 @@ body.ui::before{
   position: relative;
   flex: 1;
   max-width: 560px;
+  min-width: 280px;
   display:flex;
   align-items:center;
   gap:10px;
@@ -128,6 +133,7 @@ body.ui::before{
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 20px;
+  align-items: stretch;
 }
 
 .card{
@@ -145,6 +151,7 @@ body.ui::before{
   box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,.06) inset;
 
   transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, filter .12s ease;
+  min-width: 0;
 }
 
 .card:hover{
@@ -248,6 +255,7 @@ body.ui::before{
   display:grid;
   grid-template-columns: 1.25fr .75fr;
   gap: 18px;
+  align-items: start;
 }
 
 .panel{
@@ -257,6 +265,7 @@ max-height: 500px;
   border-radius: var(--radius);
   box-shadow: var(--shadow), 0 0 0 1px rgba(255,255,255,.04) inset;
   overflow:hidden;
+  min-width: 0;
 }
 
 .panel__head{
@@ -264,9 +273,16 @@ max-height: 500px;
   justify-content:space-between;
   align-items:center;
   padding: 16px 16px 12px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.panel__title{ font-weight: 900; letter-spacing:.2px; font-size: 16px; }
+.panel__title{
+  font-weight: 900;
+  letter-spacing:.2px;
+  font-size: 16px;
+  min-width: 0;
+}
 
 .panel__tools{ display:flex; gap: 8px; }
 
@@ -394,6 +410,28 @@ max-height: 500px;
 }
 
 @media (max-width: 860px){
-  .search{ max-width: 100%; }
+  .search{
+    max-width: 100%;
+    min-width: 0;
+  }
+  .topbar__right{
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 640px){
+  .kpis{
+    grid-template-columns: 1fr;
+  }
+  .card{
+    flex-direction: column;
+  }
+  .card__hint{
+    margin-top: 8px;
+  }
+  .panel{
+    max-height: none;
+  }
 }
 

@@ -60,6 +60,7 @@
         {% url 'store:inventory_store_v2' as inventory_url %}
         {% url 'store:history_issuance_storekeeper_v2' as issuance_hist_url %}
         {% url 'store:history_stockin_store_v2' as stockin_hist_url %}
+        {% url 'store:weekly_v2' as weekly_url %}
         {% url 'store:request_list' as request_list_url %}
         {% url 'store:stockin_v2' as stockin_url %}
         <a class="nav__link {% if current_url_name == 'dashboard' or current_url_name == 'dashboard_storekeeper_v2' or current_url_name == 'dashboard_storekeeper' %}is-active{% endif %}" href="{{ dashboard_url }}">
@@ -80,6 +81,10 @@
         </a>
         <hr>
         <div class="nav__section">Operations</div>
+        <a class="nav__link {% if current_url_name == 'weekly_v2' or current_url_name == 'weekly' %}is-active{% endif %}" href="{{ weekly_url }}">
+            <span class="nav__icon" aria-hidden="true">W</span>
+            <span>Weekly Report</span>
+        </a>
         <a class="nav__link {% if current_url_name == 'request_list' or current_url_name == 'request_create' or current_url_name == 'request_edit' or current_url_name == 'request_fulfill' or current_url_name == 'request_edit_issuance' %}is-active{% endif %}" href="{{ request_list_url }}">
             <span class="nav__icon" aria-hidden="true">R</span>
             <span>Requests</span>
