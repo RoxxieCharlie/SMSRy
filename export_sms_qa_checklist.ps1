@@ -18,7 +18,7 @@ $sections = @(
         Items = @(
             "Open /login/.",
             "Confirm the login page is styled correctly.",
-            "Confirm SMS and Store Management System appear correctly.",
+            "Confirm SMS and Smart Management Solution appear correctly.",
             "Log in with a valid account.",
             "Log in with an invalid password.",
             "Confirm invalid login shows a clean error.",
