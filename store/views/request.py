@@ -146,11 +146,14 @@ def request_create(request):
     if request.method == "POST":
         form = RequestForm(request.POST)
         formset = RequestItemFormSet(request.POST, prefix="items")
+        submit_now = (request.POST.get("action") or "").strip().lower() == "submit"
 
         if form.is_valid() and formset.is_valid():
             request_obj = form.save(commit=False)
             request_obj.requester = staff
-            request_obj.status = Request.Status.DRAFT
+            request_obj.status = Request.Status.SUBMITTED if submit_now else Request.Status.DRAFT
+            request_obj.submitted_at = timezone.now() if submit_now else None
+            request_obj.needs_resubmission = False
             request_obj.last_edited_by = request.user
             request_obj.save()
 
@@ -184,6 +187,15 @@ def request_create(request):
                 },
             )
 
+            if submit_now:
+                RequestActivity.objects.create(
+                    request=request_obj,
+                    actor=request.user,
+                    action=RequestActivity.Action.SUBMITTED,
+                    description=f"Request submitted by {request.user.get_full_name() or request.user.username}.",
+                    metadata={},
+                )
+
             emit_activity(
                 actor=request.user,
                 verb=Activity.Verb.REQUEST_CREATED,
@@ -197,7 +209,24 @@ def request_create(request):
                 },
             )
 
-            messages.success(request, "Request created successfully.")
+            if submit_now:
+                emit_activity(
+                    actor=request.user,
+                    verb=Activity.Verb.REQUEST_SUBMITTED,
+                    target=request_obj,
+                    summary=f"{staff.name} submitted Request #{request_obj.id}",
+                    metadata={
+                        "request_id": request_obj.id,
+                        "staff_id": staff.id,
+                        "staff_name": staff.name,
+                        "department": staff.department.name if staff.department else "",
+                    },
+                )
+
+            messages.success(
+                request,
+                "Request submitted successfully." if submit_now else "Request created successfully.",
+            )
             return redirect("store:request_edit", request_id=request_obj.id)
     else:
         form = RequestForm()
@@ -213,7 +242,7 @@ def request_create(request):
             "requester_meta": requester_meta,
             "request_status": Request.Status.DRAFT,
             "submit_label": "Save Draft",
-            "can_submit": False,
+            "can_submit": True,
             "recent_activities": _recent_activity_for_requester(staff, limit=6),
             "page_title": "New Request",
             "base_template": _request_base_template(request.user),

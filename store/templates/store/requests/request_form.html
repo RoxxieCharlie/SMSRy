@@ -117,7 +117,6 @@
                     <div class="glass rq-card">
                         <div class="rq-card-head">
                             <h2>Request Items</h2>
-                            {% if can_add_items %}<button type="button" class="btn btn-ghost" id="addItemBtn">Add Item</button>{% endif %}
                         </div>
 
                         <div class="rq-table-wrap">
@@ -164,16 +163,19 @@
                         </div>
                     </div>
 
+                    {% if can_add_items %}
+                    <button type="button" class="rq-fab-add" id="addItemBtn" aria-label="Add item">+</button>
+                    {% endif %}
+
                     <div class="rq-actions">
                         {% if is_storekeeper_editor and request_obj and request_obj.status == 'submitted' %}
                             <a href="{% url 'store:request_fulfill' request_obj.id %}" class="btn btn-primary-alt">Fulfill Request</a>
-                        {% elif not is_storekeeper_editor and request_obj and can_submit %}
+                        {% elif not is_storekeeper_editor and can_submit %}
                             <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
                             <button
                                 type="submit"
                                 class="btn btn-primary-alt"
-                                formaction="{% url 'store:request_submit' request_obj.id %}"
-                                formmethod="post"
+                                {% if request_obj %}formaction="{% url 'store:request_submit' request_obj.id %}" formmethod="post"{% else %}name="action" value="submit"{% endif %}
                             >
                                 Submit Request
                             </button>

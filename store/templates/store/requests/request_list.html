@@ -53,8 +53,8 @@
         </a>
     </section>
 
-    <section class="staff-grid {% if is_management %}staff-grid--single{% endif %}">  
-        <section class="panel panel-main glass {% if is_management %}panel-main--full{% endif %}">
+    <section class="staff-grid staff-grid--single">  
+        <section class="panel panel-main glass panel-main--full">
             <div class="panel-head">
                 <h2>Workspace Summary</h2>
                 <a href="{% url 'store:request_history_table' %}" class="panel-link">Open request history</a>
@@ -93,28 +93,6 @@
                 {% endfor %}
             </div>
         </section>
-
-        {% if not is_management %}
-        <aside class="panel panel-side glass">
-            <div class="panel-head">
-                <h2>Recent Activity</h2>
-            </div>
-            <ul class="activity-list">
-                {% for activity in recent_activities %}
-                    <li class="activity-item">
-                        <span class="activity-dot"></span>
-                        <div>
-                            <p class="activity-title">Request #{{ activity.request_id }} - {{ activity.get_action_display }}</p>
-                            <p class="activity-desc">{{ activity.description }}</p>
-                            <p class="activity-time">{{ activity.created_at|timesince }} ago</p>
-                        </div>
-                    </li>
-                {% empty %}
-                    <li class="empty">No request activity yet.</li>
-                {% endfor %}
-            </ul>
-        </aside>
-        {% endif %}
     </section>
 </div>
 {% endblock %}
