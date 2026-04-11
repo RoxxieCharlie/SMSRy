@@ -209,6 +209,7 @@ body.ui::before{
   flex: 0 0 auto;
   padding: 10px 6px 0px;
   border-top: 1px solid rgba(255,255,255,.08);
+  background: rgba(2,6,23,.72);
 }
 
 /* Logout button inherits nav link styles */
@@ -461,6 +462,7 @@ body.ui::before{
   .nav{
     overflow-y:auto;
     padding-right:0;
+    padding-bottom:88px;
   }
   .nav__section{
     margin-top:10px;
@@ -470,7 +472,16 @@ body.ui::before{
     font-size:14px;
   }
   .sidebar__footer{
-    padding-bottom:12px;
+    position:sticky;
+    bottom:0;
+    padding:12px 6px calc(12px + env(safe-area-inset-bottom, 0px));
+    background:linear-gradient(180deg,rgba(2,6,23,.2),rgba(2,6,23,.96) 30%);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+  }
+  .logout-form .nav__link{
+    justify-content:center;
+    min-height:46px;
   }
 }
 

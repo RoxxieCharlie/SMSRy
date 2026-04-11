@@ -7,7 +7,7 @@
 .kpi-draft{border-color:rgba(115,168,245,.34)}.kpi-submitted{border-color:rgba(97,197,189,.35);background:linear-gradient(180deg,rgba(34,93,106,.52),rgba(24,70,80,.54))}.kpi-fulfilled{border-color:rgba(112,214,154,.35);background:linear-gradient(180deg,rgba(40,96,74,.5),rgba(24,69,53,.54))}.kpi-locked{border-color:rgba(239,142,142,.3);background:linear-gradient(180deg,rgba(95,55,69,.55),rgba(63,40,53,.58))}
 .staff-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(320px,1fr);gap:14px}.panel{padding:14px}.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.panel-head h2{margin:0;font-size:20px}.panel-link{color:#cfe7ff;text-decoration:none;font-size:13px}.panel-link:hover{text-decoration:underline}
 .table-wrap{overflow:auto}.rq-table{width:100%;border-collapse:collapse}.rq-table th,.rq-table td{border-bottom:1px solid rgba(180,204,247,.14);padding:10px 8px;text-align:left}.rq-table th{color:#b9ceef;font-size:12px;text-transform:uppercase;letter-spacing:.06em}.cell-right{text-align:right}
-.panel-side{max-height:560px;display:flex;flex-direction:column}.activity-list{list-style:none;margin:0;padding:0;display:grid;gap:12px;overflow:auto}.activity-item{display:flex;gap:10px}.activity-dot{width:9px;height:9px;margin-top:7px;border-radius:50%;background:#5bd7b4;box-shadow:0 0 10px rgba(91,215,180,.7)}.activity-title{margin:0;font-weight:700;font-size:14px}.activity-desc{margin:2px 0 0;color:#c2d5f1;font-size:12px}.activity-time{margin:3px 0 0;color:#9fb4da;font-size:11px}.empty{color:#9fb4da;font-size:13px}
+.panel-side{display:flex;flex-direction:column;align-self:start}.activity-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}.activity-item{display:flex;gap:10px}.activity-dot{width:9px;height:9px;margin-top:7px;border-radius:50%;background:#5bd7b4;box-shadow:0 0 10px rgba(91,215,180,.7)}.activity-title{margin:0;font-weight:700;font-size:14px}.activity-desc{margin:2px 0 0;color:#c2d5f1;font-size:12px}.activity-time{margin:3px 0 0;color:#9fb4da;font-size:11px}.empty{color:#9fb4da;font-size:13px}
 .status-chip{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;border:1px solid transparent}.status-draft{background:rgba(120,143,174,.22);border-color:rgba(141,169,206,.4);color:#d9e8ff}.status-submitted{background:rgba(90,146,235,.24);border-color:rgba(111,174,255,.45);color:#d9edff}.status-edited{background:rgba(255,179,71,.2);border-color:rgba(255,179,71,.45);color:#ffe5bb}.status-fulfilled{background:rgba(69,181,132,.22);border-color:rgba(102,212,165,.44);color:#daf9ec}.status-locked{background:rgba(210,93,93,.22);border-color:rgba(235,130,130,.44);color:#ffe3e3}
 .btn{border:1px solid transparent;border-radius:10px;padding:9px 14px;font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;color:#f0f7ff}.btn-ghost{background:rgba(88,169,255,.12);border-color:rgba(88,169,255,.32);color:#cfe8ff}.btn-primary{background:linear-gradient(180deg,#4f9dff,#2f79d9)}
 @media (max-width:1080px){.staff-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.staff-grid{grid-template-columns:1fr}}
@@ -21,7 +21,7 @@
 .staff-kpis:has(.kpi-card.is-active) .kpi-card:not(.is-active){opacity:.66;transform:scale(.985);filter:saturate(.82)}
 .kpi-card.is-active{position:relative;transform:translateY(-6px) scale(1.04);border-color:rgba(154,205,255,.92);box-shadow:0 0 0 1px rgba(173,216,255,.26),0 28px 56px rgba(73,141,230,.28),0 0 34px rgba(98,177,255,.30);filter:brightness(1.08)}
 
-.summary-panels{display:grid;grid-template-columns:minmax(0,.95fr) minmax(340px,1.05fr);gap:14px;margin-bottom:16px}
+.summary-panels{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);gap:14px;margin-bottom:16px;align-items:start}
 .summary-panel{padding:18px}
 .panel-head-stack{align-items:flex-start;gap:10px}
 .panel-kicker{margin:0 0 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8fb0df}
@@ -80,3 +80,4 @@
   .request-table{min-width:580px}
   .activity-list{gap:10px}
 }
+

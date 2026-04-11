@@ -69,9 +69,9 @@
                             <tbody>
                                 {% for request_item in request_items %}
                                     <tr>
-                                        <td>{{ request_item.item.name }}</td>
-                                        <td>{{ request_item.requested_qty }}</td>
-                                        <td>{{ request_item.fulfilled_qty }}</td>
+                                        <td data-label="Item">{{ request_item.item.name }}</td>
+                                        <td data-label="Requested Qty">{{ request_item.requested_qty }}</td>
+                                        <td data-label="Fulfilled Qty">{{ request_item.fulfilled_qty }}</td>
                                     </tr>
                                 {% empty %}
                                     <tr>
@@ -132,7 +132,7 @@
                                 <tbody id="itemsBody">
                                     {% for item_form in formset %}
                                         <tr class="js-item-row">
-                                            <td>
+                                            <td data-label="Item">
                                                 {% if is_storekeeper_editor %}
                                                     {{ item_form.item.as_hidden }}
                                                     <span>{{ item_form.item_label }}</span>
@@ -141,8 +141,8 @@
                                                 {% endif %}
                                                 {{ item_form.item.errors }}
                                             </td>
-                                            {% if is_storekeeper_editor %}<td>{{ item_form.in_stock }}</td>{% endif %}
-                                            <td>
+                                            {% if is_storekeeper_editor %}<td data-label="In Stock">{{ item_form.in_stock }}</td>{% endif %}
+                                            <td data-label="Requested Qty">
                                                 {% if is_storekeeper_editor %}
                                                     <input type="number" name="{{ item_form.requested_qty.html_name }}" id="{{ item_form.requested_qty.id_for_label }}" value="{% firstof item_form.override_requested_qty item_form.display_requested_qty %}" min="1" step="1" inputmode="numeric">
                                                 {% else %}
@@ -150,7 +150,7 @@
                                                 {% endif %}
                                                 {{ item_form.requested_qty.errors }}
                                             </td>
-                                            <td class="cell-right">
+                                            <td class="cell-right" data-label="Remove">
                                                 {% if item_form.DELETE %}
                                                     <div class="rq-hidden-delete">{{ item_form.DELETE }}</div>
                                                 {% endif %}
@@ -194,9 +194,9 @@
     {% if not is_read_only and can_add_items %}
     <template id="itemRowTemplate">
         <tr class="js-item-row">
-            <td>{{ formset.empty_form.item }}</td>
-            <td>{{ formset.empty_form.requested_qty }}</td>
-            <td class="cell-right">
+            <td data-label="Item">{{ formset.empty_form.item }}</td>
+            <td data-label="Requested Qty">{{ formset.empty_form.requested_qty }}</td>
+            <td class="cell-right" data-label="Remove">
                 <div class="rq-hidden-delete">{{ formset.empty_form.DELETE }}</div>
                 <button type="button" class="btn btn-danger js-remove-row">Remove</button>
             </td>
