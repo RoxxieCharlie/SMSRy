@@ -132,6 +132,53 @@ def _recent_activity_for_storekeeper(limit=8):
     )
 
 
+def _summarize_request_item_changes(changes, *, phase_label="before fulfillment"):
+    item_changes = [change for change in changes if change.get("item_name") and change.get("old_qty") != change.get("new_qty")]
+    if not item_changes:
+        return ""
+
+    parts = []
+    for change in item_changes:
+        old_qty = change.get("old_qty")
+        new_qty = change.get("new_qty")
+        if old_qty is None or new_qty is None:
+            continue
+        direction = "increased" if new_qty > old_qty else "reduced"
+        parts.append(f'{direction} {change["item_name"]} from {old_qty} to {new_qty}')
+
+    if not parts:
+        return ""
+    if len(parts) == 1:
+        return f"Storekeeper {parts[0]} {phase_label}."
+    if len(parts) == 2:
+        return f"Storekeeper {parts[0]} and {parts[1]} {phase_label}."
+    return f"Storekeeper {', '.join(parts[:-1])}, and {parts[-1]} {phase_label}."
+
+
+def _build_storekeeper_history(request_obj):
+    history = []
+    for activity in request_obj.activities.filter(
+        action__in=[RequestActivity.Action.STORE_EDITED, RequestActivity.Action.FULFILLMENT_EDITED]
+    ).order_by("-created_at"):
+        metadata = activity.metadata or {}
+        changes = [
+            change for change in metadata.get("changes", [])
+            if change.get("item_name") and change.get("old_qty") != change.get("new_qty")
+        ]
+        note = (metadata.get("store_comment") or metadata.get("reason") or "").strip()
+        if not changes and not note:
+            continue
+        history.append(
+            {
+                "label": "Before fulfillment" if activity.action == RequestActivity.Action.STORE_EDITED else "After fulfillment",
+                "changes": changes,
+                "note": note,
+                "time": activity.created_at,
+            }
+        )
+    return history
+
+
 @login_required
 @transaction.atomic
 def request_create(request):
@@ -292,6 +339,7 @@ def request_edit(request, request_id):
 
     if request.method == "POST":
         old_purpose = request_obj.purpose or ""
+        old_store_note = request_obj.store_note or ""
         should_fulfill = (
             is_storekeeper_editor
             and request_obj.status == Request.Status.SUBMITTED
@@ -421,18 +469,35 @@ def request_edit(request, request_id):
                             }
                         )
 
+                store_note_changed = is_storekeeper_editor and old_store_note.strip() != (store_note or "").strip()
+
                 if request_obj.status == Request.Status.SUBMITTED and changes and not is_storekeeper_editor:
                     request_obj.needs_resubmission = True
                     request_obj.save(update_fields=["needs_resubmission", "updated_at"])
 
                 action = RequestActivity.Action.STORE_EDITED if is_storekeeper_editor else RequestActivity.Action.STAFF_EDITED
+                activity_metadata = {"changes": changes}
+                if is_storekeeper_editor and store_note:
+                    activity_metadata["store_comment"] = store_note
+
+                if is_storekeeper_editor:
+                    description = (
+                        _summarize_request_item_changes(changes, phase_label="before fulfillment")
+                        or (
+                            "Storekeeper updated the pre-fulfillment comment."
+                            if store_note_changed else
+                            f"Request edited by {request.user.get_full_name() or request.user.username}."
+                        )
+                    )
+                else:
+                    description = f"Request edited by {request.user.get_full_name() or request.user.username}."
 
                 RequestActivity.objects.create(
                     request=request_obj,
                     actor=request.user,
                     action=action,
-                    description=f"Request edited by {request.user.get_full_name() or request.user.username}.",
-                    metadata={"changes": changes},
+                    description=description,
+                    metadata=activity_metadata,
                 )
 
                 emit_activity(
@@ -775,11 +840,15 @@ def request_history_table(request):
     if status:
         requests_qs = requests_qs.filter(status=status)
 
+    requests_list = list(requests_qs)
+    for request_obj in requests_list:
+        request_obj.storekeeper_history = _build_storekeeper_history(request_obj)
+
     return render(
         request,
         "store/requests/request_history.html",
         {
-            "requests": requests_qs,
+            "requests": requests_list,
             "selected_status": status,
             "status_choices": Request.Status.choices,
             "total_count": base_qs.count(),

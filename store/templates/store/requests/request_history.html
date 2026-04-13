@@ -119,6 +119,24 @@
                                 {% empty %}
                                     <span class="history-empty-inline">-</span>
                                 {% endfor %}
+                                {% if request_obj.storekeeper_history %}
+                                    <div class="history-storekeeper">
+                                        {% for entry in request_obj.storekeeper_history %}
+                                            <div class="history-storekeeper-block">
+                                                <div class="history-storekeeper-label">Storekeeper Changes · {{ entry.label }}</div>
+                                                {% for change in entry.changes %}
+                                                    <div class="history-storekeeper-row">
+                                                        <span class="history-item-name">{{ change.item_name }}</span>
+                                                        <span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span>
+                                                    </div>
+                                                {% endfor %}
+                                                {% if entry.note %}
+                                                    <div class="history-storekeeper-note">Comment: {{ entry.note }}</div>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
                         </td>
                         <td>
