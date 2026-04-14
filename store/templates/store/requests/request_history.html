@@ -61,7 +61,7 @@
         <div class="panel-head history-panel-head">
             <div>
                 <h2>Request Table</h2>
-                <p class="history-panel-note">Review status, items, timestamps, and open the appropriate next action.</p>
+                <p class="history-panel-note">Review status, timestamps, and open the item breakdown for requested and final fulfilled quantities.</p>
             </div>
         </div>
 
@@ -110,34 +110,10 @@
                             <span class="status-chip status-{{ request_obj.display_status_slug }}">{{ request_obj.display_status_label }}</span>
                         </td>
                         <td>
-                            <div class="history-items">
-                                {% for line in request_obj.items.all %}
-                                    <div class="history-item-row">
-                                        <span class="history-item-name">{{ line.item.name }}</span>
-                                        <span class="history-item-qty">{{ line.requested_qty }}</span>
-                                    </div>
-                                {% empty %}
-                                    <span class="history-empty-inline">-</span>
-                                {% endfor %}
-                                {% if request_obj.storekeeper_history %}
-                                    <div class="history-storekeeper">
-                                        {% for entry in request_obj.storekeeper_history %}
-                                            <div class="history-storekeeper-block">
-                                                <div class="history-storekeeper-label">Storekeeper Changes Â· {{ entry.label }}</div>
-                                                {% for change in entry.changes %}
-                                                    <div class="history-storekeeper-row">
-                                                        <span class="history-item-name">{{ change.item_name }}</span>
-                                                        <span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span>
-                                                    </div>
-                                                {% endfor %}
-                                                {% if entry.note %}
-                                                    <div class="history-storekeeper-note">Comment: {{ entry.note }}</div>
-                                                {% endif %}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
+                            <button class="items-btn history-items-btn" type="button" data-toggle-items aria-expanded="false">
+                                <span class="items-ic">&gt;</span>
+                                <span>View Items</span>
+                            </button>
                         </td>
                         <td>
                             <div class="history-date-cell">
@@ -159,6 +135,62 @@
                             {% endif %}
                         </td>
                     </tr>
+                    <tr class="details-row" hidden>
+                        <td colspan="7">
+                            <div class="items-panel">
+                                <div class="items-panel-head">
+                                    <div class="items-title">Request #{{ request_obj.id }} Item Breakdown</div>
+                                    <div class="items-sub">Requested quantities and final fulfilled quantities.</div>
+                                </div>
+                                <div class="history-items-detail-grid">
+                                    <section class="history-items-section">
+                                        <h3>Requested Items</h3>
+                                        <ul class="items-grid">
+                                            {% for line in request_obj.items.all %}
+                                                <li class="item-chip">
+                                                    <span class="item-name">{{ line.item.name }}</span>
+                                                    <span class="item-qty">{{ line.requested_qty }}</span>
+                                                </li>
+                                            {% empty %}
+                                                <li class="item-chip empty">No requested items.</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </section>
+                                    <section class="history-items-section">
+                                        <h3>Fulfilled Items</h3>
+                                        <ul class="items-grid">
+                                            {% for line in request_obj.items.all %}
+                                                <li class="item-chip">
+                                                    <span class="item-name">{{ line.item.name }}</span>
+                                                    <span class="item-qty">{{ line.fulfilled_qty|default:0 }}</span>
+                                                </li>
+                                            {% empty %}
+                                                <li class="item-chip empty">No fulfilled items yet.</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </section>
+                                </div>
+                                {% if request_obj.storekeeper_history %}
+                                    <div class="history-storekeeper">
+                                        {% for entry in request_obj.storekeeper_history %}
+                                            <div class="history-storekeeper-block">
+                                                <div class="history-storekeeper-label">Storekeeper Changes · {{ entry.label }}</div>
+                                                {% for change in entry.changes %}
+                                                    <div class="history-storekeeper-row">
+                                                        <span class="history-item-name">{{ change.item_name }}</span>
+                                                        <span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span>
+                                                    </div>
+                                                {% endfor %}
+                                                {% if entry.note %}
+                                                    <div class="history-storekeeper-note">Comment: {{ entry.note }}</div>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
                     {% empty %}
                     <tr>
                         <td colspan="7">
@@ -174,5 +206,9 @@
         </div>
     </section>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'store/js/history_issuance_v2.js' %}"></script>
 {% endblock %}
 

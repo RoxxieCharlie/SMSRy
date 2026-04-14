@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from store.models import Issuance, Department, RequestActivity
 from store.decorators import group_required
+from store.views.request import _build_storekeeper_history
 
 
 @login_required
@@ -20,7 +21,7 @@ def history_issuance_management(request):
     issuances = (
         Issuance.objects
         .select_related("staff", "issued_by", "staff__department", "request__requester")
-        .prefetch_related("items__item")
+        .prefetch_related("items__item", "request__items__item", "request__activities")
         .order_by("-issued_at")
         .annotate(
             is_edited_ui=Exists(
@@ -108,6 +109,9 @@ def history_issuance_management(request):
     paginator = Paginator(issuances, 30)
     page_obj = paginator.get_page(request.GET.get("page"))
     page_range = paginator.get_elided_page_range(number=page_obj.number, on_each_side=1, on_ends=1)
+
+    for issuance in page_obj.object_list:
+        issuance.storekeeper_history = _build_storekeeper_history(issuance.request)
 
     context = {
         "page_obj": page_obj,

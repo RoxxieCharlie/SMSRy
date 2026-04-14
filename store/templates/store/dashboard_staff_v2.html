@@ -124,29 +124,5 @@
         </aside>
     </section>
 
-    <section class="staff-grid staff-grid-single">
-        <article class="panel glass summary-panel items-panel">
-            <div class="panel-head panel-head-stack">
-                <div>
-                    <p class="panel-kicker">Demand Snapshot</p>
-                    <h2>Top Requested Items</h2>
-                </div>
-            </div>
-            <ul class="top-items-list">
-                {% for item_row in top_requested_items %}
-                    <li class="top-item-row">
-                        <span class="top-item-rank">{{ forloop.counter }}</span>
-                        <div class="top-item-copy">
-                            <strong>{{ item_row.item__name }}</strong>
-                            <span>{{ item_row.request_count }} request{{ item_row.request_count|pluralize }}</span>
-                        </div>
-                        <span class="top-item-qty">{{ item_row.total_qty }} {{ item_row.item__unit_of_measurement }}</span>
-                    </li>
-                {% empty %}
-                    <li class="top-item-empty">No requested items yet.</li>
-                {% endfor %}
-            </ul>
-        </article>
-    </section>
 </div>
 {% endblock %}

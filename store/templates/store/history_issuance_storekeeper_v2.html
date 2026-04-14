@@ -122,16 +122,61 @@
             </tr>
 
             <tr class="details-row" hidden>
-                <td colspan="7">
-                    <ul class="items-list">
-                        {% for line in issuance.items.all %}
-                        <li>{{ line.item.name }} ({{ line.quantity }})</li>
+    <td colspan="7">
+        <div class="items-panel">
+            <div class="items-panel-head">
+                <div class="items-title">Issuance #{{ issuance.id }} Item Breakdown</div>
+                <div class="items-sub">Requested quantities and final fulfilled quantities.</div>
+            </div>
+            <div class="history-items-detail-grid">
+                <section class="history-items-section">
+                    <h3>Requested Items</h3>
+                    <ul class="items-grid">
+                        {% for line in issuance.request.items.all %}
+                        <li class="item-chip">
+                            <span class="item-name">{{ line.item.name }}</span>
+                            <span class="item-qty">{{ line.requested_qty }}</span>
+                        </li>
                         {% empty %}
-                        <li>-</li>
+                        <li class="item-chip empty">No requested items.</li>
                         {% endfor %}
                     </ul>
-                </td>
-            </tr>
+                </section>
+                <section class="history-items-section">
+                    <h3>Fulfilled Items</h3>
+                    <ul class="items-grid">
+                        {% for line in issuance.request.items.all %}
+                        <li class="item-chip">
+                            <span class="item-name">{{ line.item.name }}</span>
+                            <span class="item-qty">{{ line.fulfilled_qty|default:0 }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="item-chip empty">No fulfilled items recorded.</li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            </div>
+            {% if issuance.storekeeper_history %}
+            <div class="history-storekeeper">
+                {% for entry in issuance.storekeeper_history %}
+                <div class="history-storekeeper-block">
+                    <div class="history-storekeeper-label">Storekeeper Changes · {{ entry.label }}</div>
+                    {% for change in entry.changes %}
+                    <div class="history-storekeeper-row">
+                        <span class="history-item-name">{{ change.item_name }}</span>
+                        <span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span>
+                    </div>
+                    {% endfor %}
+                    {% if entry.note %}
+                    <div class="history-storekeeper-note">Comment: {{ entry.note }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </td>
+</tr>
             {% empty %}
             <tr>
                 <td colspan="7" class="empty">No issuances found for this filter.</td>
@@ -177,5 +222,7 @@
 <script src="{% static 'store/js/history_issuance_v2.js' %}"></script>
 {% endblock %}
 {% endblock %}
+
+
 
 
