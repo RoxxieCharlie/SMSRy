@@ -333,7 +333,7 @@ def request_edit(request, request_id):
         return redirect("store:request_edit", request_id=request_obj.id)
 
     if request.method == "POST" and is_read_only:
-        messages.error(request, "This fulfilled request is read-only for staff.")
+        messages.error(request, "This request is read-only.")
         return redirect("store:request_edit", request_id=request_obj.id)
 
     if not is_storekeeper and not request_obj.can_staff_edit and not is_read_only:

@@ -27,14 +27,6 @@
         </div>
     </header>
 
-    {% if messages %}
-    <div class="rq-messages">
-        {% for message in messages %}
-        <div class="rq-message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
     <div class="rq-grid">
         <section class="rq-main">
             <div class="glass rq-card">
