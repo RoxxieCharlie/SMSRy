@@ -816,24 +816,27 @@ def request_history(request):
     if not _can_access_request_workspace(request.user):
         return HttpResponseForbidden("You do not have access to request pages.")
 
-    target = "store:history_issuance_storekeeper" if _is_storekeeper(request.user) else "store:history_issuance_management"
-    return redirect(target)
+    if _is_storekeeper(request.user):
+        return redirect("store:history_issuance_storekeeper")
+    return request_history_table(request)
 
 
 @login_required
 def request_history_table(request):
     if not _can_access_request_workspace(request.user):
         return HttpResponseForbidden("You do not have access to request pages.")
-    if _is_storekeeper(request.user) or _is_in_group(request.user, "Management"):
+    if _is_storekeeper(request.user):
         return redirect("store:request_history")
 
-    requester_staff = _get_staff_for_user(request.user, required=True)
-    base_qs = (
-        Request.objects.select_related("requester", "requester__department", "fulfilled_by")
-        .prefetch_related("items__item")
-        .filter(requester=requester_staff)
-        .order_by("-updated_at", "-created_at")
-    )
+    is_management = _is_in_group(request.user, "Management")
+
+    base_qs = Request.objects.select_related(
+        "requester", "requester__department", "fulfilled_by", "requester__user"
+    ).prefetch_related("items__item", "activities").order_by("-updated_at", "-created_at")
+
+    if not is_management:
+        requester_staff = _get_staff_for_user(request.user, required=True)
+        base_qs = base_qs.filter(requester=requester_staff)
 
     status = request.GET.get("status", "").strip()
     requests_qs = base_qs
@@ -857,6 +860,7 @@ def request_history_table(request):
             "fulfilled_count": base_qs.filter(status=Request.Status.FULFILLED).count(),
             "locked_count": base_qs.filter(status=Request.Status.LOCKED).count(),
             "is_storekeeper": False,
+            "is_management": is_management,
             "base_template": _request_base_template(request.user),
         },
     )
