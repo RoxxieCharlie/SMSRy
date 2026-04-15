@@ -112,7 +112,9 @@ def history_issuance_storekeeper(request):
     page_range = paginator.get_elided_page_range(number=page_obj.number, on_each_side=1, on_ends=1)
 
     for issuance in page_obj.object_list:
-        issuance.storekeeper_history = _build_storekeeper_history(issuance.request) if issuance.request_id else []
+        issuance.storekeeper_history = (
+            _build_storekeeper_history(issuance.request, issuance) if issuance.request_id else []
+        )
 
     context = {
         "page_obj": page_obj,

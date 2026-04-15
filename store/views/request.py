@@ -155,8 +155,9 @@ def _summarize_request_item_changes(changes, *, phase_label="before fulfillment"
     return f"Storekeeper {', '.join(parts[:-1])}, and {parts[-1]} {phase_label}."
 
 
-def _build_storekeeper_history(request_obj):
+def _build_storekeeper_history(request_obj, issuance_obj=None):
     history = []
+    issuance = issuance_obj if issuance_obj is not None else getattr(request_obj, "issuance", None)
     for activity in request_obj.activities.filter(
         action__in=[RequestActivity.Action.STORE_EDITED, RequestActivity.Action.FULFILLMENT_EDITED]
     ).order_by("-created_at"):
@@ -169,7 +170,6 @@ def _build_storekeeper_history(request_obj):
         if not note and activity.action == RequestActivity.Action.STORE_EDITED:
             note = (request_obj.store_note or "").strip()
         if not note and activity.action == RequestActivity.Action.FULFILLMENT_EDITED:
-            issuance = getattr(request_obj, "issuance", None)
             note = (getattr(issuance, "comment", "") or "").strip()
         if not changes and not note:
             continue
@@ -181,6 +181,27 @@ def _build_storekeeper_history(request_obj):
                 "time": activity.created_at,
             }
         )
+    if not history:
+        pre_note = (request_obj.store_note or "").strip()
+        post_note = (getattr(issuance, "comment", "") or "").strip()
+        if pre_note:
+            history.append(
+                {
+                    "label": "Before fulfillment",
+                    "changes": [],
+                    "note": pre_note,
+                    "time": None,
+                }
+            )
+        if post_note and post_note != pre_note:
+            history.append(
+                {
+                    "label": "After fulfillment",
+                    "changes": [],
+                    "note": post_note,
+                    "time": None,
+                }
+            )
     return history
 
 
@@ -850,7 +871,7 @@ def request_history_table(request):
 
     requests_list = list(requests_qs)
     for request_obj in requests_list:
-        request_obj.storekeeper_history = _build_storekeeper_history(request_obj)
+        request_obj.storekeeper_history = _build_storekeeper_history(request_obj, getattr(request_obj, "issuance", None))
         request_obj.history_requester_staff_id = getattr(request_obj.requester, "staff_id", "-") or "-"
         try:
             request_obj.history_display_status_slug = request_obj.display_status_slug
