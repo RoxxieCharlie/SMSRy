@@ -846,6 +846,19 @@ def request_history_table(request):
     requests_list = list(requests_qs)
     for request_obj in requests_list:
         request_obj.storekeeper_history = _build_storekeeper_history(request_obj)
+        request_obj.history_requester_staff_id = getattr(request_obj.requester, "staff_id", "-") or "-"
+        try:
+            request_obj.history_display_status_slug = request_obj.display_status_slug
+        except Exception:
+            request_obj.history_display_status_slug = request_obj.status or "draft"
+        try:
+            request_obj.history_display_status_label = request_obj.display_status_label
+        except Exception:
+            request_obj.history_display_status_label = request_obj.get_status_display()
+        try:
+            request_obj.history_can_open = bool(request_obj.can_staff_edit)
+        except Exception:
+            request_obj.history_can_open = False
 
     return render(
         request,

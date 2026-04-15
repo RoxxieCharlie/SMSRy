@@ -100,14 +100,14 @@
                         <td>
                             <div class="history-person-cell">
                                 <strong>#{{ request_obj.id }}</strong>
-                                <span>{{ request_obj.requester.staff_id|default:"-" }}</span>
+                                <span>{{ request_obj.history_requester_staff_id }}</span>
                             </div>
                         </td>
                         <td>
                             <div class="history-purpose-cell">{{ request_obj.purpose|default:"-" }}</div>
                         </td>
                         <td>
-                            <span class="status-chip status-{{ request_obj.display_status_slug }}">{{ request_obj.display_status_label }}</span>
+                            <span class="status-chip status-{{ request_obj.history_display_status_slug }}">{{ request_obj.history_display_status_label }}</span>
                         </td>
                         <td>
                             <button class="items-btn history-items-btn" type="button" data-toggle-items aria-expanded="false">
@@ -128,7 +128,7 @@
                             </div>
                         </td>
                         <td class="cell-right">
-                            {% if request_obj.can_staff_edit %}
+                            {% if request_obj.history_can_open %}
                                 <a href="{% url 'store:request_edit' request_obj.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ghost">Open</a>
                             {% else %}
                                 <button type="button" class="btn btn-ghost" disabled>Locked</button>
@@ -174,7 +174,7 @@
                                     <div class="history-storekeeper">
                                         {% for entry in request_obj.storekeeper_history %}
                                             <div class="history-storekeeper-block">
-                                                <div class="history-storekeeper-label">Storekeeper Changes · {{ entry.label }}</div>
+                                                <div class="history-storekeeper-label">Storekeeper Changes Â· {{ entry.label }}</div>
                                                 {% for change in entry.changes %}
                                                     <div class="history-storekeeper-row">
                                                         <span class="history-item-name">{{ change.item_name }}</span>
