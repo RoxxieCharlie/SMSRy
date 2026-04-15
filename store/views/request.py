@@ -166,6 +166,11 @@ def _build_storekeeper_history(request_obj):
             if change.get("item_name") and change.get("old_qty") != change.get("new_qty")
         ]
         note = (metadata.get("store_comment") or metadata.get("reason") or "").strip()
+        if not note and activity.action == RequestActivity.Action.STORE_EDITED:
+            note = (request_obj.store_note or "").strip()
+        if not note and activity.action == RequestActivity.Action.FULFILLMENT_EDITED:
+            issuance = getattr(request_obj, "issuance", None)
+            note = (getattr(issuance, "comment", "") or "").strip()
         if not changes and not note:
             continue
         history.append(
@@ -831,7 +836,7 @@ def request_history_table(request):
     is_management = _is_in_group(request.user, "Management")
 
     base_qs = Request.objects.select_related(
-        "requester", "requester__department", "fulfilled_by", "requester__user"
+        "requester", "requester__department", "fulfilled_by", "requester__user", "issuance"
     ).prefetch_related("items__item", "activities").order_by("-updated_at", "-created_at")
 
     if not is_management:

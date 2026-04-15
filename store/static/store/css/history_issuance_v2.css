@@ -445,28 +445,45 @@ tbody tr:hover{
 .items-btn{
   display: inline-flex;
   align-items: center;
+  justify-content:center;
   gap: 10px;
-  padding: 7px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.08);
-  color: rgba(229,231,235,.92);
+  min-height:40px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(88,169,255,.28);
+  background:
+    linear-gradient(180deg, rgba(65,119,214,.20), rgba(30,67,132,.18)),
+    rgba(8,18,41,.52);
+  color: #e6f1ff;
   cursor: pointer;
   font-size: 12px;
-  font-weight: 650;
-  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+  font-weight: 700;
+  letter-spacing:.04em;
+  box-shadow:0 10px 26px rgba(4,12,30,.24);
+  transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
 
 .items-btn:hover{
-  background: rgba(76,195,255,0.12);
-  border-color: rgba(76,195,255,0.30);
+  background:
+    linear-gradient(180deg, rgba(74,136,235,.24), rgba(37,82,160,.20)),
+    rgba(8,18,41,.58);
+  border-color: rgba(109,180,255,.50);
   transform: translateY(-1px);
+  box-shadow:0 16px 32px rgba(10,24,58,.32), 0 0 0 1px rgba(109,180,255,.14);
 }
 
 .items-ic{
-  display:inline-block;
+  width:22px;
+  height:22px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
   transition: transform .18s ease;
-  opacity: .85;
+  opacity: .92;
+  font-size:11px;
 }
 
 .items-btn.is-open .items-ic{
