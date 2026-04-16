@@ -182,6 +182,29 @@ def _summarize_request_item_changes(changes, *, phase_label="before fulfillment"
     return f"Storekeeper {', '.join(parts[:-1])}, and {parts[-1]} {phase_label}."
 
 
+def _derive_storekeeper_fallback_changes(request_obj, *, label):
+    derived = []
+    for line in request_obj.items.select_related("item").all():
+        item_name = getattr(line.item, "name", f"Item {line.item_id}")
+        if label == "Before fulfillment":
+            old_qty = line.original_requested_qty or line.requested_qty
+            new_qty = line.requested_qty
+        else:
+            old_qty = line.requested_qty
+            new_qty = line.fulfilled_qty or 0
+
+        if old_qty != new_qty:
+            derived.append(
+                {
+                    "item_id": line.item_id,
+                    "item_name": item_name,
+                    "old_qty": old_qty,
+                    "new_qty": new_qty,
+                }
+            )
+    return derived
+
+
 def _build_storekeeper_history(request_obj, issuance_obj=None):
     history = []
     issuance = issuance_obj if issuance_obj is not None else _get_request_issuance(request_obj)
@@ -189,10 +212,13 @@ def _build_storekeeper_history(request_obj, issuance_obj=None):
         action__in=[RequestActivity.Action.STORE_EDITED, RequestActivity.Action.FULFILLMENT_EDITED]
     ).order_by("-created_at"):
         metadata = activity.metadata or {}
+        label = "Before fulfillment" if activity.action == RequestActivity.Action.STORE_EDITED else "After fulfillment"
         changes = [
             change for change in metadata.get("changes", [])
             if change.get("item_name") and change.get("old_qty") != change.get("new_qty")
         ]
+        if not changes:
+            changes = _derive_storekeeper_fallback_changes(request_obj, label=label)
         note = (metadata.get("store_comment") or metadata.get("reason") or "").strip()
         if not note and activity.action == RequestActivity.Action.STORE_EDITED:
             note = (request_obj.store_note or "").strip()
@@ -202,7 +228,7 @@ def _build_storekeeper_history(request_obj, issuance_obj=None):
             continue
         history.append(
             {
-                "label": "Before fulfillment" if activity.action == RequestActivity.Action.STORE_EDITED else "After fulfillment",
+                "label": label,
                 "changes": changes,
                 "note": note,
                 "time": activity.created_at,
@@ -215,7 +241,7 @@ def _build_storekeeper_history(request_obj, issuance_obj=None):
             history.append(
                 {
                     "label": "Before fulfillment",
-                    "changes": [],
+                    "changes": _derive_storekeeper_fallback_changes(request_obj, label="Before fulfillment"),
                     "note": pre_note,
                     "time": None,
                 }
@@ -224,7 +250,7 @@ def _build_storekeeper_history(request_obj, issuance_obj=None):
             history.append(
                 {
                     "label": "After fulfillment",
-                    "changes": [],
+                    "changes": _derive_storekeeper_fallback_changes(request_obj, label="After fulfillment"),
                     "note": post_note,
                     "time": None,
                 }
