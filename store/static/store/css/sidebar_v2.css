@@ -21,9 +21,10 @@
     font-size:14px;
   }
   .sidebar__footer{
-    padding:12px 6px 6px;
+    padding:8px 6px 0;
   }
   .logout-form .nav__link{
     justify-content:center;
+    min-height:44px;
   }
 }

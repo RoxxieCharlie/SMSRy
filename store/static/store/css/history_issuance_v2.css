@@ -182,6 +182,28 @@
   min-width: 180px;
 }
 
+.filter-date-field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width:180px;
+}
+
+.filter-date-field span{
+  font-size:11px;
+  line-height:1;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:rgba(229,231,235,.70);
+  font-weight:700;
+  padding-left:2px;
+}
+
+.filter-date-field input{
+  width:100%;
+  min-width:0;
+}
+
 .filter-bar input::placeholder{
   color: rgba(229,231,235,.55);
 }
@@ -409,6 +431,8 @@ tbody tr:hover{
     align-items:stretch;
   }
   .filter-bar input,
+  .filter-date-field,
+  .filter-date-field input,
   .filter-bar select,
   .filter-bar button,
   .btn-clear{
@@ -592,6 +616,7 @@ tbody tr:hover{
   display:grid;
   gap:8px;
   width:100%;
+  max-width:770px;
 }
 
 .history-storekeeper-block{

@@ -62,8 +62,14 @@ table th:nth-child(7),table td:nth-child(7){min-width:150px;line-height:1.35}
                 <option value="{{ dept.id }}" {% if department_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
                 {% endfor %}
             </select>
-            <input type="date" name="start" value="{{ start }}">
-            <input type="date" name="end" value="{{ end }}">
+            <label class="filter-date-field">
+                <span>Start date</span>
+                <input type="date" name="start" value="{{ start }}" aria-label="Start date">
+            </label>
+            <label class="filter-date-field">
+                <span>End date</span>
+                <input type="date" name="end" value="{{ end }}" aria-label="End date">
+            </label>
             {% if state %}<input type="hidden" name="state" value="{{ state }}">{% endif %}
             <button type="submit">Filter</button>
             {% if search_query or department_id or start or end or state %}
@@ -121,21 +127,21 @@ table th:nth-child(7),table td:nth-child(7){min-width:150px;line-height:1.35}
                                             <li class="item-chip"><span class="item-name">{{ line.item.name }}</span><span class="item-qty">{{ line.fulfilled_qty|default:0 }}</span></li>
                                             {% empty %}<li class="item-chip empty">No fulfilled items recorded.</li>{% endfor %}
                                         </ul>
-                                        {% if issuance.storekeeper_history %}
-                                        <div class="history-storekeeper">
-                                            {% for entry in issuance.storekeeper_history %}
-                                            <div class="history-storekeeper-block">
-                                                <div class="history-storekeeper-label">Storekeeper Changes · {{ entry.label }}</div>
-                                                {% for change in entry.changes %}
-                                                <div class="history-storekeeper-row"><span class="history-item-name">{{ change.item_name }}</span><span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span></div>
-                                                {% endfor %}
-                                                {% if entry.note %}<div class="history-storekeeper-note">Comment: {{ entry.note }}</div>{% endif %}
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                        {% endif %}
                                     </section>
                                 </div>
+                                {% if issuance.storekeeper_history %}
+                                <div class="history-storekeeper">
+                                    {% for entry in issuance.storekeeper_history %}
+                                    <div class="history-storekeeper-block">
+                                        <div class="history-storekeeper-label">Storekeeper Changes · {{ entry.label }}</div>
+                                        {% for change in entry.changes %}
+                                        <div class="history-storekeeper-row"><span class="history-item-name">{{ change.item_name }}</span><span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span></div>
+                                        {% endfor %}
+                                        {% if entry.note %}<div class="history-storekeeper-note">Comment: {{ entry.note }}</div>{% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                                 {% else %}
                                 <section class="history-items-section">
                                     <h3>Issued Items</h3>
