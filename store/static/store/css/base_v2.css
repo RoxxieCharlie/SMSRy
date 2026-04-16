@@ -491,9 +491,9 @@ body.ui::before{
   }
   .sidebar__footer{
     position:sticky;
-    bottom:10px;
-    margin:0 6px 10px;
-    padding:10px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+    bottom:22px;
+    margin:0 8px 18px;
+    padding:8px 6px calc(4px + env(safe-area-inset-bottom, 0px));
     background:linear-gradient(180deg,rgba(2,6,23,.2),rgba(2,6,23,.96) 30%);
     backdrop-filter:blur(10px);
     -webkit-backdrop-filter:blur(10px);

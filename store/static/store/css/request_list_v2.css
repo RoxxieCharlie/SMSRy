@@ -132,3 +132,23 @@
   .history-items-detail-grid{grid-template-columns:1fr}
   .history-items-section{max-width:none}
 }
+
+@media (max-width:720px){
+  .item-chip{
+    justify-content:flex-start;
+    gap:8px;
+    padding:10px 11px;
+  }
+  .item-name{
+    flex:0 1 auto;
+  }
+  .item-qty{
+    min-width:30px;
+    padding:4px 8px;
+    margin-left:0;
+  }
+  .history-storekeeper-row{
+    justify-content:flex-start;
+    gap:8px;
+  }
+}
