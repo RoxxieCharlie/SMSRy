@@ -570,12 +570,13 @@ tbody tr:hover{
 .history-items-detail-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:14px;
+  gap:10px;
   align-items:start;
+  justify-content:start;
 }
 
 .history-items-section{
-  max-width:420px;
+  max-width:380px;
 }
 
 .history-items-section h3{
@@ -587,9 +588,10 @@ tbody tr:hover{
 }
 
 .history-storekeeper{
-  margin-top:10px;
+  margin-top:12px;
   display:grid;
   gap:8px;
+  width:100%;
 }
 
 .history-storekeeper-block{
@@ -597,6 +599,7 @@ tbody tr:hover{
   border-radius:12px;
   background:rgba(8,18,41,.4);
   border:1px solid rgba(137,166,218,.14);
+  max-width:100%;
 }
 
 .history-storekeeper-label{

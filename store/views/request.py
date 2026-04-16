@@ -891,28 +891,52 @@ def request_history_table(request):
     if status:
         requests_qs = requests_qs.filter(status=status)
 
-    requests_list = list(requests_qs)
-    for request_obj in requests_list:
-        request_obj.storekeeper_history = _build_storekeeper_history(request_obj, _get_request_issuance(request_obj))
-        request_obj.history_requester_staff_id = getattr(request_obj.requester, "staff_id", "-") or "-"
+    history_rows = []
+    for request_obj in requests_qs:
+        issuance = _get_request_issuance(request_obj)
+        requested_items = []
+        fulfilled_items = []
+        for line in request_obj.items.all():
+            item_name = getattr(getattr(line, "item", None), "name", "Unknown item")
+            requested_items.append({"name": item_name, "qty": line.requested_qty})
+            fulfilled_items.append({"name": item_name, "qty": line.fulfilled_qty or 0})
+
         try:
-            request_obj.history_display_status_slug = request_obj.display_status_slug
+            status_slug = request_obj.display_status_slug
         except Exception:
-            request_obj.history_display_status_slug = request_obj.status or "draft"
+            status_slug = request_obj.status or "draft"
+
         try:
-            request_obj.history_display_status_label = request_obj.display_status_label
+            status_label = request_obj.display_status_label
         except Exception:
-            request_obj.history_display_status_label = request_obj.get_status_display()
+            status_label = request_obj.get_status_display()
+
         try:
-            request_obj.history_can_open = bool(request_obj.can_staff_edit)
+            can_open = (not is_management) and bool(request_obj.can_staff_edit)
         except Exception:
-            request_obj.history_can_open = False
+            can_open = False
+
+        history_rows.append(
+            {
+                "id": request_obj.id,
+                "requester_staff_id": getattr(request_obj.requester, "staff_id", "-") or "-",
+                "purpose": request_obj.purpose or "-",
+                "status_slug": status_slug,
+                "status_label": status_label,
+                "created_at": request_obj.created_at,
+                "updated_at": request_obj.updated_at,
+                "can_open": can_open,
+                "requested_items": requested_items,
+                "fulfilled_items": fulfilled_items,
+                "storekeeper_history": _build_storekeeper_history(request_obj, issuance),
+            }
+        )
 
     return render(
         request,
         "store/requests/request_history.html",
         {
-            "requests": requests_list,
+            "history_rows": history_rows,
             "selected_status": status,
             "status_choices": Request.Status.choices,
             "total_count": base_qs.count(),
