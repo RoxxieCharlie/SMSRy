@@ -108,6 +108,27 @@ def _serialize_fulfillment_items(request_obj):
     ]
 
 
+def _add_form_errors_to_messages(request, form_or_formset):
+    errors = getattr(form_or_formset, "errors", None)
+    if errors:
+        if isinstance(errors, dict):
+            for error_list in errors.values():
+                for err in error_list:
+                    messages.error(request, err)
+        else:
+            for form_errors in errors:
+                if not isinstance(form_errors, dict):
+                    continue
+                for error_list in form_errors.values():
+                    for err in error_list:
+                        messages.error(request, err)
+
+    non_form_errors = getattr(form_or_formset, "non_form_errors", None)
+    if callable(non_form_errors):
+        for err in non_form_errors():
+            messages.error(request, err)
+
+
 def _recent_activity_for_requester(staff, *, request_obj=None, limit=8):
     qs = RequestActivity.objects.select_related("actor", "request")
     if request_obj is not None:
@@ -735,6 +756,8 @@ def request_fulfill(request, request_id):
             else:
                 messages.success(request, f"Request #{request_obj.id} fulfilled successfully.")
                 return redirect("store:request_edit", request_id=request_obj.id)
+        else:
+            _add_form_errors_to_messages(request, formset)
     else:
         formset = FulfillmentFormSet(
             prefix="lines",
@@ -800,15 +823,8 @@ def request_edit_issuance(request, request_id):
                 messages.success(request, f"Fulfillment for Request #{request_obj.id} updated.")
                 return redirect("store:request_edit", request_id=request_obj.id)
         else:
-            for form_errors in formset.errors:
-                for field_name, error_list in form_errors.items():
-                    for err in error_list:
-                        messages.error(request, err)
-            for err in formset.non_form_errors():
-                messages.error(request, err)
-            for field_name, error_list in reason_form.errors.items():
-                for err in error_list:
-                    messages.error(request, err)
+            _add_form_errors_to_messages(request, formset)
+            _add_form_errors_to_messages(request, reason_form)
     else:
         initial_lines = [
             {
