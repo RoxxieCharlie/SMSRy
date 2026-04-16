@@ -174,15 +174,22 @@
                                     <div class="history-storekeeper">
                                         {% for entry in request_obj.storekeeper_history %}
                                             <div class="history-storekeeper-block">
-                                                <div class="history-storekeeper-label">Storekeeper Changes Â· {{ entry.label }}</div>
-                                                {% for change in entry.changes %}
+                                                <div class="history-storekeeper-label">Storekeeper Changes · {{ entry.label }}</div>
+                                                {% if entry.changes %}
+                                                    {% for change in entry.changes %}
+                                                        <div class="history-storekeeper-row">
+                                                            <span class="history-item-name">{{ change.item_name }}</span>
+                                                            <span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span>
+                                                        </div>
+                                                    {% endfor %}
+                                                {% else %}
                                                     <div class="history-storekeeper-row">
-                                                        <span class="history-item-name">{{ change.item_name }}</span>
-                                                        <span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span>
+                                                        <span class="history-item-name">No quantity change recorded.</span>
+                                                        <span class="history-item-qty">Comment only</span>
                                                     </div>
-                                                {% endfor %}
+                                                {% endif %}
                                                 {% if entry.note %}
-                                                    <div class="history-storekeeper-note">Comment: {{ entry.note }}</div>
+                                                    <div class="history-storekeeper-note"><strong>Storekeeper Comment:</strong> {{ entry.note }}</div>
                                                 {% endif %}
                                             </div>
                                         {% endfor %}
@@ -211,4 +218,5 @@
 {% block extra_js %}
 <script src="{% static 'store/js/history_issuance_v2.js' %}"></script>
 {% endblock %}
+
 

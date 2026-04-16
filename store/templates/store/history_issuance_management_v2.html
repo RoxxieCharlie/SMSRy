@@ -93,7 +93,7 @@ table th:nth-child(7),table td:nth-child(7){min-width:150px;line-height:1.35}
                         <td>{{ issuance.staff.name }}</td>
                         <td>{{ issuance.staff.department.name|default:"-" }}</td>
                         <td>{{ issuance.issued_by.username }}</td>
-                        <td><button class="items-btn" type="button" data-toggle-items aria-expanded="false"><span class="items-ic">&gt;</span><span>View Items</span></button></td>
+                        <td><button class="items-btn history-items-btn" type="button" data-toggle-items aria-expanded="false"><span class="items-ic">&gt;</span><span>View Items</span></button></td>
                         <td>{% if issuance.request_id %}{{ issuance.request.purpose|default:"-" }}{% else %}{{ issuance.comment|default:"-" }}{% endif %}</td>
                         <td class="status-action">{% if issuance.is_reversed %}<span class="status reversed">Reversed</span>{% elif issuance.is_edited_ui %}<span class="status editable">Edited</span>{% elif issuance.can_reverse_ui %}<span class="status editable">Editable Window</span>{% else %}<span class="status locked">Locked</span>{% endif %}</td>
                     </tr>
@@ -127,9 +127,9 @@ table th:nth-child(7),table td:nth-child(7){min-width:150px;line-height:1.35}
                                 <div class="history-storekeeper">
                                     {% for entry in issuance.storekeeper_history %}
                                     <div class="history-storekeeper-block">
-                                        <div class="history-storekeeper-label">Storekeeper Changes - {{ entry.label }}</div>
+                                        <div class="history-storekeeper-label">Storekeeper Changes · {{ entry.label }}</div>
                                         {% for change in entry.changes %}
-                                        <div class="history-storekeeper-row"><span class="history-item-name">{{ change.item_name }}</span><span class="history-item-qty">{{ change.old_qty }} -&gt; {{ change.new_qty }}</span></div>
+                                        <div class="history-storekeeper-row"><span class="history-item-name">{{ change.item_name }}</span><span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span></div>
                                         {% endfor %}
                                         {% if entry.note %}<div class="history-storekeeper-note">Comment: {{ entry.note }}</div>{% endif %}
                                     </div>
