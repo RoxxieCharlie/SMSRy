@@ -66,6 +66,8 @@ body.ui::before{
 ========================= */
 .layout{
   min-height: 100vh;
+  width:100%;
+  overflow-x:hidden;
 }
 
 .mobile-shell,
@@ -102,6 +104,14 @@ body.ui::before{
   margin-left: var(--sidebar-w);
   min-height: 100vh;
   padding: 20px 22px 28px;
+  width:calc(100% - var(--sidebar-w));
+  min-width:0;
+  overflow-x:hidden;
+}
+
+.main > *{
+  min-width:0;
+  max-width:100%;
 }
 
 /* Center content width (optional) */
@@ -393,12 +403,14 @@ body.ui::before{
     z-index:1200;
     display:flex;
     align-items:center;
-    gap:12px;
-    padding:12px 14px;
+    gap:14px;
+    min-height:67px;
+    padding:12px 14px calc(12px + env(safe-area-inset-top, 0px));
     background:rgba(2,6,23,.92);
     border-bottom:1px solid rgba(255,255,255,.10);
     backdrop-filter:blur(16px);
     -webkit-backdrop-filter:blur(16px);
+    box-shadow:0 10px 28px rgba(0,0,0,.18);
   }
   .mobile-shell__toggle{
     width:42px;
@@ -407,10 +419,11 @@ body.ui::before{
     place-items:center;
     gap:4px;
     padding:0;
-    border-radius:12px;
+    border-radius:14px;
     border:1px solid rgba(255,255,255,.12);
     background:rgba(255,255,255,.06);
     cursor:pointer;
+    box-shadow:0 12px 26px rgba(0,0,0,.18);
   }
   .mobile-shell__toggle span{
     width:18px;
@@ -423,6 +436,7 @@ body.ui::before{
     font-size:18px;
     font-weight:900;
     letter-spacing:.04em;
+    min-width:0;
   }
   .mobile-overlay{
     position:fixed;
@@ -439,7 +453,7 @@ body.ui::before{
     top:67px;
     left:0;
     bottom:0;
-    width:min(290px,86vw);
+    width:min(300px,84vw);
     height:auto;
     border-right:1px solid rgba(255,255,255,.10);
     border-bottom:none;
@@ -447,13 +461,14 @@ body.ui::before{
     transition:transform .2s ease;
     box-shadow:0 24px 70px rgba(0,0,0,.45);
     z-index:1100;
-    padding-bottom:18px;
+    padding:12px 8px 14px;
   }
   body.ui.nav-open .sidebar{
     transform:translateX(0);
   }
   .main{
     margin-left: 0;
+    width:100%;
     padding: 18px 14px 22px;
   }
   .page{
@@ -461,15 +476,18 @@ body.ui::before{
   }
   .nav{
     overflow-y:auto;
-    padding-right:0;
-    padding-bottom:88px;
+    padding:0 4px 88px;
+    gap:6px;
   }
   .nav__section{
-    margin-top:10px;
+    margin:10px 6px 4px;
+    padding:6px 10px;
   }
   .nav__link{
-    padding:10px 12px;
+    padding:12px 14px;
     font-size:14px;
+    border-radius:16px;
+    min-height:48px;
   }
   .sidebar__footer{
     position:sticky;

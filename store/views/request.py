@@ -108,6 +108,12 @@ def _serialize_fulfillment_items(request_obj):
     ]
 
 
+def _get_request_issuance(request_obj):
+    if hasattr(request_obj, "issuance"):
+        return request_obj.issuance
+    return None
+
+
 def _add_form_errors_to_messages(request, form_or_formset):
     errors = getattr(form_or_formset, "errors", None)
     if errors:
@@ -178,7 +184,7 @@ def _summarize_request_item_changes(changes, *, phase_label="before fulfillment"
 
 def _build_storekeeper_history(request_obj, issuance_obj=None):
     history = []
-    issuance = issuance_obj if issuance_obj is not None else getattr(request_obj, "issuance", None)
+    issuance = issuance_obj if issuance_obj is not None else _get_request_issuance(request_obj)
     for activity in request_obj.activities.filter(
         action__in=[RequestActivity.Action.STORE_EDITED, RequestActivity.Action.FULFILLMENT_EDITED]
     ).order_by("-created_at"):
@@ -887,7 +893,7 @@ def request_history_table(request):
 
     requests_list = list(requests_qs)
     for request_obj in requests_list:
-        request_obj.storekeeper_history = _build_storekeeper_history(request_obj, getattr(request_obj, "issuance", None))
+        request_obj.storekeeper_history = _build_storekeeper_history(request_obj, _get_request_issuance(request_obj))
         request_obj.history_requester_staff_id = getattr(request_obj.requester, "staff_id", "-") or "-"
         try:
             request_obj.history_display_status_slug = request_obj.display_status_slug

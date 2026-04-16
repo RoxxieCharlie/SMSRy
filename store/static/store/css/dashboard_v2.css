@@ -54,6 +54,7 @@ body.ui::before{
   max-width: none;
   margin: 0;
   min-width: 0;
+  overflow-x:hidden;
 }
 
 /* topbar */
@@ -256,6 +257,7 @@ body.ui::before{
   grid-template-columns: 1.25fr .75fr;
   gap: 18px;
   align-items: start;
+  min-width:0;
 }
 
 .panel{
@@ -410,6 +412,14 @@ max-height: 500px;
 }
 
 @media (max-width: 860px){
+  .page,
+  .topbar,
+  .topbar__right,
+  .search,
+  .grid,
+  .panel{
+    min-width:0;
+  }
   .search{
     max-width: 100%;
     min-width: 0;
@@ -421,6 +431,9 @@ max-height: 500px;
 }
 
 @media (max-width: 640px){
+  .page{
+    overflow-x:hidden;
+  }
   .kpis{
     grid-template-columns: 1fr;
   }
