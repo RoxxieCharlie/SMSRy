@@ -13,7 +13,7 @@
   .brand__name{font-size:20px}
   .nav{
     gap:6px;
-    padding:0 4px 88px;
+    padding:0 4px 126px;
     overflow-y:auto;
   }
   .nav__section{
@@ -32,8 +32,8 @@
   }
   .sidebar__footer{
     position:sticky;
-    bottom:22px;
-    margin:0 8px 18px;
+    bottom:42px;
+    margin:0 8px 28px;
     padding:8px 6px calc(4px + env(safe-area-inset-bottom, 0px));
     background:linear-gradient(180deg,rgba(2,6,23,.2),rgba(2,6,23,.96) 30%);
     backdrop-filter:blur(10px);
