@@ -476,7 +476,7 @@ body.ui::before{
   }
   .nav{
     overflow-y:auto;
-    padding:0 4px 126px;
+    padding:0 4px 158px;
     gap:6px;
   }
   .nav__section{
@@ -491,8 +491,8 @@ body.ui::before{
   }
   .sidebar__footer{
     position:sticky;
-    bottom:42px;
-    margin:0 8px 28px;
+    bottom:68px;
+    margin:0 8px 40px;
     padding:8px 6px calc(4px + env(safe-area-inset-bottom, 0px));
     background:linear-gradient(180deg,rgba(2,6,23,.2),rgba(2,6,23,.96) 30%);
     backdrop-filter:blur(10px);
