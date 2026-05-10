@@ -39,11 +39,13 @@ def history_stockin(request):
 
     return render(
         request,
-        "store/history_stockin_store_v2.html",
+        "store/history_stockin_v2.html",
         {
             "page_obj": page_obj,
             "page_range": page_range,
             "q": q,
             "item_id": int(item_id) if item_id.isdigit() else "",
+            "base_template": "store/base_v2.html",
+            "clear_url_name": "store:history_stockin_store_v2",
         }
     )

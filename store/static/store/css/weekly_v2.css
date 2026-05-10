@@ -1,5 +1,7 @@
 /* static/store/css/weekly_v2.css */
 
+@import "tokens.css";
+
 .weekly{
   max-width: 1120px;
   margin: 0 auto;
@@ -36,7 +38,7 @@
 .weekly__range{
   text-align:right;
   padding: 10px 12px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.06);
 }
@@ -65,7 +67,7 @@
 
 .wkpi{
   padding: 14px 14px;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(255,255,255,.12);
   background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
   box-shadow: 0 18px 60px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.04) inset;
@@ -123,7 +125,7 @@
 .panel{
   background: linear-gradient(180deg, rgba(255,255,255,.080), rgba(255,255,255,.040));
   border: 1px solid rgba(255,255,255,.12);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   box-shadow: 0 18px 60px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.04) inset;
   overflow:hidden;
   margin-bottom: 18px;
@@ -164,7 +166,7 @@
   min-width: 860px;
   overflow:hidden;
   border: 1px solid rgba(255,255,255,.08);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 }
 
 .tbl thead th{
@@ -218,7 +220,7 @@
   color: rgba(234,240,255,.58);
   background: rgba(0,0,0,.10);
   border: 1px solid rgba(255,255,255,.06);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 }
 
 /* % pill */

@@ -1,14 +1,16 @@
+@import "tokens.css";
+
 :root {
-  --bg: #01040c;
-  --bg-2: #06101f;
-  --panel: rgba(3, 9, 20, 0.88);
+  /* Landing-specific overrides — standalone page, not using app body.ui */
+  --bg:      #01040c;
+  --bg-2:    #06101f;
+  --panel:   rgba(3, 9, 20, 0.88);
   --panel-2: rgba(7, 18, 34, 0.82);
-  --line: rgba(104, 146, 194, 0.22);
-  --text: #eef6ff;
-  --muted: #a7b9ce;
-  --blue: #4ea5ff;
-  --green: #46d3a0;
-  --amber: #f7b955;
+  --line:    rgba(104, 146, 194, 0.22);
+  --text:    #eef6ff;
+  --muted:   #a7b9ce;
+  /* --blue uses tokens.css value (#4ea5ff — identical) */
+  --amber:   #f7b955;  /* landing amber is more orange than app amber */
 }
 
 * { box-sizing: border-box; }
@@ -62,7 +64,7 @@ body.landing-ui {
   height: 42px;
   display: grid;
   place-items: center;
-  border-radius: 15px;
+  border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--blue), #1b5cff);
   box-shadow: 0 18px 42px rgba(78, 165, 255, 0.26);
 }
@@ -97,7 +99,7 @@ body.landing-ui {
   justify-content: center;
   min-height: 44px;
   padding: 0 18px;
-  border-radius: 15px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--line);
   font-weight: 900;
 }
@@ -169,7 +171,7 @@ body.landing-ui {
   text-align: center;
   padding: 34px;
   border: 1px solid var(--line);
-  border-radius: 36px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   background:
     radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.08), transparent 20%),
@@ -232,7 +234,7 @@ body.landing-ui {
 
 .landing-stats article {
   padding: 18px;
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
 }
 
 .landing-stats strong,
@@ -271,7 +273,7 @@ body.landing-ui {
 .landing-cards article {
   min-height: 190px;
   padding: 22px;
-  border-radius: 24px;
+  border-radius: var(--radius-lg);
 }
 
 .landing-cards span,
@@ -302,7 +304,7 @@ body.landing-ui {
 
 .landing-steps article {
   padding: 18px;
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
 }
 
 .landing-steps span {
@@ -310,7 +312,7 @@ body.landing-ui {
   height: 34px;
   display: grid;
   place-items: center;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   color: #06101f;
   background: var(--green);
 }
@@ -327,7 +329,7 @@ body.landing-ui {
   gap: 24px;
   margin-top: 42px;
   padding: 28px;
-  border-radius: 28px;
+  border-radius: var(--radius-lg);
 }
 
 .landing-control span {

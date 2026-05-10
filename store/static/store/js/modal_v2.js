@@ -15,11 +15,12 @@
   let activeType = "info";
   let redirectUrl = "";
 
+  const _ico = (path) => `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
   const typeConfig = {
-    success: { className: "is-success", title: "Success", subtitle: "Action completed successfully.", icon: "OK" },
-    error: { className: "is-error", title: "Error", subtitle: "Please review and correct the issue.", icon: "!" },
-    warning: { className: "is-error", title: "Warning", subtitle: "Action requires attention.", icon: "!" },
-    info: { className: "", title: "Notice", subtitle: "", icon: "i" },
+    success: { className: "is-success", title: "Success", subtitle: "Action completed successfully.", icon: _ico('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>') },
+    error:   { className: "is-error",   title: "Error",   subtitle: "Please review and correct the issue.", icon: _ico('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>') },
+    warning: { className: "is-error",   title: "Warning", subtitle: "Action requires attention.", icon: _ico('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>') },
+    info:    { className: "",            title: "Notice",  subtitle: "", icon: _ico('<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>') },
   };
 
   function normalizeType(tags) {
@@ -37,7 +38,7 @@
     if (cfg.className) modal.classList.add(cfg.className);
     if (titleEl) titleEl.textContent = cfg.title;
     if (subtitleEl) subtitleEl.textContent = cfg.subtitle;
-    if (iconEl) iconEl.textContent = cfg.icon;
+    if (iconEl) iconEl.innerHTML = cfg.icon;
   }
 
   function showModal(message, type) {

@@ -1,13 +1,4 @@
-:root{
-  --panel: rgba(255,255,255,.06);
-  --border: rgba(255,255,255,.12);
-  --text:#e5e7eb;
-  --muted:#94a3b8;
-
-  --accent:#38bdf8;
-  --good:#22c55e;
-  --bad:#ef4444;
-}
+@import "tokens.css";
 
 .page{ padding: 28px 28px 40px; color: var(--text); }
 
@@ -21,23 +12,23 @@
 .user-chip{
   display:flex; align-items:center; gap:12px;
   padding:10px 12px;
-  border:1px solid var(--border);
+  border:1px solid var(--stroke);
   background: rgba(255,255,255,.04);
-  border-radius:14px;
+  border-radius:var(--radius-md);
   backdrop-filter: blur(10px);
 }
 .user-chip .hello{ font-weight:600; }
 .avatar{
   width:36px; height:36px;
   border-radius:999px;
-  border:1px solid var(--border);
+  border:1px solid var(--stroke);
   object-fit: cover;
 }
 .caret{ background:transparent; border:0; color:var(--muted); cursor:pointer; font-size:18px; }
 
 .card{
-  border-radius:22px;
-  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  border:1px solid var(--stroke);
   background: var(--panel);
   box-shadow: 0 18px 60px rgba(0,0,0,.35);
   overflow:hidden;
@@ -65,7 +56,7 @@ form{ padding: 18px 22px 22px; }
 .field input[type="file"]{
   width:100%;
   padding:12px 14px;
-  border-radius:14px;
+  border-radius:var(--radius-md);
   border:1px solid rgba(255,255,255,.10);
   background: rgba(2,6,23,.35);
   color: var(--text);
@@ -101,7 +92,7 @@ form{ padding: 18px 22px 22px; }
 
 .table-wrap{
   border:1px solid rgba(255,255,255,.10);
-  border-radius:18px;
+  border-radius:var(--radius-md);
   padding:14px;
   background: rgba(255,255,255,.03);
 }
@@ -124,7 +115,7 @@ form{ padding: 18px 22px 22px; }
   gap:12px;
   align-items:center;
   padding:10px 12px;
-  border-radius:16px;
+  border-radius:var(--radius-md);
   border:1px solid rgba(255,255,255,.08);
   background: rgba(2,6,23,.28);
 }
@@ -139,7 +130,7 @@ form{ padding: 18px 22px 22px; }
 .item-select{
   width:100%;
   padding:12px 14px 12px 34px;
-  border-radius:14px;
+  border-radius:var(--radius-md);
   border:1px solid rgba(255,255,255,.10);
   background: rgba(2,6,23,.35);
   color: var(--text);
@@ -148,7 +139,7 @@ form{ padding: 18px 22px 22px; }
 .stepper{
   display:flex; align-items:center;
   border:1px solid rgba(255,255,255,.10);
-  border-radius:14px;
+  border-radius:var(--radius-md);
   overflow:hidden;
   background: rgba(2,6,23,.35);
 }
@@ -194,7 +185,7 @@ form{ padding: 18px 22px 22px; }
 
 .trash{
   width:42px; height:42px;
-  border-radius:14px;
+  border-radius:var(--radius-md);
   border:1px solid rgba(239,68,68,.25);
   background: rgba(239,68,68,.10);
   color: rgba(255,255,255,.92);
@@ -214,7 +205,7 @@ form{ padding: 18px 22px 22px; }
   background: rgba(255,255,255,.06);
   color: var(--text);
   padding:12px 16px;
-  border-radius:14px;
+  border-radius:var(--radius-md);
   cursor:pointer;
   display:inline-flex;
   align-items:center;
@@ -255,7 +246,7 @@ form{ padding: 18px 22px 22px; }
   border: 1px solid rgba(255,255,255,.12);
   color: rgba(255,255,255,.9);
   padding: 8px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
   opacity: 0;
   pointer-events:none;
@@ -322,7 +313,7 @@ form{ padding: 18px 22px 22px; }
   justify-content: space-between;
   gap: 12px;
   padding: 12px 12px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: rgba(15, 23, 42, .88);
   border: 1px solid rgba(255,255,255,.12);
   backdrop-filter: blur(10px);
@@ -355,7 +346,7 @@ form{ padding: 18px 22px 22px; }
   color: rgba(255,255,255,.8);
   cursor: pointer;
   padding: 6px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }
 
 .toast.success{ border-color: rgba(54, 211, 153, .35); }
@@ -366,7 +357,7 @@ form{ padding: 18px 22px 22px; }
   background: rgba(255,255,255,0.06);
   color: rgba(255,255,255,0.9);
   border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 10px 14px;
 }
 

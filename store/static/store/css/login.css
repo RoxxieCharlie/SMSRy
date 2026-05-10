@@ -1,13 +1,15 @@
+@import "tokens.css";
+
 :root {
-  --login-bg: #07111f;
-  --login-bg-2: #0d1f35;
-  --login-panel: rgba(8, 18, 34, 0.86);
+  /* Login-specific tokens — standalone page, not using app body.ui */
+  --login-bg:      #07111f;
+  --login-bg-2:    #0d1f35;
+  --login-panel:   rgba(8, 18, 34, 0.86);
   --login-panel-2: rgba(14, 33, 56, 0.82);
-  --login-line: rgba(148, 190, 232, 0.22);
-  --login-text: #eef6ff;
-  --login-muted: #a8bad0;
-  --login-blue: #4ea5ff;
-  --login-green: #46d3a0;
+  --login-line:    rgba(148, 190, 232, 0.22);
+  --login-text:    #eef6ff;
+  --login-muted:   #a8bad0;
+  /* --blue uses tokens.css value (#4ea5ff — identical to old --login-blue) */
 }
 
 * {
@@ -46,7 +48,7 @@ body.login-ui {
   position: relative;
   padding: 34px;
   border: 1px solid var(--login-line);
-  border-radius: 28px;
+  border-radius: var(--radius-lg);
   background: linear-gradient(180deg, var(--login-panel), rgba(8, 18, 34, 0.72));
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
 }
@@ -63,8 +65,8 @@ body.login-ui {
   height: 48px;
   display: grid;
   place-items: center;
-  border-radius: 16px;
-  background: linear-gradient(135deg, var(--login-blue), #1b5cff);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--blue), #1b5cff);
   color: #fff;
   font-weight: 950;
   box-shadow: 0 18px 42px rgba(78, 165, 255, 0.28);
@@ -108,7 +110,7 @@ body.login-ui {
   width: 100%;
   min-height: 50px;
   border: 1px solid var(--login-line);
-  border-radius: 15px;
+  border-radius: var(--radius-md);
   outline: none;
   padding: 0 15px;
   color: var(--login-text);
@@ -129,7 +131,7 @@ body.login-ui {
 .login-password button {
   min-width: 72px;
   border: 1px solid var(--login-line);
-  border-radius: 15px;
+  border-radius: var(--radius-md);
   color: var(--login-text);
   background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
@@ -138,7 +140,7 @@ body.login-ui {
 .login-error {
   padding: 12px 14px;
   border: 1px solid rgba(248, 113, 113, 0.36);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   color: #ffd6d6;
   background: rgba(127, 29, 29, 0.28);
 }
@@ -146,9 +148,9 @@ body.login-ui {
 .login-button {
   min-height: 54px;
   border: 0;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   color: #fff;
-  background: linear-gradient(135deg, var(--login-blue), #2377ff);
+  background: linear-gradient(135deg, var(--blue), #2377ff);
   font-size: 16px;
   font-weight: 950;
   cursor: pointer;
@@ -186,7 +188,7 @@ body.login-ui {
   padding: 30px;
   text-align: center;
   border: 1px solid var(--login-line);
-  border-radius: 28px;
+  border-radius: var(--radius-lg);
   background: linear-gradient(180deg, var(--login-panel-2), rgba(8, 18, 34, 0.76));
   box-shadow: 0 35px 100px rgba(0, 0, 0, 0.36);
 }

@@ -4,125 +4,191 @@
 {% block title %}Staff Dashboard - SMS{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'store/css/issue_item_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/dashboard_v2.css' %}">
 <link rel="stylesheet" href="{% static 'store/css/staff_dashboard_v2.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="staff-page" data-live-root="staff-dashboard" data-live-topics="requests,activity,dashboard">
-    <header class="staff-topbar glass">
+<div class="page" data-live-root="staff-dashboard" data-live-topics="requests,activity,dashboard">
+
+    <header class="topbar">
         <div>
-            <p class="staff-kicker">Smart Management Solution</p>
-            <h1 class="staff-title">Staff Dashboard</h1>
-            <p class="staff-subtitle">Welcome, {{ display_name }}. Manage your requests and track status.</p>
+            <p class="staff-pg-kicker">Smart Management Solution</p>
+            <h1 class="staff-pg-title">Staff Dashboard</h1>
         </div>
-        <a href="{% url 'store:request_create' %}" class="btn btn-primary">New Request</a>
+        <div class="topbar__right">
+            <div class="hello">Hello, {{ display_name }}</div>
+            <a href="{% url 'store:request_create' %}" class="btn-new">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                New Request
+            </a>
+        </div>
     </header>
 
-    <section class="summary-panels">
-        <article class="panel glass summary-panel overview-panel">
-            <div class="panel-head panel-head-stack">
+    <section class="kpis">
+
+        <a class="card card--blue {% if selected_filter == 'all' %}is-active{% endif %}" href="?kpi=all">
+            <div class="card__left">
+                <div class="card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
                 <div>
-                    <p class="panel-kicker">Workspace Health</p>
-                    <h2>Request Overview</h2>
-                </div>
-                <a href="{% url 'store:request_list' %}" class="panel-link">Open requests</a>
-            </div>
-            <div class="summary-metrics summary-metrics-3up dashboard-kpis">
-                <a class="kpi-link" href="{% url 'store:dashboard_staff_v2' %}?kpi=all">
-                    <article class="summary-metric tone-total {% if selected_filter == 'all' %}is-active{% endif %}">
-                        <span class="summary-label">Total Requests</span>
-                        <strong class="summary-value">{{ total_requests }}</strong>
-                        <span class="summary-foot">All recorded requests</span>
-                    </article>
-                </a>
-                <a class="kpi-link" href="{% url 'store:dashboard_staff_v2' %}?kpi=open">
-                    <article class="summary-metric tone-open {% if selected_filter == 'open' %}is-active{% endif %}">
-                        <span class="summary-label">Open Requests</span>
-                        <strong class="summary-value">{{ open_requests }}</strong>
-                        <span class="summary-foot">Draft or submitted</span>
-                    </article>
-                </a>
-                <a class="kpi-link" href="{% url 'store:dashboard_staff_v2' %}?kpi=archived">
-                    <article class="summary-metric tone-archive {% if selected_filter == 'archived' %}is-active{% endif %}">
-                        <span class="summary-label">Archived Requests</span>
-                        <strong class="summary-value">{{ archived_requests }}</strong>
-                        <span class="summary-foot">Fulfilled or locked</span>
-                    </article>
-                </a>
-            </div>
-            <div class="overview-results">
-                <div class="panel-head overview-results-head">
-                    <h3>Filtered Requests{% if selected_filter == 'open' %} - Open{% elif selected_filter == 'archived' %} - Archived{% endif %}</h3>
-                    <a href="{% url 'store:request_list' %}" class="panel-link">View all</a>
-                </div>
-                <div class="table-wrap request-table-wrap">
-                    <table class="rq-table request-table">
-                        <thead>
-                            <tr>
-                                <th>Request</th>
-                                <th>Status</th>
-                                <th>Purpose</th>
-                                <th>Updated</th>
-                                <th class="cell-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for req in recent_requests %}
-                            <tr>
-                                <td>
-                                    <div class="request-id-cell">
-                                        <strong>#{{ req.id }}</strong>
-                                        <span>{{ req.created_at|date:"d M Y" }}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="status-chip status-{{ req.display_status_slug }}">{{ req.display_status_label }}</span>
-                                    {% if req.status == 'submitted' and req.needs_resubmission %}
-                                        <span class="resubmit-badge">Resubmission Required</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div class="request-purpose-cell">{{ req.purpose|default:"No purpose provided." }}</div>
-                                </td>
-                                <td>
-                                    <div class="request-date-cell">
-                                        <strong>{{ req.updated_at|date:"d M Y" }}</strong>
-                                        <span>{{ req.updated_at|date:"H:i" }}</span>
-                                    </div>
-                                </td>
-                                <td class="cell-right"><a href="{% url 'store:request_edit' req.id %}" class="btn btn-ghost">Open</a></td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="5">No requests yet.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="card__title">Total Requests</div>
+                    <div class="card__value">{{ total_requests|default:"0" }}</div>
+                    <div class="card__meta">All recorded requests</div>
                 </div>
             </div>
-        </article>
+            <div class="card__hint">View all -></div>
+        </a>
 
-        <aside class="panel panel-side glass panel-side-full">
-            <div class="panel-head">
-                <h2>Recent Activity</h2>
+        <a class="card card--green {% if selected_filter == 'open' %}is-active{% endif %}" href="?kpi=open">
+            <div class="card__left">
+                <div class="card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div>
+                    <div class="card__title">Open Requests</div>
+                    <div class="card__value">{{ open_requests|default:"0" }}</div>
+                    <div class="card__meta">Draft or submitted</div>
+                </div>
             </div>
+            <div class="card__hint">Filter -></div>
+        </a>
 
-            <ul class="activity-list">
-                {% for activity in recent_request_activity %}
-                <li class="activity-item">
-                    <span class="activity-dot"></span>
-                    <div>
-                        <p class="activity-title">Request #{{ activity.request_id }} - {{ activity.get_action_display }}</p>
-                        <p class="activity-desc">{{ activity.description }}</p>
-                        <p class="activity-time">{{ activity.created_at|timesince }} ago</p>
-                    </div>
-                </li>
-                {% empty %}
-                <li class="empty">No request activity yet.</li>
-                {% endfor %}
-            </ul>
-        </aside>
+        <a class="card card--amber" href="{% url 'store:request_list' %}">
+            <div class="card__left">
+                <div class="card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+                <div>
+                    <div class="card__title">Submitted</div>
+                    <div class="card__value">{{ submitted_count|default:"0" }}</div>
+                    <div class="card__meta">Awaiting fulfillment</div>
+                </div>
+            </div>
+            <div class="card__hint">Manage -></div>
+        </a>
+
+        <a class="card card--red {% if selected_filter == 'archived' %}is-active{% endif %}" href="?kpi=archived">
+            <div class="card__left">
+                <div class="card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg></div>
+                <div>
+                    <div class="card__title">Archived</div>
+                    <div class="card__value">{{ archived_requests|default:"0" }}</div>
+                    <div class="card__meta">Fulfilled or locked</div>
+                </div>
+            </div>
+            <div class="card__hint">Filter -></div>
+        </a>
+
     </section>
 
+    <section class="grid">
+
+        <div class="panel panel--short">
+            <div class="panel__head">
+                <div class="panel__title">Top Requested Items</div>
+            </div>
+
+            <div class="list list--scroll">
+                {% for item in top_requested_items %}
+                <div class="row">
+                    <div class="row__left">
+                        <div class="row__badge" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg></div>
+                        <div class="row__name">{{ item.item__name }}</div>
+                    </div>
+                    <div class="row__right">
+                        <div class="row__qty">{{ item.total_qty }}</div>
+                        <div class="row__unit">{{ item.item__unit_of_measurement|default:"pcs" }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty">No request history yet.</div>
+                {% endfor %}
+            </div>
+
+            <div class="panel__foot">
+                <a class="link" href="{% url 'store:request_list' %}">View requests -></a>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel__head">
+                <div class="panel__title">Request Activity</div>
+            </div>
+
+            <div class="activity">
+                {% for activity in recent_request_activity %}
+                <div class="activity__item">
+                    <div class="activity__dot"></div>
+                    <div class="activity__body">
+                        <div class="activity__line">
+                            <strong>Request #{{ activity.request_id }}</strong> — {{ activity.get_action_display }}
+                        </div>
+                        {% if activity.description %}<div class="activity__time">{{ activity.description }}</div>{% endif %}
+                        <div class="activity__time">{{ activity.created_at|timesince }} ago</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty">No request activity yet.</div>
+                {% endfor %}
+            </div>
+
+            <div class="panel__foot panel__foot--center">
+                <span class="muted"></span>
+            </div>
+        </div>
+
+    </section>
+
+    <div class="panel staff-requests-panel">
+        <div class="panel__head">
+            <div class="panel__title">
+                {% if selected_filter == 'open' %}Open Requests{% elif selected_filter == 'archived' %}Archived Requests{% else %}Recent Requests{% endif %}
+            </div>
+            <a class="link" href="{% url 'store:request_list' %}">View all -></a>
+        </div>
+
+        <div class="rq-wrap">
+            <table class="rq-table">
+                <thead>
+                    <tr>
+                        <th>Request</th>
+                        <th>Status</th>
+                        <th>Purpose</th>
+                        <th>Updated</th>
+                        <th class="rq-cell--right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in recent_requests %}
+                    <tr>
+                        <td>
+                            <div class="rq-id">
+                                <strong>#{{ req.id }}</strong>
+                                <span>{{ req.created_at|date:"d M Y" }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-chip status-{{ req.display_status_slug }}">{{ req.display_status_label }}</span>
+                            {% if req.status == 'submitted' and req.needs_resubmission %}
+                            <span class="resubmit-badge">Needs resubmission</span>
+                            {% endif %}
+                        </td>
+                        <td><div class="rq-purpose">{{ req.purpose|default:"No purpose provided." }}</div></td>
+                        <td>
+                            <div class="rq-date">
+                                <strong>{{ req.updated_at|date:"d M Y" }}</strong>
+                                <span>{{ req.updated_at|date:"H:i" }}</span>
+                            </div>
+                        </td>
+                        <td class="rq-cell--right"><a href="{% url 'store:request_edit' req.id %}" class="btn-ghost">Open</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="rq-empty">No requests found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'store/js/dashboard_v2.js' %}"></script>
 {% endblock %}

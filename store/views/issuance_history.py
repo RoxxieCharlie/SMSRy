@@ -135,7 +135,10 @@ def history_issuance_storekeeper(request):
         "kpi_today": kpi_today,
         "kpi_locked": kpi_locked,
         "kpi_edited": kpi_edited,
+
+        "base_template": "store/base_v2.html",
+        "clear_url_name": "store:history_issuance_storekeeper_v2",
     }
-    return render(request, "store/history_issuance_storekeeper_v2.html", context)
+    return render(request, "store/history_issuance_v2.html", context)
 
 

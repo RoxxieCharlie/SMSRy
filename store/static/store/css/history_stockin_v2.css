@@ -1,14 +1,4 @@
-:root{
-  --text:#e5e7eb;
-  --muted:#94a3b8;
-
-  --panel: rgba(255,255,255,.06);
-  --panel2: rgba(255,255,255,.08);
-  --border: rgba(255,255,255,.12);
-
-  --blue:#4cc3ff;
-  --purple:#a78bfa;
-}
+@import "tokens.css";
 
 .page{
   padding: 28px 28px 40px;
@@ -41,9 +31,9 @@
   align-items:center;
   gap:12px;
   padding:10px 12px;
-  border:1px solid var(--border);
+  border:1px solid var(--stroke);
   background: rgba(255,255,255,.04);
-  border-radius:14px;
+  border-radius:var(--radius-md);
   backdrop-filter: blur(10px);
 }
 
@@ -53,12 +43,12 @@
   width:36px;
   height:36px;
   border-radius:999px;
-  border:1px solid var(--border);
+  border:1px solid var(--stroke);
   object-fit: cover;
 }
 
 .glass-card{
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(255,255,255,.04);
   backdrop-filter: blur(14px);
@@ -94,6 +84,8 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
+  display:inline-flex;
+  align-items:center;
   color: rgba(148,163,184,.9);
   pointer-events: none;
 }
@@ -101,7 +93,7 @@
 .filter input{
   width: 100%;
   padding: 11px 12px 11px 34px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(255,255,255,.14);
   background: rgba(2,6,23,.30);
   color: var(--text);
@@ -115,22 +107,23 @@
 
 .btn-filter{
   padding: 11px 18px;
-  border-radius: 14px;
-  border: 1px solid rgba(76,195,255,.40);
-  background: rgba(76,195,255,.22);
-  color: rgba(240,251,255,.95);
+  border-radius: var(--radius-sm);
+  border: none;
+  background: rgba(76,195,255,.95);
+  color: #06102b;
   font-weight: 750;
   cursor: pointer;
+  transition: filter .12s ease;
 }
 
 .btn-filter:hover{
-  background: rgba(76,195,255,.30);
+  filter: brightness(1.08);
 }
 
 .btn-clear{
   text-decoration: none;
   padding: 11px 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   border: 1px solid rgba(255,255,255,.14);
   background: rgba(255,255,255,.06);
   color: rgba(229,231,235,.90);
@@ -144,7 +137,7 @@
 .table{
   width:100%;
   border-collapse: collapse;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(2,6,23,.22);
@@ -226,7 +219,7 @@ tbody tr:hover{
   align-items:center;
   justify-content:center;
   padding: 9px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(167,139,250,.30);
   background: rgba(167,139,250,.14);
   color: rgba(240,233,255,.95);
@@ -261,7 +254,7 @@ tbody tr:hover{
 
 .pg-btn{
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.06);
   color: rgba(229,231,235,.90);
@@ -282,7 +275,7 @@ tbody tr:hover{
 
 .pg-page{
   padding: 8px 11px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(255,255,255,.05);
   color: rgba(229,231,235,.85);
@@ -366,7 +359,7 @@ tbody tr:hover{
   align-items: center;
   gap: 10px;
   padding: 7px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   border: 1px solid rgba(255,255,255,0.14);
   background: rgba(255,255,255,0.08);
   color: rgba(229,231,235,.92);
@@ -435,7 +428,7 @@ tbody tr:hover{
   padding: 0;
   border: 1px solid rgba(255,255,255,0.10);
   background: rgba(2,6,23,0.22);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
@@ -480,3 +473,35 @@ tbody tr:hover{
 @media (max-width: 1100px){
   .items-grid{ grid-template-columns: 1fr; }
 }
+
+/* =========================
+   STICKY SHELL
+========================= */
+
+.sticky-shell{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:rgba(9,14,31,.90);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  padding-bottom:14px;
+  margin-bottom:16px;
+}
+.sticky-shell .hero{ margin-bottom:10px; }
+
+/* =========================
+   EMPTY STATE
+========================= */
+
+.empty-row{ padding:0 !important; border-bottom:0 !important; }
+.empty-state{
+  padding:52px 24px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+.empty-state svg{ opacity:.28; color:rgba(229,231,235,.70); }
+.empty-state__text{ margin:0; font-size:15px; font-weight:650; color:rgba(229,231,235,.65); }
+.empty-state__hint{ margin:0; font-size:13px; color:rgba(229,231,235,.38); }

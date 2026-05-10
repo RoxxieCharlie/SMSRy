@@ -41,12 +41,14 @@ def history_stockin_mgt(request):
 
     return render(
         request,
-        "store/history_stockin_mgt_v2.html",
+        "store/history_stockin_v2.html",
         {
             "page_obj": page_obj,
             "page_range": page_range,
-            "search_query": search_query,
+            "q": search_query,
             "received_by_id": int(received_by_id) if received_by_id.isdigit() else "",
             "item_id": int(item_id) if item_id.isdigit() else "",
+            "base_template": "store/mgt_base_v2.html",
+            "clear_url_name": "store:history_stockin_mgt_v2",
         }
     )

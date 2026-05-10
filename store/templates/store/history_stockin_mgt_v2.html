@@ -1,5 +1,6 @@
 {% extends "store/mgt_base_v2.html" %}
 {% load static %}
+{% load store_extras %}
 
 {% block title %}Stock In History{% endblock %}
 
@@ -11,38 +12,29 @@
 {% block content %}
 <div class="page" data-live-root="stockin-history" data-live-topics="history,inventory,activity">
 
-    <header class="hero">
-        <div class="hero-left">
-            <h1>Stock In History</h1>
-            <p>Smart Management Solution</p>
-        </div>
-
-        <div class="hero-right">
-            <div class="user-chip">
-
-                <!--<img src="{% static 'store/img/avatar.png' %}" class="avatar" alt="User">-->
+    <div class="sticky-shell">
+        <header class="hero">
+            <div class="hero-left">
+                <h1>Stock In History</h1>
+                <p>Smart Management Solution</p>
             </div>
-        </div>
-    </header>
+        </header>
+
+        <form class="filter" method="get">
+            <div class="search-wrap">
+                <span class="ic" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+                <input type="text" name="q" value="{{ q }}" placeholder="Search item or receiver...">
+            </div>
+
+            <button class="btn-filter" type="submit">Filter</button>
+
+            {% if q %}
+            <a class="btn-clear" href="{% url 'store:history_stockin_mgt_v2' %}">Clear</a>
+            {% endif %}
+        </form>
+    </div>
 
     <section class="glass-card">
-        <div class="card-head">
-            <h2>Stock In History</h2>
-
-            <form class="filter" method="get">
-                <div class="search-wrap">
-                    <span class="ic" aria-hidden="true">&#128269;</span>
-                    <input type="text" name="q" value="{{ q }}" placeholder="Search item or receiver...">
-                </div>
-
-                <button class="btn-filter" type="submit">Filter</button>
-
-                {% if q %}
-                <a class="btn-clear" href="{% url 'store:history_stockin_store_v2' %}">Clear</a>
-                {% endif %}
-            </form>
-        </div>
-
         <div class="table-wrap">
             <table class="table">
                 <thead>
@@ -57,11 +49,8 @@
 
                 <tbody>
                 {% for stockin in page_obj %}
-                <!-- MAIN ROW -->
                 <tr class="expandable">
-                    <td class="mono">
-                        {{ stockin.received_at|date:"d M Y" }}
-                    </td>
+                    <td class="mono">{{ stockin.received_at|date:"d M Y" }}</td>
 
                     <td>
                         <button class="items-btn" type="button" data-toggle-items aria-expanded="false">
@@ -70,13 +59,9 @@
                         </button>
                     </td>
 
-                    <td>
-                        {{ stockin.received_by.get_full_name|default:stockin.received_by.username }}
-                    </td>
+                    <td>{{ stockin.received_by.get_full_name|default:stockin.received_by.username }}</td>
 
-                    <td class="comment">
-                        {{ stockin.comment|default:"-" }}
-                    </td>
+                    <td class="comment">{{ stockin.comment|default:"-" }}</td>
 
                     <td>
                         {% if stockin.document %}
@@ -87,7 +72,6 @@
                     </td>
                 </tr>
 
-                <!-- EXPANDABLE DETAILS ROW -->
                 <tr class="details-row" hidden>
                     <td colspan="5">
                         <div class="items-panel">
@@ -100,9 +84,7 @@
                                 {% for line in stockin.lines.all %}
                                 <li class="items-row">
                                     <span class="item-name">{{ line.item.name }}</span>
-                                    <span class="item-meta">
-              {{ line.quantity }}{% if line.item.unit %} {{ line.item.unit }}{% endif %}
-            </span>
+                                    <span class="item-meta">{{ line.quantity }}{% if line.item.unit %} {{ line.item.unit }}{% endif %}</span>
                                 </li>
                                 {% empty %}
                                 <li class="items-row items-empty">No items</li>
@@ -113,7 +95,13 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="empty">No stock-in records found.</td>
+                    <td colspan="5" class="empty-row">
+                        <div class="empty-state">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                            <p class="empty-state__text">No stock-in records found.</p>
+                            <p class="empty-state__hint">Try adjusting your search.</p>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -123,14 +111,14 @@
         <div class="pager">
             <div class="pager-left">
                 {% if page_obj.paginator.count %}
-                {{ page_obj.start_index }} - {{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+                {{ page_obj.start_index }} – {{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
                 {% endif %}
             </div>
 
             {% if page_obj.paginator.num_pages > 1 %}
             <nav class="pager-right">
                 {% if page_obj.has_previous %}
-                <a class="pg-btn" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}">Prev</a>
+                <a class="pg-btn" href="{% pagination_url page_obj.previous_page_number %}">Prev</a>
                 {% else %}
                 <span class="pg-btn disabled">Prev</span>
                 {% endif %}
@@ -142,13 +130,13 @@
                     {% elif p == "..." %}
                     <span class="pg-ellipsis">...</span>
                     {% else %}
-                    <a class="pg-page" href="?page={{ p }}{% if q %}&q={{ q|urlencode }}{% endif %}">{{ p }}</a>
+                    <a class="pg-page" href="{% pagination_url p %}">{{ p }}</a>
                     {% endif %}
                     {% endfor %}
                 </div>
 
                 {% if page_obj.has_next %}
-                <a class="pg-btn" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}">Next</a>
+                <a class="pg-btn" href="{% pagination_url page_obj.next_page_number %}">Next</a>
                 {% else %}
                 <span class="pg-btn disabled">Next</span>
                 {% endif %}
