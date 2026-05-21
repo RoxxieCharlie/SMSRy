@@ -217,3 +217,66 @@ body.login-ui {
     display: none;
   }
 }
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: clamp(16px, 5vw, 28px);
+    border-radius: 12px;
+  }
+  .login-title    { font-size: clamp(24px, 7vw, 36px); }
+  .login-subtitle { font-size: 13px; }
+  .login-field input { font-size: 15px; padding: 12px; }
+  .login-button   { min-height: 48px; font-size: 15px; }
+}
+
+/* ========================= LIGHT THEME OVERRIDES ========================= */
+
+[data-theme="light"] body.login-ui {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(59,130,246,0.14), transparent 30%),
+    radial-gradient(circle at 82% 78%, rgba(16,185,129,0.10), transparent 28%),
+    linear-gradient(135deg, #f0f6ff, #f4f8ff);
+  color: #0f172a;
+}
+
+[data-theme="light"] .login-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.92));
+  border-color: #d0d9e8;
+  box-shadow: 0 20px 60px rgba(15,23,42,0.12);
+}
+
+[data-theme="light"] .login-brand__kicker { color: #64748b; }
+[data-theme="light"] .login-title   { color: #0f172a; }
+[data-theme="light"] .login-subtitle { color: #475569; }
+
+[data-theme="light"] .login-field   { color: #475569; }
+[data-theme="light"] .login-field input {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+[data-theme="light"] .login-field input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.12);
+}
+
+[data-theme="light"] .login-password button {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+[data-theme="light"] .login-error {
+  background: rgba(220,38,38,0.06);
+  border-color: rgba(220,38,38,0.28);
+  color: #991b1b;
+}
+
+[data-theme="light"] .login-visual__panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(240,248,255,0.84));
+  border-color: #d0d9e8;
+  box-shadow: 0 20px 60px rgba(15,23,42,0.10);
+}
+[data-theme="light"] .login-visual__panel span,
+[data-theme="light"] .login-visual__panel em { color: #475569; }
+[data-theme="light"] .login-visual__panel strong { color: #0f172a; }

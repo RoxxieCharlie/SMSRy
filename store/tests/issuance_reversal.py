@@ -43,7 +43,7 @@ class IssuanceEditWindowTests(TestCase):
 
         self.request_obj = Request.objects.create(
             requester=self.staff,
-            status=Request.Status.SUBMITTED,
+            status=Request.Status.APPROVED,
             purpose="Operations request",
         )
         self.request_item1 = RequestItem.objects.create(

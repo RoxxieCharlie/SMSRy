@@ -35,6 +35,15 @@ from store.views.request import (
     request_edit_issuance,
 )
 
+# Supervisor approval
+from store.views.approval import (
+    approval_queue,
+    approval_detail,
+    approve_request_view,
+    reject_request_view,
+    delete_item_view,
+)
+
 # History
 from store.views.history_stockin import history_stockin
 from store.views.history_stockin_mgt import history_stockin_mgt
@@ -181,4 +190,15 @@ urlpatterns = [
     # =========================
     path("weekly/", weekly_report, name="weekly_v2"),
     path("weekly/", weekly_report, name="weekly"),
+
+
+    # =========================
+    # SUPERVISOR APPROVAL
+    # =========================
+    path("approvals/", approval_queue, name="approval_queue"),
+    path("approvals/<int:pk>/", approval_detail, name="approval_detail"),
+    path("approvals/<int:pk>/approve/", approve_request_view, name="approve_request"),
+    path("approvals/<int:pk>/reject/", reject_request_view, name="reject_request"),
+    path("approvals/<int:pk>/items/<int:item_id>/delete/", delete_item_view, name="approval_delete_item"),
+
 ]

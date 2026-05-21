@@ -150,6 +150,8 @@ def _recent_activity_for_storekeeper(limit=8):
         .filter(
             action__in=[
                 RequestActivity.Action.SUBMITTED,
+                RequestActivity.Action.PENDING,
+                RequestActivity.Action.APPROVED,
                 RequestActivity.Action.FULFILLED,
                 RequestActivity.Action.STORE_EDITED,
                 RequestActivity.Action.FULFILLMENT_EDITED,
@@ -208,22 +210,19 @@ def _derive_storekeeper_fallback_changes(request_obj, *, label):
 def _build_storekeeper_history(request_obj, issuance_obj=None):
     history = []
     issuance = issuance_obj if issuance_obj is not None else _get_request_issuance(request_obj)
+
+    request_items_map = {ri.id: ri for ri in request_obj.items.select_related("item").all()}
+
     for activity in request_obj.activities.filter(
         action__in=[RequestActivity.Action.STORE_EDITED, RequestActivity.Action.FULFILLMENT_EDITED]
-    ).order_by("-created_at"):
+    ).order_by("created_at"):
         metadata = activity.metadata or {}
         label = "Before fulfillment" if activity.action == RequestActivity.Action.STORE_EDITED else "After fulfillment"
         changes = [
             change for change in metadata.get("changes", [])
             if change.get("item_name") and change.get("old_qty") != change.get("new_qty")
         ]
-        if not changes:
-            changes = _derive_storekeeper_fallback_changes(request_obj, label=label)
         note = (metadata.get("store_comment") or metadata.get("reason") or "").strip()
-        if not note and activity.action == RequestActivity.Action.STORE_EDITED:
-            note = (request_obj.store_note or "").strip()
-        if not note and activity.action == RequestActivity.Action.FULFILLMENT_EDITED:
-            note = (getattr(issuance, "comment", "") or "").strip()
         if not changes and not note:
             continue
         history.append(
@@ -234,6 +233,36 @@ def _build_storekeeper_history(request_obj, issuance_obj=None):
                 "time": activity.created_at,
             }
         )
+
+    # If no STORE_EDITED activity was found, check the FULFILLED activity for qty changes.
+    # This covers the case where the storekeeper adjusted quantities on the fulfill page
+    # directly (which logs FULFILLED but not STORE_EDITED).
+    has_pre_edit = any(e["label"] == "Before fulfillment" for e in history)
+    if not has_pre_edit:
+        fulfilled_activity = request_obj.activities.filter(
+            action=RequestActivity.Action.FULFILLED
+        ).order_by("created_at").first()
+        if fulfilled_activity:
+            pre_changes = []
+            for row in (fulfilled_activity.metadata or {}).get("items", []):
+                ri = request_items_map.get(row.get("request_item_id"))
+                if not ri:
+                    continue
+                filled_qty = row.get("fulfilled_qty")
+                if filled_qty is not None and filled_qty != ri.requested_qty:
+                    pre_changes.append({
+                        "item_id": ri.item_id,
+                        "item_name": ri.item.name,
+                        "old_qty": ri.requested_qty,
+                        "new_qty": filled_qty,
+                    })
+            if pre_changes:
+                history.insert(0, {
+                    "label": "Before fulfillment",
+                    "changes": pre_changes,
+                    "note": (getattr(issuance, "comment", "") or "").strip(),
+                    "time": fulfilled_activity.created_at,
+                })
     if not history:
         pre_note = (request_obj.store_note or "").strip()
         post_note = (getattr(issuance, "comment", "") or "").strip()
@@ -277,8 +306,7 @@ def request_create(request):
         if form.is_valid() and formset.is_valid():
             request_obj = form.save(commit=False)
             request_obj.requester = staff
-            request_obj.status = Request.Status.SUBMITTED if submit_now else Request.Status.DRAFT
-            request_obj.submitted_at = timezone.now() if submit_now else None
+            request_obj.status = Request.Status.DRAFT
             request_obj.needs_resubmission = False
             request_obj.last_edited_by = request.user
             request_obj.save()
@@ -312,6 +340,9 @@ def request_create(request):
                     ]
                 },
             )
+
+            if submit_now:
+                request_obj.mark_submitted()
 
             if submit_now:
                 RequestActivity.objects.create(
@@ -348,12 +379,40 @@ def request_create(request):
                         "department": staff.department.name if staff.department else "",
                     },
                 )
+                from store.services.approval_service import get_active_supervisor
+                from store.models import Notification
+                supervisor = get_active_supervisor()
+                if supervisor:
+                    Notification.objects.create(
+                        recipient=supervisor,
+                        event_type=Notification.EventType.REQUEST_PENDING,
+                        message=(
+                            f"New request #{request_obj.id} by {request_obj.requester.name} "
+                            f"is awaiting your approval."
+                        ),
+                        target_type="Request",
+                        target_id=request_obj.id,
+                    )
 
             messages.success(
                 request,
-                "Request submitted successfully." if submit_now else "Request created successfully.",
+                "Request submitted successfully." if submit_now else "Request saved as draft.",
             )
-            return redirect("store:request_edit", request_id=request_obj.id)
+            return redirect("store:request_list")
+        else:
+            for err in form.non_field_errors():
+                messages.error(request, err)
+            for field_name, error_list in form.errors.items():
+                if field_name == "__all__":
+                    continue
+                for err in error_list:
+                    messages.error(request, err)
+            for form_errors in formset.errors:
+                for field_name, error_list in form_errors.items():
+                    for err in error_list:
+                        messages.error(request, err)
+            for err in formset.non_form_errors():
+                messages.error(request, err)
     else:
         form = RequestForm()
         formset = RequestItemFormSet(prefix="items")
@@ -398,11 +457,14 @@ def request_edit(request, request_id):
         raise Http404("You do not have permission to edit this request.")
 
     is_owner = (not is_storekeeper) and request_obj.requester_id == requester_staff.id
-    is_storekeeper_editor = is_storekeeper and request_obj.status == Request.Status.SUBMITTED
+    is_storekeeper_editor = is_storekeeper and request_obj.status in [
+        Request.Status.APPROVED, Request.Status.ESCALATED
+    ]
     is_read_only = (is_owner or is_storekeeper) and request_obj.status in [Request.Status.FULFILLED, Request.Status.LOCKED]
 
-
-    if is_storekeeper and request.method == "POST" and request_obj.status != Request.Status.SUBMITTED:
+    if is_storekeeper and request.method == "POST" and request_obj.status not in [
+        Request.Status.APPROVED, Request.Status.ESCALATED
+    ]:
         messages.error(request, "This request is no longer editable from the request page.")
         return redirect("store:request_edit", request_id=request_obj.id)
 
@@ -421,7 +483,7 @@ def request_edit(request, request_id):
         old_store_note = request_obj.store_note or ""
         should_fulfill = (
             is_storekeeper_editor
-            and request_obj.status == Request.Status.SUBMITTED
+            and request_obj.status in [Request.Status.APPROVED, Request.Status.ESCALATED]
             and request.POST.get("action") == "fulfill"
         )
         store_note = (request.POST.get("store_note") or request_obj.store_note or "").strip() if is_storekeeper_editor else request_obj.store_note
@@ -550,9 +612,23 @@ def request_edit(request, request_id):
 
                 store_note_changed = is_storekeeper_editor and old_store_note.strip() != (store_note or "").strip()
 
-                if request_obj.status == Request.Status.SUBMITTED and changes and not is_storekeeper_editor:
+                if request_obj.status == Request.Status.PENDING and changes and not is_storekeeper_editor:
                     request_obj.needs_resubmission = True
-                    request_obj.save(update_fields=["needs_resubmission", "updated_at"])
+                    request_obj.save(update_fields=["needs_resubmission"])
+                    RequestActivity.objects.create(
+                        request=request_obj,
+                        actor=request.user,
+                        action=RequestActivity.Action.SUBMITTED,
+                        description=f"Request resubmitted by {request.user.get_full_name() or request.user.username}.",
+                        metadata={},
+                    )
+                    emit_activity(
+                        actor=request.user,
+                        verb=Activity.Verb.REQUEST_SUBMITTED,
+                        target=request_obj,
+                        summary=f"{request_obj.requester.name} resubmitted Request #{request_obj.id}",
+                        metadata={"request_id": request_obj.id},
+                    )
 
                 action = RequestActivity.Action.STORE_EDITED if is_storekeeper_editor else RequestActivity.Action.STAFF_EDITED
                 activity_metadata = {"changes": changes}
@@ -607,10 +683,10 @@ def request_edit(request, request_id):
                     else:
                         transaction.savepoint_commit(savepoint_id)
                         messages.success(request, f"Request #{request_obj.id} fulfilled successfully.")
-                        return redirect("store:request_edit", request_id=request_obj.id)
+                        return redirect("store:request_list")
                 else:
                     messages.success(request, "Request updated successfully.")
-                    return redirect(next_url)
+                    return redirect("store:request_list")
 
             else:
                 for err in form.non_field_errors():
@@ -654,7 +730,12 @@ def request_edit(request, request_id):
             "request_obj": request_obj,
             "requester_meta": _requester_meta_for_staff(request_obj.requester, request_obj.requester.user),
             "request_status": request_obj.status,
-            "submit_label": ("Save Changes" if is_storekeeper_editor else ("Save Draft" if not is_read_only else "View Only")),
+            "submit_label": (
+                "Save Changes" if is_storekeeper_editor
+                else "View Only" if is_read_only
+                else "Save Changes" if request_obj.status == Request.Status.PENDING
+                else "Save Draft"
+            ),
             "can_submit": is_owner and request_obj.can_staff_submit,
             "recent_activities": (
                 _recent_activity_for_storekeeper(limit=8)
@@ -693,23 +774,21 @@ def request_submit(request, request_id):
         requester=staff,
     )
 
-    if request_obj.status not in [Request.Status.DRAFT, Request.Status.SUBMITTED]:
-        messages.error(request, "Only draft or editable submitted requests can be submitted.")
+    if request_obj.status not in [Request.Status.DRAFT, Request.Status.PENDING]:
+        messages.error(request, "Only draft or editable pending requests can be submitted.")
         return redirect("store:request_edit", request_id=request_obj.id)
 
-    if request_obj.status == Request.Status.SUBMITTED and not request_obj.needs_resubmission:
-        messages.info(request, "Request already submitted. Edit it to enable re-submission.")
+    if request_obj.status == Request.Status.PENDING and not request_obj.needs_resubmission:
+        messages.info(request, "Request already pending approval. Edit it to enable re-submission.")
         return redirect("store:request_edit", request_id=request_obj.id)
 
     if not request_obj.items.exists():
         messages.error(request, "You must add at least one item before submitting.")
         return redirect("store:request_edit", request_id=request_obj.id)
 
-    request_obj.status = Request.Status.SUBMITTED
-    request_obj.submitted_at = timezone.now()
-    request_obj.needs_resubmission = False
     request_obj.last_edited_by = request.user
-    request_obj.save(update_fields=["status", "submitted_at", "needs_resubmission", "last_edited_by", "updated_at"])
+    request_obj.save(update_fields=["last_edited_by", "updated_at"])
+    request_obj.mark_submitted()
 
     RequestActivity.objects.create(
         request=request_obj,
@@ -732,6 +811,21 @@ def request_submit(request, request_id):
         },
     )
 
+    from store.services.approval_service import get_active_supervisor
+    from store.models import Notification
+    supervisor = get_active_supervisor()
+    if supervisor:
+        Notification.objects.create(
+            recipient=supervisor,
+            event_type=Notification.EventType.REQUEST_PENDING,
+            message=(
+                f"New request #{request_obj.id} by {request_obj.requester.name} "
+                f"is awaiting your approval."
+            ),
+            target_type="Request",
+            target_id=request_obj.id,
+        )
+
     messages.success(request, "Request submitted successfully.")
     return redirect("store:request_list")
 
@@ -747,8 +841,8 @@ def request_fulfill(request, request_id):
         pk=request_id,
     )
 
-    if request_obj.status != Request.Status.SUBMITTED:
-        messages.error(request, "Only submitted requests can be fulfilled.")
+    if request_obj.status not in [Request.Status.APPROVED, Request.Status.ESCALATED]:
+        messages.error(request, "Only approved or escalated requests can be fulfilled.")
         return redirect("store:request_list")
 
     if not request_obj.items.exists():
@@ -785,11 +879,21 @@ def request_fulfill(request, request_id):
                 )
             except IssuanceError as exc:
                 messages.error(request, str(exc))
+                formset = FulfillmentFormSet(
+                    prefix="lines",
+                    request_obj=request_obj,
+                    initial=initial_lines,
+                )
             else:
                 messages.success(request, f"Request #{request_obj.id} fulfilled successfully.")
-                return redirect("store:request_edit", request_id=request_obj.id)
+                return redirect("store:request_list")
         else:
             _add_form_errors_to_messages(request, formset)
+            formset = FulfillmentFormSet(
+                prefix="lines",
+                request_obj=request_obj,
+                initial=initial_lines,
+            )
     else:
         formset = FulfillmentFormSet(
             prefix="lines",
@@ -826,6 +930,17 @@ def request_edit_issuance(request, request_id):
         messages.error(request, "Only fulfilled requests can be edited here.")
         return redirect("store:request_list")
 
+    initial_lines = [
+        {
+            "request_item_id": request_item.id,
+            "item_name": request_item.item.name,
+            "requested_qty": request_item.requested_qty,
+            "current_fulfilled_qty": request_item.fulfilled_qty,
+            "fulfilled_qty": request_item.fulfilled_qty,
+        }
+        for request_item in request_obj.items.select_related("item").all()
+    ]
+
     if request.method == "POST":
         formset = IssuanceEditFormSet(request.POST, prefix="lines", request_obj=request_obj)
         reason_form = IssuanceEditReasonForm(request.POST)
@@ -851,23 +966,15 @@ def request_edit_issuance(request, request_id):
                 )
             except IssuanceError as exc:
                 messages.error(request, str(exc))
+                formset = IssuanceEditFormSet(prefix="lines", request_obj=request_obj, initial=initial_lines)
             else:
                 messages.success(request, f"Fulfillment for Request #{request_obj.id} updated.")
                 return redirect("store:request_edit", request_id=request_obj.id)
         else:
             _add_form_errors_to_messages(request, formset)
             _add_form_errors_to_messages(request, reason_form)
+            formset = IssuanceEditFormSet(prefix="lines", request_obj=request_obj, initial=initial_lines)
     else:
-        initial_lines = [
-            {
-                "request_item_id": request_item.id,
-                "item_name": request_item.item.name,
-                "requested_qty": request_item.requested_qty,
-                "current_fulfilled_qty": request_item.fulfilled_qty,
-                "fulfilled_qty": request_item.fulfilled_qty,
-            }
-            for request_item in request_obj.items.select_related("item").all()
-        ]
         formset = IssuanceEditFormSet(prefix="lines", request_obj=request_obj, initial=initial_lines)
         reason_form = IssuanceEditReasonForm()
 
@@ -913,9 +1020,18 @@ def request_history_table(request):
         base_qs = base_qs.filter(requester=requester_staff)
 
     status = request.GET.get("status", "").strip()
+    item_id = request.GET.get("item", "").strip()
     requests_qs = base_qs
     if status:
         requests_qs = requests_qs.filter(status=status)
+
+    selected_item = None
+    if item_id:
+        try:
+            selected_item = Item.objects.get(pk=item_id)
+            requests_qs = requests_qs.filter(items__item_id=item_id).distinct()
+        except (Item.DoesNotExist, ValueError):
+            pass
 
     history_rows = []
     for request_obj in requests_qs:
@@ -964,10 +1080,14 @@ def request_history_table(request):
         {
             "history_rows": history_rows,
             "selected_status": status,
+            "selected_item": selected_item,
             "status_choices": Request.Status.choices,
             "total_count": base_qs.count(),
             "draft_count": base_qs.filter(status=Request.Status.DRAFT).count(),
-            "submitted_count": base_qs.filter(status=Request.Status.SUBMITTED).count(),
+            "pending_count": base_qs.filter(status=Request.Status.PENDING).count(),
+            "approved_count": base_qs.filter(status=Request.Status.APPROVED).count(),
+            "rejected_count": base_qs.filter(status=Request.Status.REJECTED).count(),
+            "escalated_count": base_qs.filter(status=Request.Status.ESCALATED).count(),
             "fulfilled_count": base_qs.filter(status=Request.Status.FULFILLED).count(),
             "locked_count": base_qs.filter(status=Request.Status.LOCKED).count(),
             "is_storekeeper": False,
@@ -990,10 +1110,15 @@ def request_list(request):
     )
 
     if is_storekeeper:
+        from store.services.sla_service import escalate_overdue_requests
+        escalate_overdue_requests()
+
         selected_kpi = (request.GET.get("kpi") or "pending").strip().lower()
         today = timezone.localdate()
 
-        pending_requests = base_qs.filter(status=Request.Status.SUBMITTED).order_by("-submitted_at", "-updated_at")
+        pending_requests = base_qs.filter(
+            status__in=[Request.Status.APPROVED, Request.Status.ESCALATED]
+        ).order_by("-submitted_at", "-updated_at")
         editable_fulfilled_requests = base_qs.filter(
             status=Request.Status.FULFILLED,
             editable_until__gte=timezone.now(),
@@ -1009,8 +1134,8 @@ def request_list(request):
 
         if selected_kpi == "pending":
             active_requests = pending_requests
-            active_title = "Submitted Queue"
-            active_empty_message = "No submitted requests waiting for fulfillment."
+            active_title = "Approved Queue"
+            active_empty_message = "No approved requests waiting for fulfillment."
         elif selected_kpi == "editable":
             active_requests = editable_fulfilled_requests
             active_title = "Fulfilled (Editable Window)"
@@ -1020,6 +1145,8 @@ def request_list(request):
             active_title = "Fulfilled Today"
             active_empty_message = "No requests were fulfilled today."
 
+        escalated_count = base_qs.filter(status=Request.Status.ESCALATED).count()
+
         context = {
             "active_requests": active_requests,
             "active_title": active_title,
@@ -1028,10 +1155,11 @@ def request_list(request):
             "pending_count": pending_requests.count(),
             "editable_count": editable_fulfilled_requests.count(),
             "fulfilled_today_count": fulfilled_today_requests.count(),
+            "escalated_count": escalated_count,
             "total_fulfilled_count": base_qs.filter(
                 status__in=[Request.Status.FULFILLED, Request.Status.LOCKED],
             ).count(),
-            "pending_note": "Submitted requests waiting storekeeper action.",
+            "pending_note": "Approved requests ready for fulfillment.",
             "is_storekeeper": True,
             "is_management": is_management,
             "page_title": "Incoming Requests",
@@ -1047,15 +1175,19 @@ def request_list(request):
         requests_qs = requests_qs.filter(status=status)
 
     kpi_qs = base_qs.filter(requester=requester_staff)
-    summary_requests = list(requests_qs[:5])
+    summary_requests = list(requests_qs[:10])
     total_requests = kpi_qs.count()
-    open_requests = kpi_qs.filter(status__in=[Request.Status.DRAFT, Request.Status.SUBMITTED]).count()
+    open_requests = kpi_qs.filter(status__in=[Request.Status.DRAFT, Request.Status.PENDING]).count()
     archived_requests = kpi_qs.filter(status__in=[Request.Status.FULFILLED, Request.Status.LOCKED]).count()
     top_requested_items = list(
-        RequestItem.objects.filter(request__requester=requester_staff)
+        RequestItem.objects.filter(
+            request__requester=requester_staff,
+            request__status__in=[Request.Status.FULFILLED, Request.Status.LOCKED],
+            fulfilled_qty__gt=0,
+        )
         .values("item__name", "item__unit_of_measurement")
-        .annotate(request_count=Count("request_id", distinct=True), total_qty=Sum("requested_qty"))
-        .order_by("-request_count", "-total_qty", "item__name")[:5]
+        .annotate(fulfillment_count=Count("request_id", distinct=True), total_qty=Sum("fulfilled_qty"))
+        .order_by("-total_qty", "-fulfillment_count", "item__name")[:5]
     )
 
     context = {
@@ -1069,7 +1201,10 @@ def request_list(request):
         "page_title": "My Requests",
         "show_status_filter": True,
         "draft_count": kpi_qs.filter(status=Request.Status.DRAFT).count(),
-        "submitted_count": kpi_qs.filter(status=Request.Status.SUBMITTED).count(),
+        "pending_count": kpi_qs.filter(status=Request.Status.PENDING).count(),
+        "approved_count": kpi_qs.filter(status=Request.Status.APPROVED).count(),
+        "rejected_count": kpi_qs.filter(status=Request.Status.REJECTED).count(),
+        "escalated_count": kpi_qs.filter(status=Request.Status.ESCALATED).count(),
         "fulfilled_count": kpi_qs.filter(status=Request.Status.FULFILLED).count(),
         "locked_count": kpi_qs.filter(status=Request.Status.LOCKED).count(),
         "total_requests": total_requests,

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python manage.py collectstatic --noinput)",
+      "Bash(xargs grep -l \"kpi-card\")",
+      "Bash(python manage.py collectstatic --noinput --dry-run)",
+      "Bash(python manage.py check)",
+      "Bash(python manage.py makemigrations store --name=\"add_supervisor_approval_layer\")",
+      "Bash(python manage.py makemigrations store --empty --name=\"migrate_submitted_to_pending\")",
+      "Bash(python manage.py migrate)",
+      "Bash(python manage.py test store.tests --verbosity=2)"
+    ]
+  }
+}

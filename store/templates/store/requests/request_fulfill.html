@@ -4,106 +4,178 @@
 {% block title %}{{ page_title }} - SMS{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'store/css/issue_item_v2.css' %}">
 <link rel="stylesheet" href="{% static 'store/css/request_form_v2.css' %}">
 <style>
-.fulfill-page .rq-grid{display:block}
-.fulfill-page .rq-main{width:100%}
-.fulfill-page .rq-actions{justify-content:flex-end}
-.fulfill-page .table-wrap{overflow:auto}
-.fulfill-page .errorlist{margin:6px 0 0;padding-left:16px;color:#ffb7b7;font-size:12px}
+/* ── Fulfillment table ───────────────────────────────────── */
+.ff-table{width:100%;border-collapse:collapse}
+.ff-table th{
+  font-size:10px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;
+  color:var(--text3);padding:0 10px 10px;text-align:left;
+  border-bottom:1px solid rgba(255,255,255,.08)
+}
+.ff-table td{
+  padding:11px 10px;font-size:13px;color:var(--text);
+  border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle
+}
+.ff-table tbody tr:last-child td{border-bottom:none}
+
+/* fulfilled qty input */
+.ff-table td input[type="number"]{
+  width:110px;border-radius:8px;
+  border:1px solid rgba(155,186,244,.22);
+  background:rgba(8,15,34,.50);color:var(--text);
+  padding:7px 10px;font-size:13px;font-family:inherit;
+  text-align:center;box-sizing:border-box
+}
+.ff-table td input[type="number"]:focus{
+  outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg)
+}
+
+/* stock badge */
+.ff-stock{
+  display:inline-flex;align-items:center;
+  padding:3px 10px;border-radius:20px;
+  font-size:12px;font-weight:700;
+  background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)
+}
+
+/* requested qty */
+.ff-req-qty{font-weight:700;color:var(--blue);font-size:14px}
+
+/* item name */
+.ff-item-name{font-weight:600}
+
+/* formset errors */
+.ff-errors{margin:10px 0 0;padding:0;list-style:none}
+.ff-errors li,.ff-table .errorlist li{
+  font-size:11px;color:var(--red);margin-top:3px
+}
+.ff-table .errorlist{margin:3px 0 0;padding:0;list-style:none}
+
+/* ── Light theme ─────────────────────────────────────────── */
+[data-theme="light"] .ff-table th{
+  color:rgba(15,23,42,.42);border-bottom-color:rgba(15,23,42,.08)
+}
+[data-theme="light"] .ff-table td{
+  color:rgba(15,23,42,.88);border-bottom-color:rgba(15,23,42,.06)
+}
+[data-theme="light"] .ff-table td input[type="number"]{
+  background:#f8fafc;border-color:#ced8e8;color:rgba(15,23,42,.90)
+}
+[data-theme="light"] .ff-table td input[type="number"]:focus{
+  border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.14)
+}
+[data-theme="light"] .ff-stock{
+  background:var(--green-bg);border-color:var(--green-border);color:var(--green)
+}
+[data-theme="light"] .ff-req-qty{color:var(--blue)}
+[data-theme="light"] .ff-item-name{color:rgba(15,23,42,.90)}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="rq-page fulfill-page">
-    <header class="rq-topbar glass">
+<div class="rqf-page">
+
+    {# ── HEADER ───────────────────────────────────────────── #}
+    <header class="rqf-header">
         <div>
-            <p class="rq-kicker">Smart Management Solution</p>
-            <h1 class="rq-title">{{ page_title }}</h1>
+            <p class="rqf-kicker">Smart Management Solution</p>
+            <h1 class="rqf-title">{{ page_title }}</h1>
         </div>
-        <div class="rq-status-wrap">
-            <span class="rq-status">Submitted</span>
+        <div class="rqf-status-wrap">
+            <span class="rqf-status-pill rqf-s-{{ request_obj.status }}">
+                ● {{ request_obj.display_status_label }}
+            </span>
         </div>
     </header>
 
-    <div class="rq-grid">
-        <section class="rq-main">
-            <div class="glass rq-card">
-                <h2>Requester Info</h2>
-                <div class="rq-meta">
-                    <div><span>Name</span><strong>{{ request_obj.requester.name }}</strong></div>
-                    <div><span>Department</span><strong>{{ request_obj.requester.department.name|default:"-" }}</strong></div>
-                    <div><span>Request</span><strong>#{{ request_obj.id }}</strong></div>
-                    <div><span>Purpose</span><strong>{{ request_obj.purpose|default:"-" }}</strong></div>
-                </div>
+    {# ── CARD 1: REQUESTER INFO ───────────────────────────── #}
+    <div class="rqf-card">
+        <div class="rqf-card-label">Requester Info</div>
+        <div class="rqf-meta-grid">
+            <div class="rqf-meta-field">
+                <span>Name</span>
+                <strong>{{ request_obj.requester.name }}</strong>
             </div>
-
-            <form method="post" class="rq-form">
-                {% csrf_token %}
-                {{ formset.management_form }}
-
-                <div class="glass rq-card">
-                    <div class="rq-card-head">
-                        <h2>Fulfillment Lines</h2>
-                    </div>
-                    <div class="table-wrap">
-                        <table class="rq-table">
-                            <thead>
-                                <tr>
-                                    <th>Item</th>
-                                    <th>In Stock</th>
-                                    <th>Requested Qty</th>
-                                    <th>Fulfilled Qty</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for line_form in formset %}
-                                    <tr>
-                                        <td>
-                                            {{ line_form.request_item_id }}
-                                            {{ line_form.item_name.value }}
-                                            {{ line_form.item_name.errors }}
-                                        </td>
-                                        <td>
-                                            {{ line_form.in_stock.value }}
-                                            {{ line_form.in_stock.errors }}
-                                        </td>
-                                        <td>
-                                            {{ line_form.requested_qty.value }}
-                                            {{ line_form.requested_qty.errors }}
-                                        </td>
-                                        <td>
-                                            {{ line_form.fulfilled_qty }}
-                                            {{ line_form.fulfilled_qty.errors }}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% if formset.non_form_errors %}
-                        <ul class="errorlist">
-                            {% for err in formset.non_form_errors %}
-                                <li>{{ err }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-
-                <div class="glass rq-card">
-                    <h2>Store Comment</h2>
-                    <div class="rq-field">
-                        <textarea id="comment" name="comment" rows="3">{{ comment }}</textarea>
-                    </div>
-                </div>
-
-                <div class="rq-actions">
-                    <a href="{% url 'store:request_list' %}" class="btn btn-ghost">Back</a>
-                    <button type="submit" class="btn btn-primary-alt">Fulfill Request</button>
-                </div>
-            </form>
-        </section>
+            <div class="rqf-meta-field">
+                <span>Department</span>
+                <strong>{{ request_obj.requester.department.name|default:"-" }}</strong>
+            </div>
+            <div class="rqf-meta-field">
+                <span>Request</span>
+                <strong>#{{ request_obj.id }}</strong>
+            </div>
+            <div class="rqf-meta-field">
+                <span>Purpose</span>
+                <strong>{{ request_obj.purpose|default:"-" }}</strong>
+            </div>
+        </div>
     </div>
+
+    {# ── FORM ─────────────────────────────────────────────── #}
+    <form method="post" class="rqf-form">
+        {% csrf_token %}
+        {{ formset.management_form }}
+
+        {# CARD 2: FULFILLMENT LINES #}
+        <div class="rqf-card">
+            <div class="rqf-card-label">Fulfillment Lines</div>
+            <div style="overflow-x:auto">
+                <table class="ff-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>In Stock</th>
+                            <th>Requested Qty</th>
+                            <th>Fulfilled Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for line_form in formset %}
+                        <tr>
+                            <td>
+                                {{ line_form.request_item_id }}
+                                <span class="ff-item-name">{{ line_form.item_name.value }}</span>
+                                {{ line_form.item_name.errors }}
+                            </td>
+                            <td>
+                                <span class="ff-stock">{{ line_form.in_stock.value }}</span>
+                                {{ line_form.in_stock.errors }}
+                            </td>
+                            <td>
+                                <span class="ff-req-qty">{{ line_form.requested_qty.value }}</span>
+                                {{ line_form.requested_qty.errors }}
+                            </td>
+                            <td>
+                                {{ line_form.fulfilled_qty }}
+                                {{ line_form.fulfilled_qty.errors }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if formset.non_form_errors %}
+            <ul class="ff-errors">
+                {% for err in formset.non_form_errors %}<li>{{ err }}</li>{% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
+        {# CARD 3: STORE COMMENT #}
+        <div class="rqf-card">
+            <div class="rqf-card-label">Store Comment</div>
+            <textarea class="rqf-textarea" id="comment" name="comment" rows="3"
+                placeholder="Add an optional comment about this fulfillment...">{{ comment }}</textarea>
+        </div>
+
+        {# FOOTER #}
+        <div class="rqf-actions">
+            <a href="{% url 'store:request_list' %}" class="rqf-btn rqf-btn-cancel">Back</a>
+            <button type="submit" class="rqf-btn rqf-btn-primary">Fulfill Request</button>
+        </div>
+
+    </form>
+
 </div>
 {% endblock %}

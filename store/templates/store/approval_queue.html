@@ -1,0 +1,158 @@
+{% extends base_template|default:"store/mgt_base_v2.html" %}
+{% load static %}
+
+{% block title %}Approval Queue - SMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/staff_dashboard_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/request_list_v2.css' %}">
+<style>
+.page{max-width:1400px;padding:30px 32px}
+.sla-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:6px}
+.sla-bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.sla-ok{background:rgba(77,217,168,.8)}
+.sla-warn{background:rgba(251,191,36,.9)}
+.sla-overdue{background:rgba(255,107,107,.9)}
+.req-table td,.req-table th{font-size:12px;padding:10px 12px;vertical-align:top}
+.req-table th{font-size:11px}
+.items-list{margin:0;padding:0 0 0 14px;color:#9fb4da;font-size:12px;line-height:1.7}
+.section-head{font-size:13px;font-weight:700;color:#c3d5f2;margin:24px 0 12px}
+.escalated-notice{padding:10px 14px;border-radius:var(--radius-sm);background:rgba(251,146,60,.14);border:1px solid rgba(251,146,60,.35);color:#ffedd5;font-size:12px;margin-bottom:8px}
+[data-theme="light"] .escalated-notice{background:rgba(234,88,12,.08);border-color:rgba(234,88,12,.25);color:#9a3412}
+[data-theme="light"] .items-list{color:#334155}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page" data-live-root="approval-queue" data-live-topics="requests,activity">
+
+    <header class="topbar">
+        <div>
+            <p class="staff-pg-kicker">Supervisor Console</p>
+            <h1 class="staff-pg-title">Approval Queue</h1>
+            <p class="req-subtitle">
+                Logged in as supervisor since
+                {% if request.user.profile.supervisor_since %}
+                    {{ request.user.profile.supervisor_since|date:"d M Y H:i" }}
+                {% else %}—{% endif %}
+            </p>
+        </div>
+    </header>
+
+    <div class="section-head">Pending &amp; Escalated ({{ pending_requests|length }})</div>
+
+    {% if pending_requests %}
+    <div class="table-wrapper">
+        <div class="table-scroll">
+            <table class="req-table rq-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Requester</th>
+                        <th>Department</th>
+                        <th>Items</th>
+                        <th>Submitted</th>
+                        <th>SLA Deadline</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for req in pending_requests %}
+                    <tr>
+                        <td>{{ req.id }}</td>
+                        <td>{{ req.requester.name }}</td>
+                        <td>{{ req.requester.department.name|default:"-" }}</td>
+                        <td>
+                            <ul class="items-list">
+                                {% for line in req.items.all %}
+                                <li>{{ line.item.name }} &times; {{ line.requested_qty }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{ req.submitted_at|date:"d M Y H:i"|default:"-" }}</td>
+                        <td>
+                            {% if req.supervisor_deadline %}
+                                {{ req.supervisor_deadline|date:"d M Y H:i" }}
+                                {% if req.status == 'escalated' %}
+                                    <div class="sla-bar"><div class="sla-bar-fill sla-overdue" style="width:100%"></div></div>
+                                {% else %}
+                                    <div class="sla-bar"><div class="sla-bar-fill sla-ok" style="width:60%"></div></div>
+                                {% endif %}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if req.status == 'escalated' %}
+                                <span class="status-chip status-escalated">Escalated</span>
+                            {% else %}
+                                <span class="status-chip status-pending">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'store:approval_detail' req.id %}" class="btn btn-ghost">Review</a>
+                        </td>
+                    </tr>
+                    {% if req.status == 'escalated' %}
+                    <tr>
+                        <td colspan="8">
+                            <div class="escalated-notice">
+                                SLA breached — this request was automatically escalated. Storekeeper can now fulfill it, but supervisor action is still recorded.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="panel glass" style="padding:24px;text-align:center;color:#6b7fa3;">No pending requests awaiting approval.</div>
+    {% endif %}
+
+    {% if actioned_requests %}
+    <div class="section-head">Recently Approved (last 20)</div>
+    <div class="table-wrapper">
+        <div class="table-scroll">
+            <table class="req-table rq-table">
+                <thead><tr><th>#</th><th>Requester</th><th>Department</th><th>Approved By</th><th>Approved At</th></tr></thead>
+                <tbody>
+                {% for req in actioned_requests %}
+                    <tr>
+                        <td>{{ req.id }}</td>
+                        <td>{{ req.requester.name }}</td>
+                        <td>{{ req.requester.department.name|default:"-" }}</td>
+                        <td>{{ req.approved_by.get_full_name|default:req.approved_by.username|default:"-" }}</td>
+                        <td>{{ req.approved_at|date:"d M Y H:i"|default:"-" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if rejected_requests %}
+    <div class="section-head">Recently Rejected (last 20)</div>
+    <div class="table-wrapper">
+        <div class="table-scroll">
+            <table class="req-table rq-table">
+                <thead><tr><th>#</th><th>Requester</th><th>Department</th><th>Rejected At</th><th>Reason</th></tr></thead>
+                <tbody>
+                {% for req in rejected_requests %}
+                    <tr>
+                        <td>{{ req.id }}</td>
+                        <td>{{ req.requester.name }}</td>
+                        <td>{{ req.requester.department.name|default:"-" }}</td>
+                        <td>{{ req.rejected_at|date:"d M Y H:i"|default:"-" }}</td>
+                        <td style="max-width:260px;white-space:pre-wrap;">{{ req.rejection_reason|default:"-" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

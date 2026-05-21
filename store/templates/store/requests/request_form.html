@@ -4,230 +4,216 @@
 {% block title %}{{ page_title|default:"Request" }} - SMS{% endblock %}
 
 {% block extra_css %}
-<style>.rq-grid.full-width{display:block}.rq-grid.full-width .rq-main{width:100%}</style>
-<link rel="stylesheet" href="{% static 'store/css/issue_item_v2.css' %}">
 <link rel="stylesheet" href="{% static 'store/css/request_form_v2.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="rq-page">
-    <header class="rq-topbar glass">
+<div class="rqf-page">
+
+    {# ── HEADER ─────────────────────────────────────────────── #}
+    <header class="rqf-header">
         <div>
-            <p class="rq-kicker">Smart Management Solution</p>
-            <h1 class="rq-title">{{ page_title|default:"Request" }}</h1>
+            <p class="rqf-kicker">Smart Management Solution</p>
+            <h1 class="rqf-title">{{ page_title|default:"New Request" }}</h1>
         </div>
-        <div class="rq-status-wrap">
-            <span class="rq-status">{% if request_obj %}{{ request_obj.display_status_label }}{% else %}{{ request_status|default:"draft"|title }}{% endif %}</span>
-            {% if request_obj and request_obj.status == 'submitted' and request_obj.needs_resubmission %}
-                <span class="resubmit-badge">Resubmission Required</span>
+        <div class="rqf-status-wrap">
+            <span class="rqf-status-pill rqf-s-{% if request_obj %}{{ request_obj.status }}{% else %}draft{% endif %}">
+                ● {% if request_obj %}{{ request_obj.display_status_label }}{% else %}{{ request_status|default:"draft"|title }}{% endif %}
+            </span>
+            {% if request_obj and request_obj.status == 'pending' and request_obj.needs_resubmission %}
+            <span class="rqf-resubmit-badge">Resubmission Required</span>
             {% endif %}
         </div>
     </header>
 
-    {% if messages %}
-    <div class="rq-messages">
-        {% for message in messages %}
-        <div class="rq-message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
-        {% endfor %}
+    {# ── CARD 1: REQUESTER INFO ──────────────────────────────── #}
+    <div class="rqf-card">
+        <div class="rqf-card-label">Requester Info</div>
+        <div class="rqf-meta-grid">
+            <div class="rqf-meta-field">
+                <span>Name</span>
+                <strong>{{ requester_meta.name }}</strong>
+            </div>
+            <div class="rqf-meta-field">
+                <span>Staff ID</span>
+                <strong>{{ requester_meta.staff_id|default:"-" }}</strong>
+            </div>
+            <div class="rqf-meta-field">
+                <span>Department</span>
+                <strong>{{ requester_meta.department|default:"-" }}</strong>
+            </div>
+            <div class="rqf-meta-field">
+                <span>Role</span>
+                <strong>{{ requester_meta.role|default:"-" }}</strong>
+            </div>
+        </div>
     </div>
-    {% endif %}
 
-    <div class="rq-grid full-width">
-        <section class="rq-main">
-            <div class="glass rq-card">
-                <h2>Requester Info</h2>
-                <div class="rq-meta">
-                    <div><span>Name</span><strong>{{ requester_meta.name }}</strong></div>
-                    <div><span>Staff ID</span><strong>{{ requester_meta.staff_id|default:"-" }}</strong></div>
-                    <div><span>Department</span><strong>{{ requester_meta.department|default:"-" }}</strong></div>
-                    <div><span>Role</span><strong>{{ requester_meta.role|default:"-" }}</strong></div>
-                </div>
+    {% if is_read_only %}
+    {# ── READ-ONLY MODE ──────────────────────────────────────── #}
+
+    <div class="rqf-card">
+        <div class="rqf-card-label">Purpose</div>
+        <textarea class="rqf-textarea" disabled>{{ request_obj.purpose|default:"" }}</textarea>
+    </div>
+
+    <div class="rqf-card">
+        <div class="rqf-card-label">Request Items</div>
+        <div class="rqf-items-head rqf-items-head--ro">
+            <span>Item</span>
+            <span>Requested Qty</span>
+            <span>Fulfilled Qty</span>
+        </div>
+        {% for request_item in request_items %}
+        <div class="rqf-item-row rqf-item-row--ro">
+            <span>{{ request_item.item.name }}</span>
+            <span>{{ request_item.requested_qty }}</span>
+            <span>{{ request_item.fulfilled_qty }}</span>
+        </div>
+        {% empty %}
+        <p class="rqf-empty">No items on this request.</p>
+        {% endfor %}
+        <p class="rqf-readonly-note">This request is fulfilled and is now read-only.</p>
+    </div>
+
+    {% else %}
+    {# ── EDITABLE FORM MODE ──────────────────────────────────── #}
+
+    <form method="post" class="rqf-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next_url|default:request.get_full_path }}">
+        {{ formset.management_form }}
+
+        {# CARD 2: PURPOSE #}
+        <div class="rqf-card">
+            <div class="rqf-card-label">Purpose</div>
+            {% if is_storekeeper_editor %}
+                <textarea class="rqf-textarea" disabled>{{ request_obj.purpose|default:"" }}</textarea>
+            {% else %}
+                {{ form.purpose }}
+                {{ form.purpose.errors }}
+            {% endif %}
+        </div>
+
+        {% if is_storekeeper_editor %}
+        {# CARD 2b: STORE COMMENT (storekeeper only) #}
+        <div class="rqf-card">
+            <div class="rqf-card-label">Store Comment</div>
+            <textarea class="rqf-textarea" name="store_note" rows="3"
+                placeholder="Add optional fulfillment note...">{{ store_note|default:request_obj.store_note|default:"" }}</textarea>
+        </div>
+        {% endif %}
+
+        {# CARD 3: REQUEST ITEMS #}
+        <div class="rqf-card">
+            <div class="rqf-card-label">Request Items</div>
+
+            <div class="rqf-items-head{% if is_storekeeper_editor %} has-stock{% endif %}">
+                <span>Item</span>
+                {% if is_storekeeper_editor %}<span>In Stock</span>{% endif %}
+                <span>Qty Requested</span>
+                <span></span>
             </div>
 
-            {% if is_read_only %}
-                <div class="glass rq-card">
-                    <h2>Purpose</h2>
-                    <div class="rq-field">
-                        <textarea disabled>{{ request_obj.purpose|default:"" }}</textarea>
-                    </div>
-                </div>
-
-                <div class="glass rq-card">
-                    <div class="rq-card-head">
-                        <h2>Request Items</h2>
-                    </div>
-
-                    <div class="rq-table-wrap">
-                        <table class="rq-table">
-                            <thead>
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Requested Qty</th>
-                                    <th>Fulfilled Qty</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for request_item in request_items %}
-                                    <tr>
-                                        <td data-label="Item">{{ request_item.item.name }}</td>
-                                        <td data-label="Requested Qty">{{ request_item.requested_qty }}</td>
-                                        <td data-label="Fulfilled Qty">{{ request_item.fulfilled_qty }}</td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="3">No items on this request.</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="glass rq-card">
-                    <p class="tl-desc">This request is fulfilled and is now read-only for staff.</p>
-                </div>
-            {% else %}
-                <form method="post" class="rq-form">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ next_url|default:request.get_full_path }}">
-                    {{ formset.management_form }}
-
-                    <div class="glass rq-card">
-                        <h2>Purpose</h2>
-                        <div class="rq-field">
-                            {% if is_storekeeper_editor %}
-                                <textarea disabled>{{ request_obj.purpose|default:"" }}</textarea>
-                            {% else %}
-                                {{ form.purpose }}
-                                {{ form.purpose.errors }}
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    {% if is_storekeeper_editor %}
-                    <div class="glass rq-card">
-                        <h2>Store Comment</h2>
-                        <div class="rq-field">
-                            <textarea name="store_note" rows="3" placeholder="Add optional fulfillment note...">{{ store_note|default:request_obj.store_note|default:"" }}</textarea>
-                        </div>
-                    </div>
-                    {% endif %}
-
-
-                    <div class="glass rq-card">
-                        <div class="rq-card-head">
-                            <h2>Request Items</h2>
-                        </div>
-
-                        <div class="rq-table-wrap">
-                            <table class="rq-table">
-                                <thead>
-                                    <tr>
-                                        <th>Item</th>
-                                        {% if is_storekeeper_editor %}<th>In Stock</th>{% endif %}
-                                        <th>Requested Qty</th>
-                                        <th class="cell-right">Remove</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="itemsBody">
-                                    {% for item_form in formset %}
-                                        <tr class="js-item-row">
-                                            <td data-label="Item">
-                                                {% if is_storekeeper_editor %}
-                                                    {{ item_form.item.as_hidden }}
-                                                    <span>{{ item_form.item_label }}</span>
-                                                {% else %}
-                                                    {{ item_form.item }}
-                                                {% endif %}
-                                                {{ item_form.item.errors }}
-                                            </td>
-                                            {% if is_storekeeper_editor %}<td data-label="In Stock">{{ item_form.in_stock }}</td>{% endif %}
-                                            <td data-label="Requested Qty">
-                                                {% if is_storekeeper_editor %}
-                                                    <input type="number" name="{{ item_form.requested_qty.html_name }}" id="{{ item_form.requested_qty.id_for_label }}" value="{% firstof item_form.override_requested_qty item_form.display_requested_qty %}" min="1" step="1" inputmode="numeric">
-                                                {% else %}
-                                                    {{ item_form.requested_qty }}
-                                                {% endif %}
-                                                {{ item_form.requested_qty.errors }}
-                                            </td>
-                                            <td class="cell-right" data-label="Remove">
-                                                {% if item_form.DELETE %}
-                                                    <div class="rq-hidden-delete">{{ item_form.DELETE }}</div>
-                                                {% endif %}
-                                                <button type="button" class="btn btn-danger js-remove-row">Remove</button>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    {% if can_add_items %}
-                    <button type="button" class="rq-fab-add" id="addItemBtn" aria-label="Add item">+</button>
-                    {% endif %}
-
-                    <div class="rq-actions">
-                        {% if is_storekeeper_editor and request_obj and request_obj.status == 'submitted' %}
-                            <a href="{% url 'store:request_fulfill' request_obj.id %}" class="btn btn-primary-alt">Fulfill Request</a>
-                        {% elif not is_storekeeper_editor and can_submit %}
-                            <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
-                            <button
-                                type="submit"
-                                class="btn btn-primary-alt"
-                                {% if request_obj %}formaction="{% url 'store:request_submit' request_obj.id %}" formmethod="post"{% else %}name="action" value="submit"{% endif %}
-                            >
-                                Submit Request
-                            </button>
-                        {% elif not is_storekeeper_editor %}
-                            <button type="submit" class="btn btn-primary">{{ submit_label }}</button>
-                            <button type="button" class="btn btn-primary-alt" disabled>Submit Request</button>
+            <div id="itemsBody">
+                {% for item_form in formset %}
+                <div class="rqf-item-row js-item-row{% if is_storekeeper_editor %} has-stock{% endif %}">
+                    <div class="rqf-item-cell">
+                        {% if is_storekeeper_editor %}
+                            {{ item_form.item.as_hidden }}
+                            <span class="rqf-item-label">{{ item_form.item_label }}</span>
                         {% else %}
-                            <button type="button" class="btn btn-primary" disabled>{{ submit_label }}</button>
+                            {{ item_form.item }}
                         {% endif %}
+                        {{ item_form.item.errors }}
                     </div>
-                </form>
+                    {% if is_storekeeper_editor %}
+                    <div class="rqf-item-cell rqf-item-cell--stock">{{ item_form.in_stock }}</div>
+                    {% endif %}
+                    <div class="rqf-item-cell rqf-item-cell--qty">
+                        {% if is_storekeeper_editor %}
+                            <input type="number"
+                                   name="{{ item_form.requested_qty.html_name }}"
+                                   id="{{ item_form.requested_qty.id_for_label }}"
+                                   value="{% firstof item_form.override_requested_qty item_form.display_requested_qty %}"
+                                   min="1" step="1" inputmode="numeric">
+                        {% else %}
+                            {{ item_form.requested_qty }}
+                        {% endif %}
+                        {{ item_form.requested_qty.errors }}
+                    </div>
+                    <div class="rqf-item-cell rqf-item-cell--del">
+                        {% if item_form.DELETE %}
+                            <div class="rqf-hidden-delete">{{ item_form.DELETE }}</div>
+                        {% endif %}
+                        <button type="button" class="rqf-remove-btn js-remove-row" aria-label="Remove item">×</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if can_add_items %}
+            <button type="button" class="rqf-add-btn" id="addItemBtn">＋ Add item</button>
             {% endif %}
-        </section>
+        </div>
+
+        {# FOOTER ACTIONS #}
+        <div class="rqf-actions">
+            <a href="{% url 'store:request_list' %}" class="rqf-btn rqf-btn-cancel">Cancel</a>
+
+            {% if is_storekeeper_editor and request_obj %}
+                <a href="{% url 'store:request_fulfill' request_obj.id %}" class="rqf-btn rqf-btn-primary">Fulfill Request</a>
+            {% elif not is_storekeeper_editor and can_submit %}
+                <button type="submit" class="rqf-btn rqf-btn-secondary">{{ submit_label }}</button>
+                <button
+                    type="submit"
+                    class="rqf-btn rqf-btn-primary"
+                    {% if request_obj %}formaction="{% url 'store:request_submit' request_obj.id %}" formmethod="post"{% else %}name="action" value="submit"{% endif %}
+                >Submit Request</button>
+            {% elif not is_storekeeper_editor %}
+                <button type="submit" class="rqf-btn rqf-btn-secondary">{{ submit_label }}</button>
+                <button type="button" class="rqf-btn rqf-btn-primary" disabled>Submit Request</button>
+            {% else %}
+                <button type="button" class="rqf-btn rqf-btn-primary" disabled>{{ submit_label }}</button>
+            {% endif %}
+        </div>
+
+    </form>
+    {% endif %}
+
 </div>
 
-    {% if not is_read_only and can_add_items %}
-    <template id="itemRowTemplate">
-        <tr class="js-item-row">
-            <td data-label="Item">{{ formset.empty_form.item }}</td>
-            <td data-label="Requested Qty">{{ formset.empty_form.requested_qty }}</td>
-            <td class="cell-right" data-label="Remove">
-                <div class="rq-hidden-delete">{{ formset.empty_form.DELETE }}</div>
-                <button type="button" class="btn btn-danger js-remove-row">Remove</button>
-            </td>
-        </tr>
-    </template>
-    {% endif %}
-</div>
+{% if not is_read_only and can_add_items %}
+<template id="itemRowTemplate">
+    <div class="rqf-item-row js-item-row">
+        <div class="rqf-item-cell">{{ formset.empty_form.item }}</div>
+        <div class="rqf-item-cell rqf-item-cell--qty">{{ formset.empty_form.requested_qty }}</div>
+        <div class="rqf-item-cell rqf-item-cell--del">
+            <div class="rqf-hidden-delete">{{ formset.empty_form.DELETE }}</div>
+            <button type="button" class="rqf-remove-btn js-remove-row" aria-label="Remove item">×</button>
+        </div>
+    </div>
+</template>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
 {% if not is_read_only and can_add_items %}
 <script>
 (() => {
-    const addBtn = document.getElementById("addItemBtn");
-    const body = document.getElementById("itemsBody");
+    const addBtn    = document.getElementById("addItemBtn");
+    const body      = document.getElementById("itemsBody");
     const totalForms = document.getElementById("id_items-TOTAL_FORMS");
-    const template = document.getElementById("itemRowTemplate");
+    const template  = document.getElementById("itemRowTemplate");
 
     function markDeleted(row) {
         const del = row.querySelector("input[type='checkbox'][name$='-DELETE']");
-        if (del) {
-            del.checked = true;
-            row.classList.add("is-deleted");
-            row.style.display = "none";
-            return;
-        }
+        if (del) { del.checked = true; row.style.display = "none"; return; }
         row.remove();
     }
 
-    body.addEventListener("click", (event) => {
-        const btn = event.target.closest(".js-remove-row");
+    body.addEventListener("click", e => {
+        const btn = e.target.closest(".js-remove-row");
         if (!btn) return;
         const row = btn.closest(".js-item-row");
         if (row) markDeleted(row);
@@ -245,26 +231,3 @@
 </script>
 {% endif %}
 {% endblock %}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -33,7 +33,7 @@ def history_stockin(request):
             Q(received_by__username__icontains=q)
         ).distinct()
 
-    paginator = Paginator(stockins, 10)
+    paginator = Paginator(stockins, 20)
     page_obj = paginator.get_page(request.GET.get("page"))
     page_range = paginator.get_elided_page_range(number=page_obj.number, on_each_side=1, on_ends=1)
 

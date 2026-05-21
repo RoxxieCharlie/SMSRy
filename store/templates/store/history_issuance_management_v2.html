@@ -7,21 +7,24 @@
 <link rel="stylesheet" href="{% static 'store/css/base_v2.css' %}">
 <link rel="stylesheet" href="{% static 'store/css/history_issuance_v2.css' %}">
 <style>
-.page{max-width:1600px;padding:30px 32px}
+.page{max-width:1640px;padding:34px 40px}
 .table-wrapper{width:100%}
 .table-scroll{overflow-x:auto}
 table{min-width:1220px}
-th{font-size:11px;padding:12px 12px}
-td{font-size:12px;padding:12px 12px;vertical-align:top}.card.stat{padding:18px 96px 18px 18px;align-items:flex-start}
-.card.stat h4{max-width:78%}
-.card.stat h2{position:absolute;right:14px;top:16px;width:56px;height:46px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0;font-size:24px;line-height:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+th{font-size:13px;padding:16px 18px}
+td{font-size:14px;padding:15px 18px;vertical-align:top}
+.card.stat{padding:24px 26px;flex-direction:column;align-items:flex-start;gap:8px}
+.card.stat h4{max-width:none;font-size:12px}
+.card.stat h2{position:static;width:auto;height:auto;border-radius:0;display:block;margin:0;font-size:38px;font-weight:900;line-height:1;background:transparent;border:0;padding:0}
 .card.stat::after{display:none}
-table th:nth-child(1),table td:nth-child(1){min-width:104px}
-table th:nth-child(2),table td:nth-child(2){min-width:122px}
-table th:nth-child(3),table td:nth-child(3),table th:nth-child(4),table td:nth-child(4){min-width:122px}
-table th:nth-child(5),table td:nth-child(5){min-width:126px}
-table th:nth-child(6),table td:nth-child(6){min-width:180px;line-height:1.35}
-table th:nth-child(7),table td:nth-child(7){min-width:150px;line-height:1.35}
+table th:nth-child(1),table td:nth-child(1){min-width:110px}
+table th:nth-child(2),table td:nth-child(2){min-width:130px}
+table th:nth-child(3),table td:nth-child(3){min-width:130px}
+table th:nth-child(4),table td:nth-child(4){min-width:130px}
+table th:nth-child(5),table td:nth-child(5){min-width:130px}
+table th:nth-child(6),table td:nth-child(6){min-width:130px}
+table th:nth-child(7),table td:nth-child(7){min-width:190px;line-height:1.45}
+table th:nth-child(8),table td:nth-child(8){min-width:170px;line-height:1.45}
 </style>
 {% endblock %}
 
@@ -86,6 +89,7 @@ table th:nth-child(7),table td:nth-child(7){min-width:150px;line-height:1.35}
                         <th>Date</th>
                         <th>Staff</th>
                         <th>Department</th>
+                        <th>Approved By</th>
                         <th>Issued By</th>
                         <th>Items</th>
                         <th>Comment</th>
@@ -98,13 +102,14 @@ table th:nth-child(7),table td:nth-child(7){min-width:150px;line-height:1.35}
                         <td>{{ issuance.issued_at|date:"d M Y" }}</td>
                         <td>{{ issuance.staff.name }}</td>
                         <td>{{ issuance.staff.department.name|default:"-" }}</td>
+                        <td>{% if issuance.request_id %}{% if issuance.request.approved_by %}{{ issuance.request.approved_by.get_full_name|default:issuance.request.approved_by.username }}{% elif issuance.request.status == 'escalated' or issuance.request.escalated_at %}Escalated{% else %}—{% endif %}{% else %}—{% endif %}</td>
                         <td>{{ issuance.issued_by.username }}</td>
                         <td><button class="items-btn history-items-btn" type="button" data-toggle-items aria-expanded="false"><span class="items-ic">&gt;</span><span>View Items</span></button></td>
                         <td>{% if issuance.request_id %}{{ issuance.request.purpose|default:"-" }}{% else %}{{ issuance.comment|default:"-" }}{% endif %}</td>
                         <td class="status-action">{% if issuance.is_reversed %}<span class="status reversed">Reversed</span>{% elif issuance.is_edited_ui %}<span class="status editable">Edited</span>{% elif issuance.can_reverse_ui %}<span class="status editable">Editable Window</span>{% else %}<span class="status locked">Locked</span>{% endif %}</td>
                     </tr>
                     <tr class="details-row" hidden>
-                        <td colspan="7">
+                        <td colspan="8">
                             <div class="items-panel">
                                 <div class="items-panel-head">
                                     <div class="items-title">Issuance #{{ issuance.id }} Item Breakdown</div>
@@ -155,7 +160,7 @@ table th:nth-child(7),table td:nth-child(7){min-width:150px;line-height:1.35}
                             </div>
                         </td>
                     </tr>
-                    {% empty %}<tr><td colspan="7" class="empty">No issuances found for this filter.</td></tr>{% endfor %}
+                    {% empty %}<tr><td colspan="8" class="empty">No issuances found for this filter.</td></tr>{% endfor %}
                 </tbody>
             </table>
         </div>

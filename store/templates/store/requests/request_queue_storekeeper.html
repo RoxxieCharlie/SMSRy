@@ -8,11 +8,181 @@
 <link rel="stylesheet" href="{% static 'store/css/request_list_v2.css' %}">
 <style>
 
-.kpi-editable{border-color:rgba(255,198,88,.45);background:linear-gradient(180deg,rgba(120,94,34,.45),rgba(95,72,24,.52))}
-.kpi-today{border-color:rgba(112,214,154,.35);background:linear-gradient(180deg,rgba(40,96,74,.5),rgba(24,69,53,.54))}
+.kpi-submitted{
+  border-color:rgba(78,165,255,.72);
+  background:
+    radial-gradient(300px 155px at 16% 12%, rgba(78,165,255,1.0), transparent 62%),
+    radial-gradient(200px 130px at 88% 88%, rgba(78,165,255,.36), transparent 60%),
+    #010818;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  box-shadow:0 18px 50px rgba(0,0,0,.36),0 0 54px rgba(78,165,255,.36);
+  filter:brightness(1.10);
+}
+.kpi-editable{
+  border-color:rgba(255,204,102,.72);
+  background:
+    radial-gradient(320px 160px at 16% 12%, rgba(255,204,102,1.0), transparent 62%),
+    radial-gradient(220px 140px at 88% 88%, rgba(255,184,72,.36), transparent 60%),
+    #0d0901;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  box-shadow:0 18px 50px rgba(0,0,0,.36),0 0 54px rgba(255,204,102,.36);
+  filter:brightness(1.10);
+}
+.kpi-today{
+  border-color:rgba(77,217,168,.68);
+  background:
+    radial-gradient(300px 155px at 16% 12%, rgba(77,217,168,.98), transparent 62%),
+    radial-gradient(200px 130px at 88% 88%, rgba(77,217,168,.32), transparent 60%),
+    #010d07;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  box-shadow:0 18px 50px rgba(0,0,0,.36),0 0 54px rgba(77,217,168,.30);
+  filter:brightness(1.10);
+}
+.kpi-locked{
+  border-color:rgba(255,107,107,.68);
+  background:
+    radial-gradient(300px 155px at 16% 12%, rgba(255,107,107,.98), transparent 62%),
+    radial-gradient(200px 130px at 88% 88%, rgba(255,107,107,.32), transparent 60%),
+    #0d0101;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  box-shadow:0 18px 50px rgba(0,0,0,.36),0 0 54px rgba(255,107,107,.28);
+  filter:brightness(1.10);
+}
+.kpi-submitted .kpi-label, .kpi-submitted .kpi-note,
+.kpi-editable  .kpi-label, .kpi-editable  .kpi-note,
+.kpi-today     .kpi-label, .kpi-today     .kpi-note,
+.kpi-locked    .kpi-label, .kpi-locked    .kpi-note {
+  color: rgba(255,255,255,.85);
+  text-shadow: 0 1px 5px rgba(0,0,0,.55);
+}
+.kpi-submitted .kpi-value, .kpi-editable .kpi-value,
+.kpi-today     .kpi-value, .kpi-locked   .kpi-value {
+  color: #ffffff;
+  text-shadow: 0 1px 8px rgba(0,0,0,.55);
+}
 .queue-main{grid-column:1 / -1}
-.staff-kpis:has(.kpi-card.is-active) .kpi-card:not(.is-active){opacity:.66;transform:scale(.985);filter:saturate(.82)}
-.staff-kpis .kpi-card.is-active{position:relative;transform:translateY(-6px) scale(1.04);border-color:rgba(154,205,255,.92);box-shadow:0 0 0 1px rgba(173,216,255,.26),0 28px 56px rgba(73,141,230,.28),0 0 34px rgba(98,177,255,.30);filter:brightness(1.08)}
+.staff-kpis:has(.kpi-card.is-active) .kpi-card:not(.is-active){
+  opacity:.90;
+  filter:saturate(.94) brightness(1.08);
+  transform:scale(.985);
+}
+.staff-kpis .kpi-card.is-active{
+  position:relative;
+  transform:translateY(-6px) scale(1.04);
+  border-color:rgba(255,255,255,.60);
+  box-shadow:0 0 0 2px rgba(255,255,255,.22),0 28px 56px rgba(0,0,0,.40),0 0 44px rgba(255,255,255,.16);
+  filter:brightness(1.14);
+}
+
+/* Light mode — reset dark-mode brightness filter and text shadows */
+[data-theme="light"] .kpi-submitted,
+[data-theme="light"] .kpi-editable,
+[data-theme="light"] .kpi-today,
+[data-theme="light"] .kpi-locked,
+[data-theme="light"] .staff-kpis .kpi-card.is-active { filter: none; }
+
+[data-theme="light"] .kpi-submitted .kpi-label, [data-theme="light"] .kpi-submitted .kpi-note,
+[data-theme="light"] .kpi-editable  .kpi-label, [data-theme="light"] .kpi-editable  .kpi-note,
+[data-theme="light"] .kpi-today     .kpi-label, [data-theme="light"] .kpi-today     .kpi-note,
+[data-theme="light"] .kpi-locked    .kpi-label, [data-theme="light"] .kpi-locked    .kpi-note,
+[data-theme="light"] .kpi-submitted .kpi-value, [data-theme="light"] .kpi-editable  .kpi-value,
+[data-theme="light"] .kpi-today     .kpi-value, [data-theme="light"] .kpi-locked    .kpi-value {
+  color: unset;
+  text-shadow: none;
+}
+
+/* Light mode KPI colour variants — glassy */
+[data-theme="light"] .kpi-submitted {
+  background: linear-gradient(145deg,rgba(147,197,253,0.50),rgba(191,219,254,0.36));
+  border-color: #3b82f6;
+  border-width: 2px;
+  box-shadow: 0 8px 24px rgba(37,99,235,0.22), 0 1px 0 rgba(255,255,255,.70) inset;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-theme="light"] .kpi-submitted .kpi-label,
+[data-theme="light"] .kpi-submitted .kpi-note  { color: #1e3a8a; }
+[data-theme="light"] .kpi-submitted .kpi-value  { color: #1e3a8a; }
+
+[data-theme="light"] .kpi-editable {
+  background: linear-gradient(145deg,rgba(252,211,77,0.50),rgba(253,230,138,0.36));
+  border-color: #f59e0b;
+  border-width: 2px;
+  box-shadow: 0 8px 24px rgba(180,83,9,0.22), 0 1px 0 rgba(255,255,255,.70) inset;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-theme="light"] .kpi-editable .kpi-label,
+[data-theme="light"] .kpi-editable .kpi-note  { color: #78350f; }
+[data-theme="light"] .kpi-editable .kpi-value  { color: #451a03; }
+
+[data-theme="light"] .kpi-today {
+  background: linear-gradient(145deg,rgba(110,231,183,0.50),rgba(167,243,208,0.36));
+  border-color: #10b981;
+  border-width: 2px;
+  box-shadow: 0 8px 24px rgba(5,150,105,0.20), 0 1px 0 rgba(255,255,255,.70) inset;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-theme="light"] .kpi-today .kpi-label,
+[data-theme="light"] .kpi-today .kpi-note  { color: #064e3b; }
+[data-theme="light"] .kpi-today .kpi-value  { color: #064e3b; }
+
+[data-theme="light"] .kpi-locked {
+  background: linear-gradient(145deg,rgba(252,165,165,0.50),rgba(254,202,202,0.36));
+  border-color: #ef4444;
+  border-width: 2px;
+  box-shadow: 0 8px 24px rgba(220,38,38,0.20), 0 1px 0 rgba(255,255,255,.70) inset;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+[data-theme="light"] .kpi-locked .kpi-label,
+[data-theme="light"] .kpi-locked .kpi-note  { color: #7f1d1d; }
+[data-theme="light"] .kpi-locked .kpi-value  { color: #450a0a; }
+
+/* Light mode — hover: lift + color-matched border glow */
+[data-theme="light"] .kpi-link:hover .kpi-submitted {
+  border-color: #2563eb;
+  box-shadow: 0 10px 28px rgba(37,99,235,0.32), 0 1px 0 rgba(255,255,255,.80) inset;
+}
+[data-theme="light"] .kpi-link:hover .kpi-editable {
+  border-color: #d97706;
+  box-shadow: 0 10px 28px rgba(180,83,9,0.32), 0 1px 0 rgba(255,255,255,.80) inset;
+}
+[data-theme="light"] .kpi-link:hover .kpi-today {
+  border-color: #059669;
+  box-shadow: 0 10px 28px rgba(5,150,105,0.30), 0 1px 0 rgba(255,255,255,.80) inset;
+}
+[data-theme="light"] .kpi-link:hover .kpi-locked {
+  border-color: #dc2626;
+  box-shadow: 0 10px 28px rgba(220,38,38,0.30), 0 1px 0 rgba(255,255,255,.80) inset;
+}
+
+/* Light mode — active: deeper gradient + sharp 2px color ring */
+[data-theme="light"] .staff-kpis:has(.kpi-card.is-active) .kpi-card:not(.is-active) {
+  opacity: .68;
+  filter: saturate(.78);
+}
+[data-theme="light"] .kpi-submitted.is-active {
+  background: linear-gradient(145deg,rgba(147,197,253,0.78),rgba(191,219,254,0.60));
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #3b82f6, 0 10px 32px rgba(37,99,235,0.52), 0 0 22px rgba(59,130,246,0.42), 0 1px 0 rgba(255,255,255,.80) inset;
+}
+[data-theme="light"] .kpi-editable.is-active {
+  background: linear-gradient(145deg,rgba(252,211,77,0.78),rgba(253,230,138,0.60));
+  border-color: #d97706;
+  box-shadow: 0 0 0 2px #f59e0b, 0 10px 32px rgba(180,83,9,0.52), 0 0 22px rgba(245,158,11,0.42), 0 1px 0 rgba(255,255,255,.80) inset;
+}
+[data-theme="light"] .kpi-today.is-active {
+  background: linear-gradient(145deg,rgba(110,231,183,0.78),rgba(167,243,208,0.60));
+  border-color: #059669;
+  box-shadow: 0 0 0 2px #10b981, 0 10px 32px rgba(5,150,105,0.48), 0 0 22px rgba(16,185,129,0.38), 0 1px 0 rgba(255,255,255,.80) inset;
+}
+[data-theme="light"] .kpi-locked.is-active {
+  background: linear-gradient(145deg,rgba(252,165,165,0.78),rgba(254,202,202,0.60));
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px #ef4444, 0 10px 32px rgba(220,38,38,0.48), 0 0 22px rgba(239,68,68,0.38), 0 1px 0 rgba(255,255,255,.80) inset;
+}
 
 </style>
 {% endblock %}
@@ -23,16 +193,16 @@
         <div>
             <p class="staff-kicker">Store Operations</p>
             <h1 class="staff-title">Incoming Requests</h1>
-            <p class="staff-subtitle">Fulfillment queue for submitted requests.</p>
+            <p class="staff-subtitle">Fulfillment queue for approved requests.</p>
         </div>
     </header>
 
     <section class="staff-kpis">
         <a class="kpi-link" href="{% url 'store:request_list' %}?kpi=pending">
             <article class="kpi-card kpi-submitted {% if selected_kpi == 'pending' %}is-active{% endif %}">
-                <div class="kpi-label">Pending Requests</div>
+                <div class="kpi-label">Approved Requests</div>
                 <div class="kpi-value">{{ pending_count }}</div>
-                <div class="kpi-note">{{ pending_note }}</div>
+                <div class="kpi-note">{{ pending_note }}{% if escalated_count %} ({{ escalated_count }} escalated){% endif %}</div>
             </article>
         </a>
         <a class="kpi-link" href="{% url 'store:request_list' %}?kpi=editable">
@@ -67,6 +237,7 @@
                         <tr>
                             <th>Requester</th>
                             <th>Department</th>
+                            <th>Approved By</th>
                             <th>Purpose</th>
                             <th>{% if selected_kpi == 'pending' %}Submitted{% else %}Fulfilled{% endif %}</th>
                             <th class="cell-right">Action</th>
@@ -77,7 +248,13 @@
                         <tr>
                             <td>{{ request_obj.requester.name }}</td>
                             <td>{{ request_obj.requester.department.name|default:"-" }}</td>
-                            <td>{{ request_obj.purpose|default:"-" }}</td>
+                            <td>{% if request_obj.approved_by %}{{ request_obj.approved_by.get_full_name|default:request_obj.approved_by.username }}{% elif request_obj.status == 'escalated' or request_obj.escalated_at %}Escalated{% else %}—{% endif %}</td>
+                            <td>
+                                {{ request_obj.purpose|default:"-" }}
+                                {% if request_obj.status == 'escalated' %}
+                                    <span style="display:inline-block;margin-left:6px;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(251,146,60,.18);color:#fb923c;border:1px solid rgba(251,146,60,.4);">ESCALATED</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if selected_kpi == 'pending' %}
                                     {{ request_obj.submitted_at|date:"d M Y H:i" }}
@@ -96,7 +273,7 @@
                             </td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="5">{{ active_empty_message }}</td></tr>
+                        <tr><td colspan="6">{{ active_empty_message }}</td></tr>
                     {% endfor %}
                     </tbody>
                 </table>

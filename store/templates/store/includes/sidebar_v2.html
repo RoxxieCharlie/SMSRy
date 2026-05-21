@@ -1,8 +1,20 @@
+{% load static %}
+{% if sidebar_variant == 'staff' %}
+<aside class="sidebar sidebar--staff">
+{% elif sidebar_variant == 'management' %}
+<aside class="sidebar sidebar--mgt">
+{% else %}
+<aside class="sidebar sidebar--store">
+{% endif %}
 <div class="brand">
-    <div class="brand__mark" aria-hidden="true"></div>
-    <div class="brand__name">SMS</div>
+  <img src="{% static 'store/img/sms_logo_mark.svg' %}" alt="SMS" class="brand__mark-img" width="28" height="28">
+  <span class="brand__name">SMS</span>
 </div>
 <hr>
+<div class="sidebar__user">
+  <span class="sidebar__user-greeting">Hello,</span>
+  <span class="sidebar__user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+</div>
 {% with request.resolver_match.url_name as current_url_name %}
 <nav class="nav nav--{{ sidebar_variant|default:'storekeeper' }}">
     <div class="nav__section">Main</div>
@@ -55,6 +67,13 @@
             <span class="nav__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
             <span>Requests</span>
         </a>
+        {% if request.user.profile.is_active_supervisor %}
+        {% url 'store:approval_queue' as approval_url %}
+        <a class="nav__link {% if current_url_name == 'approval_queue' or current_url_name == 'approval_detail' %}is-active{% endif %}" href="{{ approval_url }}">
+            <span class="nav__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+            <span>Approvals{% if pending_approval_count %} <span style="display:inline-block;min-width:18px;padding:0 4px;border-radius:99px;background:rgba(251,191,36,.9);color:#78350f;font-size:10px;font-weight:700;text-align:center;">{{ pending_approval_count }}</span>{% endif %}</span>
+        </a>
+        {% endif %}
     {% else %}
         {% url 'store:dashboard' as dashboard_url %}
         {% url 'store:inventory_store_v2' as inventory_url %}
@@ -95,6 +114,10 @@
 </nav>
 {% endwith %}
 <div class="sidebar__footer">
+    <button class="nav__link theme-toggle" type="button" data-theme-toggle aria-label="Switch to light mode">
+      <span class="nav__icon theme-toggle__icon" aria-hidden="true">◑</span>
+      <span class="theme-toggle__label">Light mode</span>
+    </button>
     <form method="post" action="{% url 'store:logout' %}" class="logout-form">
         {% csrf_token %}
         <button type="submit" class="nav__link is-logout">
@@ -103,3 +126,4 @@
         </button>
     </form>
 </div>
+</aside>

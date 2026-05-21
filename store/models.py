@@ -165,10 +165,13 @@ class StockInItem(models.Model):
 # =========================
 class Request(models.Model):
     class Status(models.TextChoices):
-        DRAFT = "draft", "Draft"
-        SUBMITTED = "submitted", "Submitted"
+        DRAFT     = "draft",     "Draft"
+        PENDING   = "pending",   "Pending Approval"
+        APPROVED  = "approved",  "Approved"
+        REJECTED  = "rejected",  "Rejected"
+        ESCALATED = "escalated", "Escalated"
         FULFILLED = "fulfilled", "Fulfilled"
-        LOCKED = "locked", "Locked"
+        LOCKED    = "locked",    "Locked"
 
     requester = models.ForeignKey(
         Staff,
@@ -199,6 +202,28 @@ class Request(models.Model):
         blank=True,
         related_name="fulfilled_requests",
     )
+
+    # Supervisor approval fields
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="approved_requests",
+    )
+    rejected_at = models.DateTimeField(null=True, blank=True)
+    rejected_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="rejected_requests",
+    )
+    rejection_reason = models.TextField(blank=True)
+    escalated_at = models.DateTimeField(null=True, blank=True)
+    supervisor_deadline = models.DateTimeField(null=True, blank=True)
+
     last_edited_by = models.ForeignKey(
         User,
         on_delete=models.PROTECT,
@@ -215,6 +240,9 @@ class Request(models.Model):
             models.Index(fields=["submitted_at"]),
             models.Index(fields=["fulfilled_at"]),
         ]
+        permissions = [
+            ("can_approve_requests", "Can approve store requests"),
+        ]
 
     def __str__(self):
         return f"Request #{self.id} by {self.requester.name}"
@@ -229,14 +257,16 @@ class Request(models.Model):
 
     @property
     def can_staff_edit(self):
-        return self.status in {self.Status.DRAFT, self.Status.SUBMITTED} and self.fulfilled_at is None
-
+        return self.status in {
+            self.Status.DRAFT,
+            self.Status.PENDING,
+        } and self.fulfilled_at is None
 
     @property
     def can_staff_submit(self):
         if self.status == self.Status.DRAFT:
             return True
-        if self.status == self.Status.SUBMITTED:
+        if self.status == self.Status.PENDING:
             return self.needs_resubmission
         return False
 
@@ -264,11 +294,45 @@ class Request(models.Model):
         return timezone.now() <= self.editable_until
 
     def mark_submitted(self):
+        from store.services.sla_service import compute_supervisor_deadline
         now = timezone.now()
-        self.status = self.Status.SUBMITTED
+        self.status = self.Status.PENDING
         self.submitted_at = now
         self.needs_resubmission = False
-        self.save(update_fields=["status", "submitted_at", "needs_resubmission", "updated_at"])
+        self.supervisor_deadline = compute_supervisor_deadline(now)
+        self.save(update_fields=[
+            "status",
+            "submitted_at",
+            "needs_resubmission",
+            "supervisor_deadline",
+            "updated_at",
+        ])
+
+    def mark_approved(self, user):
+        now = timezone.now()
+        self.status = self.Status.APPROVED
+        self.approved_at = now
+        self.approved_by = user
+        self.save(update_fields=[
+            "status", "approved_at", "approved_by", "updated_at"
+        ])
+
+    def mark_rejected(self, user, reason):
+        now = timezone.now()
+        self.status = self.Status.REJECTED
+        self.rejected_at = now
+        self.rejected_by = user
+        self.rejection_reason = reason
+        self.save(update_fields=[
+            "status", "rejected_at", "rejected_by",
+            "rejection_reason", "updated_at"
+        ])
+
+    def mark_escalated(self):
+        now = timezone.now()
+        self.status = self.Status.ESCALATED
+        self.escalated_at = now
+        self.save(update_fields=["status", "escalated_at", "updated_at"])
 
     def mark_fulfilled(self, user):
         now = timezone.now()
@@ -310,6 +374,9 @@ class RequestItem(models.Model):
     # Storekeeper may decrease and later increase, but never beyond this value.
     original_requested_qty = models.PositiveIntegerField(default=0)
     fulfilled_qty = models.PositiveIntegerField(default=0)
+    # Set by supervisor at approval time. Storekeeper ceiling — cannot fulfill beyond this.
+    # Null means not yet approved (request still pending or rejected).
+    approved_qty = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -333,18 +400,24 @@ class RequestItem(models.Model):
         super().save(*args, **kwargs)
     @property
     def can_increase_fulfilled_qty(self):
-        return self.fulfilled_qty < self.requested_qty
+        ceiling = self.approved_qty if self.approved_qty is not None else self.requested_qty
+        return self.fulfilled_qty < ceiling
 
 
 class RequestActivity(models.Model):
     class Action(models.TextChoices):
-        CREATED = "created", "Created"
-        STAFF_EDITED = "staff_edited", "Staff edited"
-        STORE_EDITED = "store_edited", "Store edited"
-        SUBMITTED = "submitted", "Submitted"
-        FULFILLED = "fulfilled", "Fulfilled"
+        CREATED            = "created",            "Created"
+        STAFF_EDITED       = "staff_edited",       "Staff edited"
+        STORE_EDITED       = "store_edited",       "Store edited"
+        SUBMITTED          = "submitted",          "Submitted"
+        FULFILLED          = "fulfilled",          "Fulfilled"
         FULFILLMENT_EDITED = "fulfillment_edited", "Fulfillment edited"
-        LOCKED = "locked", "Locked"
+        LOCKED             = "locked",             "Locked"
+        SUPERVISOR_EDITED  = "supervisor_edited",  "Supervisor edited"
+        APPROVED           = "approved",           "Approved"
+        REJECTED           = "rejected",           "Rejected"
+        ESCALATED          = "escalated",          "Escalated"
+        PENDING            = "pending",            "Pending"
 
     request = models.ForeignKey(
         Request,
@@ -493,6 +566,10 @@ class Activity(models.Model):
         REQUEST_UPDATED = "REQUEST_UPDATED", "Request updated"
         REQUEST_SUBMITTED = "REQUEST_SUBMITTED", "Request submitted"
         REQUEST_FULFILLED = "REQUEST_FULFILLED", "Request fulfilled"
+        REQUEST_PENDING   = "REQUEST_PENDING",   "Request pending approval"
+        REQUEST_APPROVED  = "REQUEST_APPROVED",  "Request approved"
+        REQUEST_REJECTED  = "REQUEST_REJECTED",  "Request rejected"
+        REQUEST_ESCALATED = "REQUEST_ESCALATED", "Request escalated"
 
     actor = models.ForeignKey(
         User,
@@ -530,6 +607,79 @@ class Activity(models.Model):
     def __str__(self):
         return f"{self.get_verb_display()} by {self.actor}"
 
+class UserProfile(models.Model):
+    """
+    Lightweight extension for plain Django User objects
+    (Management, StoreKeeper). Holds the supervisor toggle.
+    Only one user may be active supervisor at a time.
+    This is enforced at the model save level, not just the UI.
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="profile",
+    )
+    is_active_supervisor = models.BooleanField(default=False)
+    supervisor_since = models.DateTimeField(null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        if self.is_active_supervisor:
+            UserProfile.objects.exclude(pk=self.pk).filter(
+                is_active_supervisor=True
+            ).update(
+                is_active_supervisor=False,
+                supervisor_since=None,
+            )
+            if not self.supervisor_since:
+                self.supervisor_since = timezone.now()
+        else:
+            self.supervisor_since = None
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Profile of {self.user.username}"
+
+
+# =========================
+# Notification
+# =========================
+class Notification(models.Model):
+    class EventType(models.TextChoices):
+        STOCKIN_CREATED   = "stockin_created",   "Stock-in created"
+        ISSUANCE_CREATED  = "issuance_created",  "Issuance created"
+        ISSUANCE_UPDATED  = "issuance_updated",  "Issuance updated"
+        ISSUANCE_REVERSED = "issuance_reversed", "Issuance reversed"
+        ISSUANCE_FAILED   = "issuance_failed",   "Issuance failed"
+        LOW_STOCK_ALERT   = "low_stock_alert",   "Low stock alert"
+        REQUEST_CREATED   = "request_created",   "Request created"
+        REQUEST_UPDATED   = "request_updated",   "Request updated"
+        REQUEST_SUBMITTED = "REQUEST_SUBMITTED", "Request submitted"
+        REQUEST_FULFILLED = "REQUEST_FULFILLED", "Request fulfilled"
+        REQUEST_APPROVED  = "request_approved",  "Request approved"
+        REQUEST_REJECTED  = "request_rejected",  "Request rejected"
+        REQUEST_ESCALATED = "request_escalated", "Request escalated"
+        REQUEST_PENDING   = "request_pending",   "Request pending approval"
+
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+    )
+    event_type = models.CharField(max_length=50, choices=EventType.choices, db_index=True)
+    message = models.TextField()
+    target_type = models.CharField(max_length=50, blank=True)
+    target_id = models.PositiveIntegerField(null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["recipient", "is_read"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def __str__(self):
+        return f"Notification to {self.recipient.username}: {self.event_type}"
 
 

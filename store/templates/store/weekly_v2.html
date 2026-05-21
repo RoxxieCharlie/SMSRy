@@ -55,19 +55,19 @@
 
     <!-- KPI Strip -->
     <section class="weekly__kpis">
-        <div class="wkpi">
+        <div class="wkpi wkpi--blue">
             <div class="wkpi__label">Total issued (this report)</div>
             <div class="wkpi__value">{{ weekly_total|default:"0" }}</div>
             <div class="wkpi__meta">Total quantity that left the store</div>
         </div>
 
-        <div class="wkpi wkpi--soft">
+        <div class="wkpi wkpi--green">
             <div class="wkpi__label">Departments involved</div>
             <div class="wkpi__value">{{ dept_summary|length }}</div>
             <div class="wkpi__meta">Departments that collected items</div>
         </div>
 
-        <div class="wkpi wkpi--soft">
+        <div class="wkpi wkpi--amber">
             <div class="wkpi__label">Unique items</div>
             <div class="wkpi__value">{{ report_list|length }}</div>
             <div class="wkpi__meta">Item types issued in this report</div>
@@ -128,9 +128,10 @@
             <table class="tbl" aria-label="Department collections table">
                 <thead>
                 <tr>
-                    <th>Department</th>
-                    <th class="num" style="width:200px">Total Collected</th>
-                    <th class="num" style="width:120px">Share</th>
+                    <th style="width:180px">Department</th>
+                    <th class="num" style="width:160px">Total Collected</th>
+                    <th class="num" style="width:100px">Share</th>
+                    <th>Items Collected</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -141,10 +142,15 @@
                     <td class="num">
                         <span class="pillPct">{{ d.pct }}%</span>
                     </td>
+                    <td class="muted dept-items-cell">
+                        {% for itm in d.items %}
+                        <span class="dept-item-chip"><span class="dept-item-name">{{ itm.item }}</span><span class="dept-item-qty">{{ itm.qty }}</span></span>{% if not forloop.last %} {% endif %}
+                        {% empty %}—{% endfor %}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3" class="empty">No department activity for this report.</td>
+                    <td colspan="4" class="empty">No department activity for this report.</td>
                 </tr>
                 {% endfor %}
                 </tbody>

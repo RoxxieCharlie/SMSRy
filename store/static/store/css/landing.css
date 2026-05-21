@@ -387,3 +387,67 @@ body.landing-ui {
     flex-direction: column;
   }
 }
+
+/* ========================= LIGHT THEME OVERRIDES ========================= */
+
+[data-theme="light"] body.landing-ui {
+  background:
+    radial-gradient(circle at 16% 12%, rgba(59,130,246,0.12), transparent 28%),
+    radial-gradient(circle at 84% 70%, rgba(16,185,129,0.08), transparent 28%),
+    linear-gradient(135deg, #f0f6ff, #f4f8ff);
+  color: #0f172a;
+}
+
+[data-theme="light"] .landing-brand,
+[data-theme="light"] .landing-login,
+[data-theme="light"] .landing-button,
+[data-theme="light"] .landing-links a,
+[data-theme="light"] .landing-footer a { color: #0f172a; }
+
+[data-theme="light"] .landing-links {
+  background: rgba(255,255,255,0.70);
+  border-color: #d0d9e8;
+}
+[data-theme="light"] .landing-links a { color: #475569; }
+[data-theme="light"] .landing-links a:hover {
+  color: #0f172a;
+  background: rgba(15,23,42,0.06);
+}
+
+[data-theme="light"] .landing-login,
+[data-theme="light"] .landing-button--ghost {
+  background: rgba(255,255,255,0.80);
+  border-color: #d0d9e8;
+}
+
+[data-theme="light"] .landing-copy { color: #475569; }
+
+[data-theme="light"] .landing-hero__card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(240,248,255,0.84));
+  border-color: #d0d9e8;
+  box-shadow: 0 24px 70px rgba(15,23,42,0.10);
+}
+[data-theme="light"] .landing-hero__card span  { color: #475569; }
+[data-theme="light"] .landing-hero__card strong { color: #0f172a; }
+
+[data-theme="light"] .landing-stats article,
+[data-theme="light"] .landing-cards article,
+[data-theme="light"] .landing-steps article,
+[data-theme="light"] .landing-control {
+  background: rgba(255,255,255,0.82);
+  border-color: #d0d9e8;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.06);
+}
+
+[data-theme="light"] .landing-stats strong { color: #0f172a; }
+[data-theme="light"] .landing-stats span   { color: #475569; }
+
+[data-theme="light"] .landing-section__head h2,
+[data-theme="light"] .landing-control h2 { color: #0f172a; }
+
+[data-theme="light"] .landing-cards h3  { color: #0f172a; }
+[data-theme="light"] .landing-cards p,
+[data-theme="light"] .landing-steps p,
+[data-theme="light"] .landing-control span { color: #475569; }
+
+[data-theme="light"] .landing-footer { color: #475569; }

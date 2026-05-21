@@ -248,3 +248,15 @@
         max-width:none;
     }
 }
+
+@media (max-width:480px){
+    .history-topbar         { gap: 8px; }
+    .history-title          { font-size: 22px; }
+    .history-table th       { font-size: 11px; padding: 10px 8px; }
+    .history-table td       { font-size: 12px; padding: 10px 8px; }
+    .history-table-wrap     { padding: 0 6px 6px; }
+    .history-table          { min-width: 520px; }
+    .history-filter         { gap: 8px; padding: 12px; }
+    .history-filter input,
+    .history-filter select  { font-size: 14px; padding: 9px 10px; }
+}

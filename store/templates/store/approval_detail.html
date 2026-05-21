@@ -1,0 +1,181 @@
+{% extends base_template|default:"store/mgt_base_v2.html" %}
+{% load static %}
+
+{% block title %}Review Request #{{ request_obj.id }} - SMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/staff_dashboard_v2.css' %}">
+<link rel="stylesheet" href="{% static 'store/css/request_list_v2.css' %}">
+<style>
+.page{max-width:1100px;padding:30px 32px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:700px){.detail-grid{grid-template-columns:1fr}}
+.detail-card{padding:20px 22px;background:rgba(255,255,255,.03);border:1px solid rgba(137,166,218,.14);border-radius:var(--radius)}
+.detail-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6b7fa3;margin-bottom:4px}
+.detail-value{font-size:14px;color:#e9f1ff;font-weight:500}
+.items-edit-table{width:100%;border-collapse:collapse;margin-top:10px}
+.items-edit-table th,.items-edit-table td{padding:10px 12px;font-size:13px;border-bottom:1px solid rgba(137,166,218,.12);text-align:left}
+.items-edit-table th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6b7fa3}
+.items-edit-table input[type=number]{width:90px;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid rgba(137,166,218,.3);background:rgba(8,15,34,.6);color:#e9f1ff;font-size:13px}
+.action-strip{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px;padding-top:20px;border-top:1px solid rgba(137,166,218,.12)}
+.btn-approve{padding:10px 22px;border-radius:var(--radius-sm);background:rgba(77,217,168,.22);border:1px solid rgba(77,217,168,.5);color:#daf9ec;font-size:13px;font-weight:600;cursor:pointer}
+.btn-approve:hover{background:rgba(77,217,168,.32)}
+.btn-reject{padding:10px 22px;border-radius:var(--radius-sm);background:rgba(255,107,107,.16);border:1px solid rgba(255,107,107,.4);color:#ffe3e3;font-size:13px;font-weight:600;cursor:pointer}
+.btn-reject:hover{background:rgba(255,107,107,.28)}
+.btn-delete-item{padding:4px 10px;border-radius:var(--radius-sm);background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:#fca5a5;font-size:11px;cursor:pointer}
+.reject-panel{margin-top:24px;padding:18px 20px;background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);border-radius:var(--radius)}
+.reject-panel h3{font-size:14px;margin:0 0 12px;color:#fca5a5}
+.reject-panel textarea{width:100%;min-height:90px;padding:10px;border-radius:var(--radius-sm);border:1px solid rgba(255,107,107,.3);background:rgba(8,15,34,.7);color:#e9f1ff;font-size:13px;resize:vertical}
+.activity-log{margin-top:28px}
+.activity-item{padding:10px 12px;border-bottom:1px solid rgba(137,166,218,.1);font-size:12px;color:#9fb4da}
+.activity-item strong{color:#c3d5f2}
+.escalated-notice{padding:12px 16px;border-radius:var(--radius-sm);background:rgba(251,146,60,.14);border:1px solid rgba(251,146,60,.35);color:#ffedd5;font-size:13px;margin-bottom:20px}
+[data-theme="light"] .detail-card{background:rgba(0,0,0,.03);border-color:rgba(14,42,100,.14)}
+[data-theme="light"] .detail-value{color:#0f172a}
+[data-theme="light"] .items-edit-table th{color:#64748b}
+[data-theme="light"] .items-edit-table td{color:#0f172a}
+[data-theme="light"] .items-edit-table input[type=number]{background:#fff;color:#0f172a;border-color:#cbd5e1}
+[data-theme="light"] .btn-approve{background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.4);color:#15803d}
+[data-theme="light"] .btn-reject{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.3);color:#991b1b}
+[data-theme="light"] .escalated-notice{background:rgba(234,88,12,.08);border-color:rgba(234,88,12,.25);color:#9a3412}
+[data-theme="light"] .activity-item{color:#475569}
+[data-theme="light"] .activity-item strong{color:#1e293b}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page">
+    <header class="topbar">
+        <div>
+            <p class="staff-pg-kicker">Supervisor Review</p>
+            <h1 class="staff-pg-title">Request #{{ request_obj.id }}</h1>
+            <p class="req-subtitle">
+                {% if request_obj.status == 'escalated' %}
+                    <span class="status-chip status-escalated">Escalated</span>
+                {% else %}
+                    <span class="status-chip status-pending">Pending Approval</span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="topbar__right">
+            <a href="{% url 'store:approval_queue' %}" class="btn-ghost">Back to Queue</a>
+        </div>
+    </header>
+
+    {% if request_obj.status == 'escalated' %}
+    <div class="escalated-notice">
+        SLA breached — this request was automatically escalated. Storekeeper can now fulfill it, but your action is still recorded and appreciated.
+    </div>
+    {% endif %}
+
+    <div class="detail-grid">
+        <div class="detail-card">
+            <div class="detail-label">Requester</div>
+            <div class="detail-value">{{ request_obj.requester.name }}</div>
+        </div>
+        <div class="detail-card">
+            <div class="detail-label">Department</div>
+            <div class="detail-value">{{ request_obj.requester.department.name|default:"-" }}</div>
+        </div>
+        <div class="detail-card">
+            <div class="detail-label">Submitted</div>
+            <div class="detail-value">{{ request_obj.submitted_at|date:"d M Y H:i"|default:"-" }}</div>
+        </div>
+        <div class="detail-card">
+            <div class="detail-label">SLA Deadline</div>
+            <div class="detail-value">
+                {% if request_obj.supervisor_deadline %}
+                    {{ request_obj.supervisor_deadline|date:"d M Y H:i" }}
+                    {% if request_obj.supervisor_deadline < now %}
+                        <span style="color:#fb923c;font-size:11px;margin-left:6px;">(Overdue)</span>
+                    {% endif %}
+                {% else %}—{% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if request_obj.purpose %}
+    <div class="detail-card" style="margin-top:16px">
+        <div class="detail-label">Purpose</div>
+        <div class="detail-value" style="white-space:pre-wrap;">{{ request_obj.purpose }}</div>
+    </div>
+    {% endif %}
+
+    {# Approve form — includes qty edits and item delete #}
+    <form method="post" action="{% url 'store:approve_request' request_obj.id %}">
+        {% csrf_token %}
+        <div style="margin-top:24px">
+            <div style="font-size:13px;font-weight:700;color:#c3d5f2;margin-bottom:10px">Requested Items</div>
+            <table class="items-edit-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Original Qty</th>
+                        <th>Approve Qty (reduce only)</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for line in items %}
+                    <tr>
+                        <td>{{ line.item.name }}</td>
+                        <td>{{ line.original_requested_qty }}</td>
+                        <td>
+                            <input type="number"
+                                   name="qty_{{ line.id }}"
+                                   value="{{ line.requested_qty }}"
+                                   min="1"
+                                   max="{{ line.original_requested_qty }}"
+                                   step="1">
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'store:approval_delete_item' request_obj.id line.id %}" style="display:inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-delete-item" onclick="return confirm('Remove {{ line.item.name }}?')">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="action-strip">
+            <button type="submit" class="btn-approve">Approve Request</button>
+        </div>
+    </form>
+
+    {# Reject form #}
+    <div class="reject-panel">
+        <h3>Reject This Request</h3>
+        <form method="post" action="{% url 'store:reject_request' request_obj.id %}">
+            {% csrf_token %}
+            <textarea name="rejection_reason" placeholder="State the reason for rejection (required)…" required></textarea>
+            <div style="margin-top:10px">
+                <button type="submit" class="btn-reject">Reject Request</button>
+            </div>
+        </form>
+    </div>
+
+    {# Activity log #}
+    {% if request_obj.activities.all %}
+    <div class="activity-log">
+        <div style="font-size:13px;font-weight:700;color:#c3d5f2;margin-bottom:10px">Activity Log</div>
+        {% for activity in request_obj.activities.all %}
+            {% if activity.actor.username != '__system__' %}
+            <div class="activity-item">
+                <strong>{{ activity.actor.get_full_name|default:activity.actor.username }}</strong>
+                — {{ activity.description }}
+                <span style="float:right;color:#4b5e7a">{{ activity.created_at|date:"d M Y H:i" }}</span>
+            </div>
+            {% else %}
+            <div class="activity-item">
+                <strong>System</strong> — {{ activity.description }}
+                <span style="float:right;color:#4b5e7a">{{ activity.created_at|date:"d M Y H:i" }}</span>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

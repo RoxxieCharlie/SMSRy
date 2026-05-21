@@ -54,7 +54,7 @@ class RequestFulfillmentServiceTest(TestCase):
     def _make_submitted_request(self, requested_qty):
         request_obj = Request.objects.create(
             requester=self.staff,
-            status=Request.Status.SUBMITTED,
+            status=Request.Status.APPROVED,
             purpose="Site work",
         )
         request_item = RequestItem.objects.create(

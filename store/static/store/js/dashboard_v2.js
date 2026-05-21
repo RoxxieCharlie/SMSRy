@@ -149,6 +149,32 @@
       @media (max-width: 640px){
         .sd__label, .sd__meta{ max-width: 220px; }
       }
+
+      [data-theme="light"] .sd__sectionTitle{ color: #64748b; }
+      [data-theme="light"] .sd__row{
+        border-color: rgba(0,0,0,.08);
+        background: rgba(0,0,0,.03);
+      }
+      [data-theme="light"] .sd__row:hover{
+        background: rgba(0,0,0,.06);
+        border-color: rgba(0,0,0,.14);
+      }
+      [data-theme="light"] .sd__row.is-active{
+        background: rgba(30,100,220,.08);
+        border-color: rgba(30,100,220,.22);
+      }
+      [data-theme="light"] .sd__label{ color: #0d1526; }
+      [data-theme="light"] .sd__meta{ color: #475569; }
+      [data-theme="light"] .sd__action{
+        color: #334155;
+        border-color: rgba(0,0,0,.14);
+        background: rgba(0,0,0,.04);
+      }
+      [data-theme="light"] .sd__action:hover{
+        background: rgba(0,0,0,.08);
+        border-color: rgba(0,0,0,.20);
+      }
+      [data-theme="light"] .sd__empty{ color: #64748b; }
     `;
     document.head.appendChild(style);
   }

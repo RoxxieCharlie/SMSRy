@@ -70,6 +70,7 @@
                         <th>Date</th>
                         <th>Staff</th>
                         <th>Department</th>
+                        <th>Approved By</th>
                         <th>Issued By</th>
                         <th>Items</th>
                         <th>Comment</th>
@@ -82,13 +83,14 @@
                         <td>{{ issuance.issued_at|date:"d M Y" }}</td>
                         <td>{{ issuance.staff.name }}</td>
                         <td>{{ issuance.staff.department.name|default:"-" }}</td>
+                        <td>{% if issuance.request_id %}{% if issuance.request.approved_by %}{{ issuance.request.approved_by.get_full_name|default:issuance.request.approved_by.username }}{% elif issuance.request.status == 'escalated' or issuance.request.escalated_at %}Escalated{% else %}—{% endif %}{% else %}—{% endif %}</td>
                         <td>{{ issuance.issued_by.username }}</td>
                         <td><button class="items-btn history-items-btn" type="button" data-toggle-items aria-expanded="false"><span class="items-ic">&gt;</span><span>View Items</span></button></td>
                         <td>{% if issuance.request_id %}{{ issuance.request.purpose|default:"-" }}{% else %}{{ issuance.comment|default:"-" }}{% endif %}</td>
                         <td class="status-action">{% if issuance.is_reversed %}<span class="status reversed">Reversed</span>{% elif issuance.is_edited_ui %}<span class="status editable">Edited</span>{% elif issuance.can_reverse_ui %}<span class="status editable">Editable Window</span>{% else %}<span class="status locked">Locked</span>{% endif %}</td>
                     </tr>
                     <tr class="details-row" hidden>
-                        <td colspan="7">
+                        <td colspan="8">
                             <div class="items-panel">
                                 <div class="items-panel-head">
                                     <div class="items-title">Issuance #{{ issuance.id }} Item Breakdown</div>
@@ -117,11 +119,11 @@
                                 <div class="history-storekeeper">
                                     {% for entry in issuance.storekeeper_history %}
                                     <div class="history-storekeeper-block">
-                                        <div class="history-storekeeper-label">Storekeeper Changes · {{ entry.label }}</div>
-                                        {% for change in entry.changes %}
-                                        <div class="history-storekeeper-row"><span class="history-item-name">{{ change.item_name }}</span><span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span></div>
-                                        {% endfor %}
-                                        {% if entry.note %}<div class="history-storekeeper-note">Comment: {{ entry.note }}</div>{% endif %}
+                                        <div class="history-storekeeper-label">Edit {{ forloop.counter }} · {{ entry.label }}</div>
+                                        <div class="history-storekeeper-row">
+                                            {% if entry.note %}<span class="history-storekeeper-comment">{{ entry.note }}</span>{% endif %}
+                                            {% if entry.changes %}<span class="history-storekeeper-changes">{% for change in entry.changes %}{{ change.item_name }}: {{ change.old_qty }}→{{ change.new_qty }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>{% endif %}
+                                        </div>
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -141,7 +143,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="empty-row">
+                        <td colspan="8" class="empty-row">
                             <div class="empty-state">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
                                 <p class="empty-state__text">No issuances found.</p>

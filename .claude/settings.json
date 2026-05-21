@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python manage.py test store --verbosity=1 --keepdb)",
+      "Bash(python manage.py test store --verbosity=2 --keepdb)",
+      "Bash(python manage.py test store --verbosity=2)",
+      "Read(//c/Users/DELL/.claude/projects/c--Users-DELL-Desktop-Django-SMS/**)"
+    ]
+  }
+}

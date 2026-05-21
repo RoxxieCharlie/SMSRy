@@ -1,5 +1,5 @@
 # store/views/dashboard.py
-from datetime import timedelta
+from datetime import timedelta, datetime as dt_class
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, F, Sum
@@ -33,46 +33,95 @@ def _time_ago(dt):
     return f"{weeks}w ago"
 
 
-def _activity_ui(a: Activity):
-    actor = a.actor.get_full_name() or a.actor.username
+def _week_start():
+    """Return Monday 00:00:00 of the current calendar week as an aware datetime."""
+    today = timezone.localdate()
+    monday = today - timedelta(days=today.weekday())  # weekday(): Mon=0 … Sun=6
+    return timezone.make_aware(dt_class(monday.year, monday.month, monday.day))
+
+
+def _activity_ui(a: Activity, current_user=None):
+    is_self = current_user is not None and a.actor_id == current_user.id
+    actor = "You" if is_self else (a.actor.get_full_name() or a.actor.username)
     verb = a.verb
+    meta = a.metadata or {}
 
     ui_type = "ok"
-    action = a.get_verb_display()
+    action = ""
+    obj = ""
 
-    if verb in (Activity.Verb.LOW_STOCK_ALERT,):
-        ui_type = "warning"
-        action = "triggered a low stock warning"
-    elif verb in (Activity.Verb.ISSUANCE_FAILED,):
+    if verb == Activity.Verb.REQUEST_SUBMITTED:
+        action = "submitted"
+        req_id = meta.get("request_id") or a.target_id
+        obj = f"Request #{req_id}"
+
+    elif verb == Activity.Verb.REQUEST_FULFILLED:
+        action = "fulfilled"
+        # summary stored as "Request #X was fulfilled for Y" — rewrite to "Request #X for Y"
+        obj = (a.summary or "").replace(" was fulfilled for ", " for ")
+
+    elif verb == Activity.Verb.ISSUANCE_CREATED:
+        action = "issued items for"
+        req_id = meta.get("request_id")
+        staff_name = meta.get("staff_name", "")
+        if req_id:
+            obj = f"Request #{req_id}" + (f", {staff_name}" if staff_name else "")
+        else:
+            obj = a.summary or ""
+
+    elif verb == Activity.Verb.STOCKIN_CREATED:
+        action = "stocked in"
+        summary = a.summary or ""
+        # summary: "[actor] stocked in N item(s)" — extract just the quantity part
+        parts = summary.split(" stocked in ", 1)
+        obj = parts[1] if len(parts) > 1 else summary
+
+    elif verb == Activity.Verb.REQUEST_APPROVED:
+        ui_type = "ok-green"
+        action = "approved"
+        req_id = meta.get("request_id") or a.target_id
+        obj = f"Request #{req_id}"
+
+    elif verb == Activity.Verb.REQUEST_REJECTED:
         ui_type = "danger"
-        action = "attempted an issuance (failed)"
-    elif verb in (Activity.Verb.ISSUANCE_REVERSED,):
-        ui_type = "ok"
-        action = "reversed an issuance"
-    elif verb in (Activity.Verb.ISSUANCE_CREATED,):
-        ui_type = "ok"
-        action = "issued items"
-    elif verb in (Activity.Verb.STOCKIN_CREATED,):
-        ui_type = "ok"
-        action = "stocked in items"
-    elif verb in (Activity.Verb.REQUEST_UPDATED,):
-        ui_type = "ok"
-        action = "updated a request"
-    elif verb in (Activity.Verb.REQUEST_SUBMITTED,):
-        ui_type = "ok"
-        action = "submitted a request"
-    elif verb in (Activity.Verb.REQUEST_FULFILLED,):
-        ui_type = "ok"
-        action = "fulfilled a request"
+        action = "rejected"
+        req_id = meta.get("request_id") or a.target_id
+        summary = a.summary or ""
+        reason_part = summary.split("Reason: ", 1)
+        obj = f"Request #{req_id}" + (f" — {reason_part[1]}" if len(reason_part) > 1 else "")
 
-    obj = a.summary or ""
+    elif verb == Activity.Verb.REQUEST_UPDATED:
+        action = "updated"
+        req_id = meta.get("request_id") or a.target_id
+        obj = f"Request #{req_id}"
+
+    elif verb == Activity.Verb.ISSUANCE_UPDATED:
+        action = "edited the issuance for"
+        req_id = meta.get("request_id")
+        obj = f"Request #{req_id}" if req_id else (a.summary or "")
+
+    elif verb == Activity.Verb.ISSUANCE_REVERSED:
+        action = "reversed an issuance"
+
+    elif verb == Activity.Verb.ISSUANCE_FAILED:
+        ui_type = "danger"
+        action = "attempted a failed issuance"
+
+    elif verb == Activity.Verb.LOW_STOCK_ALERT:
+        ui_type = "warning"
+        action = "triggered a low-stock alert"
+
+    else:
+        action = a.get_verb_display().lower()
+        obj = a.summary or ""
+
     return {
         "actor": actor,
         "verb": verb,
         "action": action,
         "object": obj,
         "time_ago": _time_ago(a.created_at),
-        "type": "danger" if ui_type == "danger" else ("warning" if ui_type == "warning" else "ok"),
+        "type": "danger" if ui_type == "danger" else ("warning" if ui_type == "warning" else ("green" if ui_type == "ok-green" else "ok")),
     }
 
 
@@ -87,8 +136,14 @@ def _dashboard_recent_activity(limit=10):
         Activity.Verb.REQUEST_SUBMITTED,
         Activity.Verb.REQUEST_FULFILLED,
         Activity.Verb.REQUEST_UPDATED,
+        Activity.Verb.REQUEST_APPROVED,
+        Activity.Verb.REQUEST_REJECTED,
     ]
-    return Activity.objects.filter(verb__in=allowed_verbs).order_by("-created_at")[:limit]
+    return (
+        Activity.objects
+        .filter(verb__in=allowed_verbs, created_at__gte=_week_start())
+        .order_by("-created_at")[:limit]
+    )
 
 @login_required
 def dashboard_router(request):
@@ -110,6 +165,9 @@ def dashboard_router(request):
 def dashboard_storekeeper(request):
     if not request.user.groups.filter(name__iexact="StoreKeeper").exists():
         return HttpResponseForbidden("Forbidden")
+
+    from store.services.sla_service import escalate_overdue_requests
+    escalate_overdue_requests()
 
     user = request.user
 
@@ -195,7 +253,7 @@ def dashboard_storekeeper(request):
 
     # Activity
     activities = _dashboard_recent_activity(limit=10)
-    recent_activity = [_activity_ui(a) for a in activities]
+    recent_activity = [_activity_ui(a, current_user=request.user) for a in activities]
 
     # KPI drilldowns
     inventory_url = reverse("store:inventory_store")
@@ -235,6 +293,9 @@ def dashboard_storekeeper(request):
 def dashboard_management(request):
     if not request.user.groups.filter(name__iexact="Management").exists():
         return HttpResponseForbidden("Forbidden")
+
+    from store.services.sla_service import escalate_overdue_requests
+    escalate_overdue_requests()
 
     # timeframe toggle: 7d or 30d (default 7d)
     timeframe = request.GET.get("t", "7d")
@@ -322,7 +383,7 @@ def dashboard_management(request):
 
     # Recent activity (global)
     activities = _dashboard_recent_activity(limit=10)
-    recent_activity = [_activity_ui(a) for a in activities]
+    recent_activity = [_activity_ui(a, current_user=request.user) for a in activities]
 
     # KPI drilldowns
     inventory_url = reverse("store:inventory_mgt")
@@ -354,6 +415,11 @@ def dashboard_management(request):
 
         # Activity panel
         "recent_activity": recent_activity,
+
+        # Supervisor approval queue count
+        "pending_approval_count": Request.objects.filter(
+            status__in=[Request.Status.PENDING, Request.Status.ESCALATED]
+        ).count(),
     }
 
     return render(request, "store/dashboard_management_v2.html", context)
@@ -371,26 +437,31 @@ def dashboard_staff(request):
     my_requests = Request.objects.filter(requester=staff)
     total_requests = my_requests.count()
     draft_count = my_requests.filter(status=Request.Status.DRAFT).count()
-    submitted_count = my_requests.filter(status=Request.Status.SUBMITTED).count()
+    pending_count = my_requests.filter(status=Request.Status.PENDING).count()
+    rejected_count = my_requests.filter(status=Request.Status.REJECTED).count()
     fulfilled_count = my_requests.filter(status=Request.Status.FULFILLED).count()
     locked_count = my_requests.filter(status=Request.Status.LOCKED).count()
-    open_requests = draft_count + submitted_count
+    open_requests = draft_count + pending_count
     archived_requests = fulfilled_count + locked_count
     selected_filter = (request.GET.get("kpi") or "all").strip().lower()
 
     recent_requests_qs = my_requests.order_by("-updated_at")
     if selected_filter == "open":
-        recent_requests_qs = recent_requests_qs.filter(status__in=[Request.Status.DRAFT, Request.Status.SUBMITTED])
+        recent_requests_qs = recent_requests_qs.filter(status__in=[Request.Status.DRAFT, Request.Status.PENDING])
     elif selected_filter == "archived":
         recent_requests_qs = recent_requests_qs.filter(status__in=[Request.Status.FULFILLED, Request.Status.LOCKED])
     else:
         selected_filter = "all"
 
     top_requested_items = list(
-        RequestItem.objects.filter(request__requester=staff)
-        .values("item__name", "item__unit_of_measurement")
-        .annotate(request_count=Count("request_id", distinct=True), total_qty=Sum("requested_qty"))
-        .order_by("-request_count", "-total_qty", "item__name")[:5]
+        RequestItem.objects.filter(
+            request__requester=staff,
+            request__status__in=[Request.Status.FULFILLED, Request.Status.LOCKED],
+            fulfilled_qty__gt=0,
+        )
+        .values("item__id", "item__name", "item__unit_of_measurement")
+        .annotate(fulfillment_count=Count("request_id", distinct=True), total_qty=Sum("fulfilled_qty"))
+        .order_by("-total_qty", "-fulfillment_count", "item__name")[:5]
     )
 
     display_name = (
@@ -405,7 +476,8 @@ def dashboard_staff(request):
         "display_name": display_name,
         "total_requests": total_requests,
         "draft_count": draft_count,
-        "submitted_count": submitted_count,
+        "pending_count": pending_count,
+        "rejected_count": rejected_count,
         "fulfilled_count": fulfilled_count,
         "locked_count": locked_count,
         "open_requests": open_requests,

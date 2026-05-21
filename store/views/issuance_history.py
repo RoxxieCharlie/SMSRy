@@ -107,7 +107,7 @@ def history_issuance_storekeeper(request):
         qs = base_qs.filter(is_reversed=False, issued_at__lt=cutoff)
     else:
         qs = base_qs
-    paginator = Paginator(qs, 10)
+    paginator = Paginator(qs, 20)
     page_obj = paginator.get_page(request.GET.get("page"))
     page_range = paginator.get_elided_page_range(number=page_obj.number, on_each_side=1, on_ends=1)
 

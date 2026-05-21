@@ -76,7 +76,7 @@ class RequestBasedIssuanceWorkflowTests(TestCase):
     def _create_submitted_request(self, requester, requested_qty=5):
         request_obj = Request.objects.create(
             requester=requester,
-            status=Request.Status.SUBMITTED,
+            status=Request.Status.APPROVED,
             purpose="Site work",
         )
         request_item = RequestItem.objects.create(
@@ -428,7 +428,7 @@ class RequestBasedIssuanceWorkflowTests(TestCase):
         first_submit = self.client.post(reverse("store:request_submit", kwargs={"request_id": request_obj.id}))
         self.assertEqual(first_submit.status_code, 302)
         request_obj.refresh_from_db()
-        self.assertEqual(request_obj.status, Request.Status.SUBMITTED)
+        self.assertEqual(request_obj.status, Request.Status.PENDING)
         self.assertFalse(request_obj.needs_resubmission)
 
         after_submit_page = self.client.get(reverse("store:request_edit", kwargs={"request_id": request_obj.id}))
@@ -481,8 +481,10 @@ class RequestBasedIssuanceWorkflowTests(TestCase):
         self.client.force_login(self.staff_user_1)
         response = self.client.get(reverse("store:request_history"))
 
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("store:history_issuance_management"))
+        self.assertEqual(response.status_code, 200)
+        row_ids = {row["id"] for row in response.context["history_rows"]}
+        self.assertIn(own_request.id, row_ids)
+        self.assertNotIn(other_request.id, row_ids)
     def test_20_storekeeper_issuance_history_shows_requester_column(self):
         request_obj, request_item = self._create_submitted_request(self.staff_1, requested_qty=2)
         fulfill_request_service(

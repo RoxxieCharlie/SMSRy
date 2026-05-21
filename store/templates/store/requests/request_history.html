@@ -1,87 +1,111 @@
-﻿{% extends base_template|default:"store/staff_base_v2.html" %}
+{% extends base_template|default:"store/staff_base_v2.html" %}
 {% load static %}
 
 {% block title %}Request History - SMS{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/dashboard_v2.css' %}">
 <link rel="stylesheet" href="{% static 'store/css/staff_dashboard_v2.css' %}">
 <link rel="stylesheet" href="{% static 'store/css/request_list_v2.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="staff-page history-page" data-live-root="request-history" data-live-topics="requests,activity">
-    <header class="staff-topbar glass history-topbar">
+<div class="page" data-live-root="request-history" data-live-topics="requests,activity">
+
+    <header class="topbar">
         <div>
-            <p class="staff-kicker">Smart Management Solution</p>
-            <h1 class="staff-title">Request History</h1>
-            <p class="staff-subtitle">Tabular archive of all your requests and their current workflow state.</p>
+            <p class="staff-pg-kicker">Smart Management Solution</p>
+            <h1 class="staff-pg-title">Request History</h1>
+            <p class="req-subtitle">Tabular archive of all your requests and their current workflow state.</p>
         </div>
-        <a href="{% url 'store:request_list' %}" class="btn btn-ghost">Back to Requests</a>
+        <div class="topbar__right">
+            <a href="{% url 'store:request_list' %}" class="btn-ghost">Back to Requests</a>
+        </div>
     </header>
 
-    <section class="staff-kpis history-kpis">
-        <a class="kpi-link" href="{% url 'store:request_history_table' %}">
-            <article class="kpi-card kpi-draft {% if not selected_status %}is-active{% endif %}">
-                <div class="kpi-label">All Requests</div>
-                <div class="kpi-value">{{ total_count }}</div>
-                <div class="kpi-note">Complete request record</div>
-            </article>
+    <section class="kpis kpis--5">
+        <a class="card {% if not selected_status %}is-active{% endif %}" href="{% url 'store:request_history_table' %}">
+            <div class="card__left">
+                <div>
+                    <div class="card__title">All Requests</div>
+                    <div class="card__value">{{ total_count }}</div>
+                    <div class="card__meta">Complete record</div>
+                </div>
+            </div>
         </a>
-        <a class="kpi-link" href="{% url 'store:request_history_table' %}?status=draft">
-            <article class="kpi-card kpi-draft {% if selected_status == 'draft' %}is-active{% endif %}">
-                <div class="kpi-label">Draft</div>
-                <div class="kpi-value">{{ draft_count }}</div>
-                <div class="kpi-note">Editable drafts</div>
-            </article>
+        <a class="card card--blue {% if selected_status == 'draft' %}is-active{% endif %}" href="{% url 'store:request_history_table' %}?status=draft">
+            <div class="card__left">
+                <div>
+                    <div class="card__title">Draft</div>
+                    <div class="card__value">{{ draft_count }}</div>
+                    <div class="card__meta">Editable drafts</div>
+                </div>
+            </div>
         </a>
-        <a class="kpi-link" href="{% url 'store:request_history_table' %}?status=submitted">
-            <article class="kpi-card kpi-submitted {% if selected_status == 'submitted' %}is-active{% endif %}">
-                <div class="kpi-label">Submitted</div>
-                <div class="kpi-value">{{ submitted_count }}</div>
-                <div class="kpi-note">Waiting fulfillment</div>
-            </article>
+        <a class="card card--amber {% if selected_status == 'pending' %}is-active{% endif %}" href="{% url 'store:request_history_table' %}?status=pending">
+            <div class="card__left">
+                <div>
+                    <div class="card__title">Pending Approval</div>
+                    <div class="card__value">{{ pending_count }}</div>
+                    <div class="card__meta">Awaiting supervisor</div>
+                </div>
+            </div>
         </a>
-        <a class="kpi-link" href="{% url 'store:request_history_table' %}?status=fulfilled">
-            <article class="kpi-card kpi-fulfilled {% if selected_status == 'fulfilled' %}is-active{% endif %}">
-                <div class="kpi-label">Fulfilled</div>
-                <div class="kpi-value">{{ fulfilled_count }}</div>
-                <div class="kpi-note">Completed requests</div>
-            </article>
+        <a class="card card--green {% if selected_status == 'fulfilled' %}is-active{% endif %}" href="{% url 'store:request_history_table' %}?status=fulfilled">
+            <div class="card__left">
+                <div>
+                    <div class="card__title">Fulfilled</div>
+                    <div class="card__value">{{ fulfilled_count }}</div>
+                    <div class="card__meta">Completed requests</div>
+                </div>
+            </div>
         </a>
-        <a class="kpi-link" href="{% url 'store:request_history_table' %}?status=locked">
-            <article class="kpi-card kpi-locked {% if selected_status == 'locked' %}is-active{% endif %}">
-                <div class="kpi-label">Locked</div>
-                <div class="kpi-value">{{ locked_count }}</div>
-                <div class="kpi-note">Archived history</div>
-            </article>
+        <a class="card card--red {% if selected_status == 'rejected' %}is-active{% endif %}" href="{% url 'store:request_history_table' %}?status=rejected">
+            <div class="card__left">
+                <div>
+                    <div class="card__title">Rejected</div>
+                    <div class="card__value">{{ rejected_count }}</div>
+                    <div class="card__meta">Declined by supervisor</div>
+                </div>
+            </div>
         </a>
     </section>
 
-    <section class="panel glass history-panel">
-        <div class="panel-head history-panel-head">
+    {% if selected_item %}
+    <div class="item-filter-tag">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        Showing requests for: <strong>{{ selected_item.name }}</strong>
+        <a href="{% url 'store:request_history_table' %}" class="item-filter-clear">Clear filter</a>
+    </div>
+    {% endif %}
+
+    <div class="panel">
+        <div class="panel__head">
             <div>
-                <h2>Request Table</h2>
-                <p class="history-panel-note">Review status, timestamps, and open the item breakdown for requested and final fulfilled quantities.</p>
+                <div class="panel__title">Request Table</div>
+                <p class="req-subtitle" style="margin-top:4px;">Review status, timestamps, and open the item breakdown for requested and final fulfilled quantities.</p>
             </div>
         </div>
 
-        <div class="glass rqh-filter">
+        <div class="rqh-filter">
             <form method="get" class="filter-form">
-                <label for="status">Filter status</label>
-                <select name="status" id="status">
-                    <option value="">All statuses</option>
-                    {% for value, label in status_choices %}
+                <div>
+                    <label for="status">Filter status</label>
+                    <select name="status" id="status">
+                        <option value="">All statuses</option>
+                        {% for value, label in status_choices %}
                         <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+                        {% endfor %}
+                    </select>
+                </div>
                 <button type="submit" class="btn btn-ghost">Apply</button>
                 {% if selected_status %}
-                    <a href="{% url 'store:request_history_table' %}" class="btn btn-ghost">Clear</a>
+                <a href="{% url 'store:request_history_table' %}" class="btn btn-ghost">Clear</a>
                 {% endif %}
             </form>
         </div>
 
-        <div class="table-wrap history-table-wrap">
+        <div class="history-table-wrap">
             <table class="rq-table history-table">
                 <thead>
                     <tr>
@@ -91,20 +115,20 @@
                         <th>Items</th>
                         <th>Created</th>
                         <th>Updated</th>
-                        <th class="cell-right">Action</th>
+                        <th class="rq-cell--right">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for row in history_rows %}
                     <tr>
                         <td>
-                            <div class="history-person-cell">
+                            <div class="rq-id">
                                 <strong>#{{ row.id }}</strong>
                                 <span>{{ row.requester_staff_id }}</span>
                             </div>
                         </td>
                         <td>
-                            <div class="history-purpose-cell">{{ row.purpose }}</div>
+                            <div class="rq-purpose">{{ row.purpose }}</div>
                         </td>
                         <td>
                             <span class="status-chip status-{{ row.status_slug }}">{{ row.status_label }}</span>
@@ -116,22 +140,22 @@
                             </button>
                         </td>
                         <td>
-                            <div class="history-date-cell">
+                            <div class="rq-date">
                                 <strong>{{ row.created_at|date:"d M Y" }}</strong>
                                 <span>{{ row.created_at|date:"H:i" }}</span>
                             </div>
                         </td>
                         <td>
-                            <div class="history-date-cell">
+                            <div class="rq-date">
                                 <strong>{{ row.updated_at|date:"d M Y" }}</strong>
                                 <span>{{ row.updated_at|date:"H:i" }}</span>
                             </div>
                         </td>
-                        <td class="cell-right">
+                        <td class="rq-cell--right">
                             {% if row.can_open %}
-                                <a href="{% url 'store:request_edit' row.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ghost">Open</a>
+                            <a href="{% url 'store:request_edit' row.id %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ghost">Open</a>
                             {% else %}
-                                <button type="button" class="btn btn-ghost" disabled>Locked</button>
+                            <button type="button" class="btn btn-ghost" disabled>Locked</button>
                             {% endif %}
                         </td>
                     </tr>
@@ -147,12 +171,12 @@
                                         <h3>Requested Items</h3>
                                         <ul class="items-grid">
                                             {% for line in row.requested_items %}
-                                                <li class="item-chip">
-                                                    <span class="item-name">{{ line.name }}</span>
-                                                    <span class="item-qty">{{ line.qty }}</span>
-                                                </li>
+                                            <li class="item-chip">
+                                                <span class="item-name">{{ line.name }}</span>
+                                                <span class="item-qty">{{ line.qty }}</span>
+                                            </li>
                                             {% empty %}
-                                                <li class="item-chip empty">No requested items.</li>
+                                            <li class="item-chip empty">No requested items.</li>
                                             {% endfor %}
                                         </ul>
                                     </section>
@@ -160,58 +184,42 @@
                                         <h3>Fulfilled Items</h3>
                                         <ul class="items-grid">
                                             {% for line in row.fulfilled_items %}
-                                                <li class="item-chip">
-                                                    <span class="item-name">{{ line.name }}</span>
-                                                    <span class="item-qty">{{ line.qty }}</span>
-                                                </li>
+                                            <li class="item-chip">
+                                                <span class="item-name">{{ line.name }}</span>
+                                                <span class="item-qty">{{ line.qty }}</span>
+                                            </li>
                                             {% empty %}
-                                                <li class="item-chip empty">No fulfilled items yet.</li>
+                                            <li class="item-chip empty">No fulfilled items yet.</li>
                                             {% endfor %}
                                         </ul>
                                     </section>
                                 </div>
                                 {% if row.storekeeper_history %}
-                                    <div class="history-storekeeper">
-                                        {% for entry in row.storekeeper_history %}
-                                            <div class="history-storekeeper-block">
-                                                <div class="history-storekeeper-label">Storekeeper Changes · {{ entry.label }}</div>
-                                                {% if entry.changes %}
-                                                    {% for change in entry.changes %}
-                                                        <div class="history-storekeeper-row">
-                                                            <span class="history-item-name">{{ change.item_name }}</span>
-                                                            <span class="history-item-qty">{{ change.old_qty }} -> {{ change.new_qty }}</span>
-                                                        </div>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <div class="history-storekeeper-row">
-                                                        <span class="history-item-name">No quantity change recorded.</span>
-                                                        <span class="history-item-qty">Comment only</span>
-                                                    </div>
-                                                {% endif %}
-                                                {% if entry.note %}
-                                                    <div class="history-storekeeper-note"><strong>Storekeeper Comment:</strong> {{ entry.note }}</div>
-                                                {% endif %}
-                                            </div>
-                                        {% endfor %}
+                                <div class="history-storekeeper">
+                                    {% for entry in row.storekeeper_history %}
+                                    <div class="history-storekeeper-block">
+                                        <div class="history-storekeeper-label">Edit {{ forloop.counter }} · {{ entry.label }}</div>
+                                        <div class="history-storekeeper-row">
+                                            {% if entry.note %}<span class="history-storekeeper-comment">{{ entry.note }}</span>{% endif %}
+                                            {% if entry.changes %}<span class="history-storekeeper-changes">{% for change in entry.changes %}{{ change.item_name }}: {{ change.old_qty }}→{{ change.new_qty }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>{% endif %}
+                                        </div>
                                     </div>
+                                    {% endfor %}
+                                </div>
                                 {% endif %}
                             </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7">
-                            <div class="history-empty-state">
-                                <h3>No request history yet.</h3>
-                                <p>Your requests will appear here once records exist.</p>
-                            </div>
-                        </td>
+                        <td colspan="7" class="rq-empty">No request history yet.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-    </section>
+    </div>
+
 </div>
 {% endblock %}
 

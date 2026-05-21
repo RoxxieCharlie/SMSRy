@@ -50,3 +50,108 @@
     min-height:44px;
   }
 }
+
+/* Logo image in sidebar brand */
+.brand__mark-img {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  width: 100%;
+  cursor: pointer;
+  border: 0;
+  text-align: left;
+  background: transparent;
+  margin-bottom: 6px;
+}
+
+.theme-toggle:hover {
+  background: var(--panel2);
+  border-color: var(--stroke);
+}
+
+/* Role-specific active nav states */
+.sidebar--staff .nav__link.is-active {
+  color: var(--role-staff);
+  background: var(--role-staff-bg);
+  border-color: var(--role-staff-border);
+}
+
+.sidebar--store .nav__link.is-active {
+  color: var(--role-store);
+  background: var(--role-store-bg);
+  border-color: var(--role-store-border);
+}
+
+.sidebar--mgt .nav__link.is-active {
+  color: var(--role-mgt);
+  background: var(--role-mgt-bg);
+  border-color: var(--role-mgt-border);
+}
+
+/* User greeting */
+.sidebar__user {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px 12px;
+  margin: 0 4px 10px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.sidebar__user-greeting {
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(148,163,184,.70);
+  font-weight: 600;
+}
+
+.sidebar__user-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(234,240,255,.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ========================= LIGHT THEME OVERRIDES ========================= */
+
+[data-theme="light"] .sidebar hr {
+  border-top-color: var(--stroke2);
+}
+
+[data-theme="light"] .sidebar__user {
+  background: rgba(15,23,42,.04);
+  border-color: rgba(15,23,42,.10);
+}
+[data-theme="light"] .sidebar__user-greeting { color: rgba(15,23,42,.48); }
+[data-theme="light"] .sidebar__user-name     { color: rgba(15,23,42,.88); }
+
+[data-theme="light"] .nav__badge {
+  background: var(--amber-bg);
+  border-color: var(--amber-border);
+  color: var(--amber);
+}
+
+[data-theme="light"] .theme-toggle {
+  color: var(--text2);
+}
+
+[data-theme="light"] .theme-toggle:hover {
+  background: rgba(15,23,42,0.05);
+  border-color: rgba(15,23,42,0.08);
+}
+
+@media (max-width:820px) {
+  [data-theme="light"] .sidebar__footer {
+    background: linear-gradient(180deg, rgba(248,250,252,0), rgba(248,250,252,0.96) 30%);
+  }
+}

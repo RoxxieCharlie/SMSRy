@@ -2,6 +2,7 @@
 {% load static %}
 <html lang="en">
 <head>
+<script>(function(){var t=localStorage.getItem('sms-theme');if(!t)t=window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}SMS{% endblock %}</title>
@@ -20,15 +21,15 @@
         <span></span>
         <span></span>
     </button>
-    <div class="mobile-shell__brand">SMS</div>
+    <div class="mobile-shell__brand">
+  <img src="{% static 'store/img/sms_logo_mark.svg' %}" alt="SMS" width="26" height="26" style="border-radius:8px;vertical-align:middle;margin-right:8px;">SMS
+</div>
 </div>
 <button class="mobile-overlay" type="button" hidden aria-label="Close navigation" data-mobile-nav-close></button>
 <div class="layout">
-    <aside class="sidebar">
-        {% block sidebar %}
-        {% include "store/includes/sidebar_v2.html" with sidebar_variant="storekeeper" %}
-        {% endblock %}
-    </aside>
+    {% block sidebar %}
+    {% include "store/includes/sidebar_v2.html" with sidebar_variant="storekeeper" %}
+    {% endblock %}
     <main class="main">
         {% block content %}{% endblock %}
     </main>
@@ -61,5 +62,6 @@
 <script src="{% static 'store/js/store_live_updates.js' %}"></script>
 <script src="{% static 'store/js/mobile_shell_v2.js' %}"></script>
 {% block extra_js %}{% endblock %}
+<script src="{% static 'store/js/theme_v2.js' %}"></script>
 </body>
 </html>

@@ -1,0 +1,144 @@
+{% extends base_template|default:"store/mgt_base_v2.html" %}
+{% load static %}
+
+{% block title %}Supervisor Management - SMS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'store/css/staff_dashboard_v2.css' %}">
+<style>
+.page{max-width:860px;padding:30px 32px}
+.sv-card{padding:20px 22px;background:rgba(255,255,255,.03);border:1px solid rgba(137,166,218,.14);border-radius:var(--radius);margin-bottom:24px}
+.sv-card h2{font-size:13px;font-weight:700;color:#c3d5f2;margin:0 0 14px}
+.sv-notice{padding:12px 16px;border-radius:var(--radius-sm);background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.3);color:#ffedd5;font-size:12px;margin-bottom:20px;line-height:1.6}
+.sv-notice strong{color:#fed7aa}
+.sv-active-box{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--radius-sm);background:rgba(77,217,168,.08);border:1px solid rgba(77,217,168,.25)}
+.sv-active-avatar{width:38px;height:38px;border-radius:50%;background:rgba(77,217,168,.2);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#4dd9a8;flex-shrink:0}
+.sv-active-name{font-size:14px;font-weight:600;color:#e9f1ff}
+.sv-active-since{font-size:11px;color:#6b7fa3;margin-top:2px}
+.sv-none{font-size:13px;color:#6b7fa3;padding:12px 0}
+.sv-table{width:100%;border-collapse:collapse}
+.sv-table th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#6b7fa3;padding:8px 12px;border-bottom:1px solid rgba(137,166,218,.15);text-align:left}
+.sv-table td{padding:10px 12px;font-size:13px;border-bottom:1px solid rgba(137,166,218,.08);vertical-align:middle}
+.sv-username{color:#e9f1ff;font-weight:500}
+.sv-fullname{color:#6b7fa3;font-size:11px;margin-top:1px}
+.sv-badge-active{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(77,217,168,.15);border:1px solid rgba(77,217,168,.35);color:#4dd9a8}
+.sv-badge-active::before{content:'';width:6px;height:6px;border-radius:50%;background:#4dd9a8}
+.btn-activate{padding:7px 16px;border-radius:var(--radius-sm);background:rgba(77,217,168,.16);border:1px solid rgba(77,217,168,.4);color:#daf9ec;font-size:12px;font-weight:600;cursor:pointer}
+.btn-activate:hover{background:rgba(77,217,168,.26)}
+.btn-deactivate{padding:7px 16px;border-radius:var(--radius-sm);background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35);color:#fca5a5;font-size:12px;font-weight:600;cursor:pointer}
+.btn-deactivate:hover{background:rgba(255,107,107,.22)}
+[data-theme="light"] .sv-card{background:rgba(0,0,0,.02);border-color:rgba(14,42,100,.12)}
+[data-theme="light"] .sv-card h2{color:#1e293b}
+[data-theme="light"] .sv-notice{background:rgba(234,88,12,.06);border-color:rgba(234,88,12,.2);color:#7c2d12}
+[data-theme="light"] .sv-notice strong{color:#9a3412}
+[data-theme="light"] .sv-active-box{background:rgba(22,163,74,.06);border-color:rgba(22,163,74,.2)}
+[data-theme="light"] .sv-active-avatar{background:rgba(22,163,74,.12);color:#15803d}
+[data-theme="light"] .sv-active-name{color:#0f172a}
+[data-theme="light"] .sv-active-since{color:#64748b}
+[data-theme="light"] .sv-none{color:#94a3b8}
+[data-theme="light"] .sv-table th{color:#64748b}
+[data-theme="light"] .sv-table td{border-color:rgba(14,42,100,.08)}
+[data-theme="light"] .sv-username{color:#0f172a}
+[data-theme="light"] .sv-fullname{color:#64748b}
+[data-theme="light"] .sv-badge-active{background:rgba(22,163,74,.1);border-color:rgba(22,163,74,.3);color:#15803d}
+[data-theme="light"] .sv-badge-active::before{background:#16a34a}
+[data-theme="light"] .btn-activate{background:rgba(22,163,74,.1);border-color:rgba(22,163,74,.35);color:#15803d}
+[data-theme="light"] .btn-activate:hover{background:rgba(22,163,74,.18)}
+[data-theme="light"] .btn-deactivate{background:rgba(220,38,38,.07);border-color:rgba(220,38,38,.25);color:#991b1b}
+[data-theme="light"] .btn-deactivate:hover{background:rgba(220,38,38,.14)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page">
+    <header class="topbar">
+        <div>
+            <p class="staff-pg-kicker">Administration</p>
+            <h1 class="staff-pg-title">Supervisor Management</h1>
+        </div>
+    </header>
+
+    <div class="sv-notice">
+        <strong>One supervisor at a time.</strong>
+        Activating a new supervisor automatically deactivates the current one.
+        The active supervisor reviews all pending store requests and is recorded on every approval action.
+    </div>
+
+    <div class="sv-card">
+        <h2>Active Supervisor</h2>
+        {% if current_supervisor %}
+            <div class="sv-active-box">
+                <div class="sv-active-avatar">{{ current_supervisor.get_full_name|default:current_supervisor.username|slice:":1"|upper }}</div>
+                <div>
+                    <div class="sv-active-name">{{ current_supervisor.get_full_name|default:current_supervisor.username }}</div>
+                    <div class="sv-active-since">
+                        @{{ current_supervisor.username }}
+                        {% if current_supervisor.profile.supervisor_since %}
+                            &nbsp;&middot;&nbsp; Active since {{ current_supervisor.profile.supervisor_since|date:"d M Y H:i" }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="sv-none">No active supervisor assigned. All pending requests will stall until one is set.</div>
+        {% endif %}
+    </div>
+
+    <div class="sv-card">
+        <h2>Management Users</h2>
+        {% if management_users %}
+        <table class="sv-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Status</th>
+                    <th style="text-align:right">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in management_users %}
+                <tr>
+                    <td>
+                        <div class="sv-username">{{ user.get_full_name|default:user.username }}</div>
+                        <div class="sv-fullname">@{{ user.username }}</div>
+                    </td>
+                    <td>
+                        {% if user.profile.is_active_supervisor %}
+                            <span class="sv-badge-active">Active Supervisor</span>
+                        {% else %}
+                            <span style="font-size:12px;color:#6b7fa3">—</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align:right">
+                        {% if user.profile.is_active_supervisor %}
+                            <form method="post" style="display:inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="deactivate">
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <button type="submit" class="btn-deactivate"
+                                    onclick="return confirm('Deactivate {{ user.get_full_name|default:user.username }} as supervisor?')">
+                                    Deactivate
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="post" style="display:inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="activate">
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <button type="submit" class="btn-activate"
+                                    onclick="return confirm('Assign {{ user.get_full_name|default:user.username }} as supervisor?{% if current_supervisor %} This will deactivate {{ current_supervisor.get_full_name|default:current_supervisor.username }}.{% endif %}')">
+                                    Assign as Supervisor
+                                </button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="sv-none">No users in the Management group. Add users to Management in the Django admin to manage them here.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

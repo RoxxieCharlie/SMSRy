@@ -120,14 +120,20 @@ def _build_weekly_excel(report_list, dept_summary, weekly_total, start_dt, end_d
 
     departments = wb.create_sheet("Department Summary")
     dept_rows = [
-        [idx, row["department"], row["total_quantity"], f'{row["pct"]}%']
+        [
+            idx,
+            row["department"],
+            row["total_quantity"],
+            f'{row["pct"]}%',
+            ", ".join(f'{i["item"]} ({i["qty"]})' for i in row.get("items", [])),
+        ]
         for idx, row in enumerate(dept_summary, start=1)
     ]
     _style_weekly_sheet(
         departments,
         "SMS WEEKLY DEPARTMENT SUMMARY",
         f"REPORT PERIOD: {period} | GENERATED: {generated}",
-        ["S/N", "Department", "Total Collected", "Share"],
+        ["S/N", "Department", "Total Collected", "Share", "Items Collected"],
         dept_rows,
         totals=[
             ("Total issued", weekly_total),
@@ -230,6 +236,7 @@ def weekly_report(request):
     # item_name -> {"total": int, "dept_counts": {dept_name: int}}
     agg = {}
     dept_totals = {}  # dept_name -> total_qty
+    dept_items = {}   # dept_name -> {item_name: qty}
 
     for line in qs:
         item_name = line.item.name
@@ -248,6 +255,10 @@ def weekly_report(request):
         )
 
         dept_totals[dept_name] = dept_totals.get(dept_name, 0) + line.quantity
+
+        if dept_name not in dept_items:
+            dept_items[dept_name] = {}
+        dept_items[dept_name][item_name] = dept_items[dept_name].get(item_name, 0) + line.quantity
 
     # Build item rows
     report_list = []
@@ -268,10 +279,15 @@ def weekly_report(request):
     dept_summary = []
     for dept_name, qty in sorted(dept_totals.items(), key=lambda x: (-x[1], x[0])):
         pct = 0 if weekly_total == 0 else round((qty / weekly_total) * 100)
+        items_for_dept = sorted(
+            dept_items.get(dept_name, {}).items(),
+            key=lambda x: (-x[1], x[0]),
+        )
         dept_summary.append({
             "department": dept_name,
             "total_quantity": qty,
             "pct": pct,
+            "items": [{"item": n, "qty": q} for n, q in items_for_dept],
         })
 
     # Export a styled Excel workbook for management reporting.

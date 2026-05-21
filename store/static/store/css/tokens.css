@@ -1,56 +1,133 @@
-/* store/static/store/css/tokens.css
-   Single source of truth for all SMSRy design tokens.
-   Every other CSS file @imports this file and references these variables.
-   Do not define design tokens anywhere else.
-*/
+/* tokens.css — single source of truth for all SMS design tokens */
 
-:root {
-  /* --- Backgrounds --- */
+:root,
+[data-theme="dark"] {
   --bg0: #020617;
   --bg1: #0b1224;
+  --bg2: #0d1526;
 
-  /* --- Panels --- */
-  --panel:  rgba(255,255,255,.06);
-  --panel2: rgba(255,255,255,.08);
+  --panel: rgba(255,255,255,0.06);
+  --panel2: rgba(255,255,255,0.08);
+  --panel3: rgba(255,255,255,0.04);
 
-  /* --- Strokes --- */
-  --stroke:  rgba(255,255,255,.12);
-  --stroke2: rgba(255,255,255,.10);
+  --stroke: rgba(255,255,255,0.12);
+  --stroke2: rgba(255,255,255,0.08);
+  --stroke3: rgba(255,255,255,0.06);
 
-  /* --- Text --- */
-  --text:  rgba(255,255,255,.92);
-  --muted: rgba(148,163,184,.85);
+  --text: rgba(255,255,255,0.92);
+  --text2: rgba(234,240,255,0.70);
+  --text3: rgba(234,240,255,0.50);
+  --muted: rgba(148,163,184,0.85);
 
-  /* --- Accent colours --- */
-  --blue:   #4ea5ff;
-  --green:  #4dd9a8;
-  --amber:  #ffcc66;
-  --red:    #ff6b6b;
+  --blue: #4ea5ff;
+  --blue-bg: rgba(78,165,255,0.14);
+  --blue-border: rgba(78,165,255,0.30);
+
+  --green: #4dd9a8;
+  --green-bg: rgba(77,217,168,0.14);
+  --green-border: rgba(77,217,168,0.28);
+
+  --amber: #ffcc66;
+  --amber-bg: rgba(255,204,102,0.14);
+  --amber-border: rgba(255,204,102,0.30);
+
+  --red: #ff6b6b;
+  --red-bg: rgba(255,107,107,0.14);
+  --red-border: rgba(255,107,107,0.28);
+
   --purple: #a78bfa;
+  --purple-bg: rgba(167,139,250,0.14);
+  --purple-border: rgba(167,139,250,0.28);
 
-  /* --- Border radius (3 values only) --- */
-  --radius-sm: 10px;   /* inputs, chips, badges, small buttons */
-  --radius-md: 14px;   /* cards, panels, form fields */
-  --radius-lg: 22px;   /* major glass panels */
+  --role-staff: #4dd9a8;
+  --role-staff-bg: rgba(77,217,168,0.14);
+  --role-staff-border: rgba(77,217,168,0.30);
 
-  /* --- Shadow --- */
-  --shadow: 0 18px 60px rgba(0,0,0,.45);
+  --role-store: #4ea5ff;
+  --role-store-bg: rgba(78,165,255,0.14);
+  --role-store-border: rgba(78,165,255,0.30);
 
-  /* --- Role accent colours --- */
-  --role-staff: #2dd4bf;  /* teal  — staff sidebar / KPI glow */
-  --role-store: #4ea5ff;  /* blue  — storekeeper sidebar / KPI glow */
-  --role-mgt:   #a78bfa;  /* purple — management sidebar / KPI glow */
+  --role-mgt: #a78bfa;
+  --role-mgt-bg: rgba(167,139,250,0.14);
+  --role-mgt-border: rgba(167,139,250,0.30);
 
-  /* --- Layout --- */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  --shadow: 0 18px 60px rgba(0,0,0,0.45);
+  --shadow-sm: 0 8px 24px rgba(0,0,0,0.28);
+
   --sidebar-w: 210px;
+
+  --body-bg:
+    radial-gradient(1200px 600px at 30% 20%, rgba(78,165,255,0.16), transparent 60%),
+    radial-gradient(900px 500px at 80% 10%, rgba(77,217,168,0.08), transparent 55%),
+    radial-gradient(900px 700px at 60% 90%, rgba(255,204,102,0.07), transparent 60%),
+    linear-gradient(135deg, #020617, #0b1224);
 }
 
-/* Global body background — defined once, here only.
-   base_v2.css removes its own background declaration and imports this file. */
-body.ui {
-  background:
-    radial-gradient(1200px 600px at 30% 20%, rgba(78,165,255,.16),  transparent 60%),
-    radial-gradient(900px  500px at 80% 10%, rgba(77,217,168,.08),  transparent 55%),
-    radial-gradient(900px  700px at 60% 90%, rgba(255,204,102,.07), transparent 60%),
-    linear-gradient(135deg, var(--bg0), var(--bg1));
+[data-theme="light"] {
+  --bg0: #f8fafc;
+  --bg1: #f1f5f9;
+  --bg2: #e8eef6;
+
+  --panel: rgba(255,255,255,0.85);
+  --panel2: rgba(255,255,255,0.95);
+  --panel3: rgba(248,250,252,0.80);
+
+  --stroke: rgba(15,23,42,0.12);
+  --stroke2: rgba(15,23,42,0.08);
+  --stroke3: rgba(15,23,42,0.05);
+
+  --text: rgba(15,23,42,0.92);
+  --text2: rgba(30,41,59,0.70);
+  --text3: rgba(30,41,59,0.50);
+  --muted: rgba(71,85,105,0.85);
+
+  --blue: #1d6fd6;
+  --blue-bg: rgba(29,111,214,0.10);
+  --blue-border: rgba(29,111,214,0.24);
+
+  --green: #0f7a5a;
+  --green-bg: rgba(15,122,90,0.10);
+  --green-border: rgba(15,122,90,0.22);
+
+  --amber: #b45309;
+  --amber-bg: rgba(180,83,9,0.10);
+  --amber-border: rgba(180,83,9,0.22);
+
+  --red: #dc2626;
+  --red-bg: rgba(220,38,38,0.10);
+  --red-border: rgba(220,38,38,0.22);
+
+  --purple: #6d28d9;
+  --purple-bg: rgba(109,40,217,0.10);
+  --purple-border: rgba(109,40,217,0.22);
+
+  --role-staff: #0f7a5a;
+  --role-staff-bg: rgba(15,122,90,0.10);
+  --role-staff-border: rgba(15,122,90,0.24);
+
+  --role-store: #1d6fd6;
+  --role-store-bg: rgba(29,111,214,0.10);
+  --role-store-border: rgba(29,111,214,0.24);
+
+  --role-mgt: #6d28d9;
+  --role-mgt-bg: rgba(109,40,217,0.10);
+  --role-mgt-border: rgba(109,40,217,0.24);
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  --shadow: 0 18px 60px rgba(15,23,42,0.12);
+  --shadow-sm: 0 8px 24px rgba(15,23,42,0.08);
+
+  --sidebar-w: 210px;
+
+  --body-bg:
+    radial-gradient(1200px 600px at 30% 20%, rgba(29,111,214,0.08), transparent 60%),
+    radial-gradient(900px 500px at 80% 10%, rgba(15,122,90,0.05), transparent 55%),
+    linear-gradient(135deg, #f8fafc, #edf2f7);
 }

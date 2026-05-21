@@ -143,8 +143,8 @@ def fulfill_request_service(
         .get(pk=request_obj.pk)
     )
 
-    if request_obj.status != Request.Status.SUBMITTED:
-        raise IssuanceError("Only submitted requests can be fulfilled.")
+    if request_obj.status not in [Request.Status.APPROVED, Request.Status.ESCALATED]:
+        raise IssuanceError("Only approved or escalated requests can be fulfilled.")
 
     if hasattr(request_obj, "issuance"):
         raise IssuanceError("This request has already been fulfilled.")

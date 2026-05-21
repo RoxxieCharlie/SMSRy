@@ -17,7 +17,6 @@
             <h1 class="staff-pg-title">Staff Dashboard</h1>
         </div>
         <div class="topbar__right">
-            <div class="hello">Hello, {{ display_name }}</div>
             <a href="{% url 'store:request_create' %}" class="btn-new">
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
                 New Request
@@ -51,19 +50,31 @@
             <div class="card__hint">Filter -></div>
         </a>
 
-        <a class="card card--amber" href="{% url 'store:request_list' %}">
+        <a class="card card--amber" href="{% url 'store:request_list' %}?status=pending">
             <div class="card__left">
                 <div class="card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
                 <div>
-                    <div class="card__title">Submitted</div>
-                    <div class="card__value">{{ submitted_count|default:"0" }}</div>
-                    <div class="card__meta">Awaiting fulfillment</div>
+                    <div class="card__title">Awaiting Approval</div>
+                    <div class="card__value">{{ pending_count|default:"0" }}</div>
+                    <div class="card__meta">Pending supervisor review</div>
                 </div>
             </div>
             <div class="card__hint">Manage -></div>
         </a>
 
-        <a class="card card--red {% if selected_filter == 'archived' %}is-active{% endif %}" href="?kpi=archived">
+        <a class="card card--red" href="{% url 'store:request_list' %}?status=rejected">
+            <div class="card__left">
+                <div class="card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+                <div>
+                    <div class="card__title">Rejected</div>
+                    <div class="card__value">{{ rejected_count|default:"0" }}</div>
+                    <div class="card__meta">Declined by supervisor</div>
+                </div>
+            </div>
+            <div class="card__hint">View -></div>
+        </a>
+
+        <a class="card card--purple {% if selected_filter == 'archived' %}is-active{% endif %}" href="?kpi=archived">
             <div class="card__left">
                 <div class="card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg></div>
                 <div>
@@ -86,7 +97,7 @@
 
             <div class="list list--scroll">
                 {% for item in top_requested_items %}
-                <div class="row">
+                <a class="row" href="{% url 'store:request_history_table' %}?item={{ item.item__id }}">
                     <div class="row__left">
                         <div class="row__badge" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg></div>
                         <div class="row__name">{{ item.item__name }}</div>
@@ -95,7 +106,7 @@
                         <div class="row__qty">{{ item.total_qty }}</div>
                         <div class="row__unit">{{ item.item__unit_of_measurement|default:"pcs" }}</div>
                     </div>
-                </div>
+                </a>
                 {% empty %}
                 <div class="empty">No request history yet.</div>
                 {% endfor %}
@@ -114,7 +125,7 @@
             <div class="activity">
                 {% for activity in recent_request_activity %}
                 <div class="activity__item">
-                    <div class="activity__dot"></div>
+                    <div class="activity__dot {% if activity.action == 'approved' %}is-ok{% elif activity.action == 'rejected' %}is-danger{% elif activity.action == 'fulfilled' %}is-ok{% elif activity.action == 'pending' or activity.action == 'submitted' %}is-warn{% else %}{% endif %}"></div>
                     <div class="activity__body">
                         <div class="activity__line">
                             <strong>Request #{{ activity.request_id }}</strong> — {{ activity.get_action_display }}
@@ -165,7 +176,7 @@
                         </td>
                         <td>
                             <span class="status-chip status-{{ req.display_status_slug }}">{{ req.display_status_label }}</span>
-                            {% if req.status == 'submitted' and req.needs_resubmission %}
+                            {% if req.status == 'pending' and req.needs_resubmission %}
                             <span class="resubmit-badge">Needs resubmission</span>
                             {% endif %}
                         </td>

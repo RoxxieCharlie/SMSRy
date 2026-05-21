@@ -14,6 +14,7 @@ from .models import (
     Request,
     RequestItem,
     RequestActivity,
+    UserProfile,
 )
 
 from store.services.stockin_service import create_bulk_stockin
@@ -249,3 +250,23 @@ class IssuanceAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+# ===============================
+# USER PROFILE ADMIN (Supervisor toggle)
+# ===============================
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ["user", "is_active_supervisor", "supervisor_since"]
+    list_filter = ["is_active_supervisor"]
+    readonly_fields = ["supervisor_since"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(
+            user__groups__name="Management"
+        ).select_related("user")
+
+    def save_model(self, request, obj, form, change):
+        # UserProfile.save() enforces mutual exclusivity automatically
+        super().save_model(request, obj, form, change)

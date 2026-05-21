@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 52" width="280" height="52">
+  <rect x="0" y="0" width="52" height="52" rx="12" fill="#1a2f52"/>
+  <rect x="0" y="0" width="52" height="52" rx="12" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <circle cx="15" cy="15" r="4.5" fill="#4ea5ff"/>
+  <circle cx="26" cy="15" r="4.5" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="37" cy="15" r="4.5" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="15" cy="26" r="4.5" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="26" cy="26" r="4.5" fill="rgba(255,255,255,0.88)"/>
+  <circle cx="37" cy="26" r="4.5" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="15" cy="37" r="4.5" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="26" cy="37" r="4.5" fill="rgba(255,255,255,0.22)"/>
+  <circle cx="37" cy="37" r="4.5" fill="#4ea5ff" opacity="0.65"/>
+  <text x="66" y="24" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="800" fill="#ffffff" letter-spacing="-0.8">SMS</text>
+  <text x="66" y="40" font-family="system-ui,-apple-system,sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.52)" letter-spacing="1.6">SMART MANAGEMENT</text>
+</svg>

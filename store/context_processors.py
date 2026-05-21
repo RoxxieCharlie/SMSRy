@@ -13,7 +13,9 @@ def store_nav_context(request):
     is_storekeeper = user.groups.filter(name__iexact="StoreKeeper").exists()
     pending_count = 0
     if is_storekeeper:
-        pending_count = Request.objects.filter(status=Request.Status.SUBMITTED).count()
+        pending_count = Request.objects.filter(
+            status__in=[Request.Status.APPROVED, Request.Status.ESCALATED]
+        ).count()
 
     return {
         "is_storekeeper_user": is_storekeeper,
